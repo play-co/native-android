@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical" >
+
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Servers"
+		android:textStyle="bold"
+		android:textSize="20sp"
+		android:textColor="#FFFFFF"
+		android:gravity="center"
+		android:orientation="horizontal"
+		/>
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:weightSum="100"
+		android:orientation="horizontal" >
+
+		<EditText
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="60"
+			android:id = "@+id/serverHost"
+			android:inputType="textUri"
+			/>
+		<EditText
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="25"
+			android:id = "@+id/serverPort"
+			android:inputType="number"
+			/>
+
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="15"
+			android:id = "@+id/goButton"
+			android:text = "GO!"
+			/>
+
+	</LinearLayout>
+</LinearLayout>

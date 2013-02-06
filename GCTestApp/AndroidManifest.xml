@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      android:installLocation="auto" android:versionCode="1"
+      android:versionName="1.0" package="com.tealeaf.test_app">
+	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="13" />
+	<supports-screens android:resizeable="true" android:smallScreens="true" android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" />
+
+   <uses-feature android:glEsVersion="0x00020000"/>
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature android:name="android.hardware.wifi" android:required="false" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+<!--START_PLUGINS_MANIFEST-->
+<!--END_PLUGINS_MANIFEST-->
+	<application android:icon="@drawable/icon" android:label="GC Test App" android:name="com.tealeaf.TeaLeafApplication" android:debuggable="true">
+        <meta-data android:name="develop" android:value="true" />
+        <meta-data android:name="forceURL" android:value="true" />
+        <meta-data android:name="useZeroConfig" android:value="true" />
+        <meta-data android:name="installShortcut" android:value="false" />
+        <meta-data android:name="" android:value="" />
+	    <activity android:label="GC Test App" android:name="com.tealeaf.test_app.TestAppActivity"  android:configChanges="keyboardHidden|orientation" android:screenOrientation="portrait">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW"></action>
+				<category android:name="android.intent.category.DEFAULT"></category>
+				<category android:name="android.intent.category.BROWSABLE"></category>
+				<data android:host="*" android:scheme="tealeaf"></data>
+			</intent-filter>
+		</activity>
+
+		<activity android:label="DebugActivity" android:name="com.tealeaf.DebugActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation">
+		</activity>
+
+
+	    <activity android:name="com.tealeaf.CrashRecover" android:configChanges="keyboard|keyboardHidden|orientation" android:excludeFromRecents="true" android:exported="false" android:stateNotNeeded="true" android:process=":CrashRecover" />
+
+		<service android:name="com.tealeaf.TeaLeafService" android:enabled="true" exported="false" />
+
+        <receiver android:name="com.tealeaf.NotificationReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.tealeaf.ALARM_TIMER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.tealeaf.MarketBroadcastReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
+                <action android:name="com.android.vending.billing.RESPONSE_CODE" />
+                <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.tealeaf.ReferrerReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER"></action>
+            </intent-filter>
+
+            <meta-data android:name="forward.google" android:value="com.google.ads.InstallReceiver" />
+        </receiver>
+
+        <receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
+        <receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />
+<!--START_PLUGINS_APPLICATION-->
+<!--END_PLUGINS_APPLICATION-->
+	</application>
+</manifest>

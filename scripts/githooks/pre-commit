@@ -1,0 +1,27 @@
+#!/bin/bash
+
+branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
+branch_name="(unnamed branch)"     # detached HEAD
+branch_name=${branch_name##refs/heads/}
+
+
+function test {
+	git stash -q --keep-index
+	make test
+	if [ "$?" -ne 0 ]; then
+		git stash pop -q
+		echo "Test(s) failed. Commit failed. You can use --no-verify to bypass this checking."
+		exit 1
+	fi
+	git stash pop -q
+}
+
+if [[ "$branch_name" == "develop" ]]; then
+	test
+fi
+
+if [[ "$branch_name" == "master" ]]; then 
+	test
+fi
+
+exit 0

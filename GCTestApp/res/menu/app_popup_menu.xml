@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<group android:id="@+id/group_app_popup_menu">
+		<item android:id="@+id/launch_game"
+			android:title="Launch Game"/>
+		<item android:id="@+id/clear_game_files"
+			android:title="Clear Game Files"/>
+		<item android:id="@+id/cancel"
+			android:title="Cancel"/>
+	</group>
+</menu>

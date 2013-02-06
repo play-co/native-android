@@ -1,0 +1,43 @@
+# ctags
+tags
+
+#os generated stuff
+.DS_Store
+
+#eclipse stuff
+.classpath
+.project
+local.properties
+
+# build directories
+bin
+gen
+obj
+armeabi
+
+# application files
+*.apk
+*.ap_
+
+#dev VM
+*.dex
+
+#Java class files 
+*.class
+
+#test app assets
+assets
+
+#build dir for dev_sdk deploy
+build
+
+#android generated stuff
+build.xml
+proguard-project.txt
+
+#plugins
+TeaLeaf/src/com/tealeaf/plugin/plugins
+plugins/config.json
+
+#gitmodules
+.gitmodules

@@ -1,0 +1,4 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:title="Reset" android:id="@+id/reset_ta"></item>
+  <item android:title="Exit" android:id="@+id/exit_ta"></item>
+</menu>

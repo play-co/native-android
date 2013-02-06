@@ -1,0 +1,785 @@
+/* @license
+ * This file is part of the Game Closure SDK.
+ *
+ * The Game Closure SDK is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ 
+ * The Game Closure SDK is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ 
+ * You should have received a copy of the GNU General Public License
+ * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include "js/js_context.h"
+
+extern "C" {
+#include "core/texture_2d.h"
+#include "core/texture_manager.h"
+#include "core/tealeaf_canvas.h"
+#include "core/tealeaf_context.h"
+#include "core/rgba.h"
+#include "core/draw_textures.h"
+}
+#include "platform/text_manager.h"
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+
+using namespace v8;
+//extern void print_model_view(context_2d*, int);
+
+Handle<Value> defLoadIdentity(const Arguments& args) {
+	HandleScope handleScope;
+
+	context_2d_loadIdentity(GET_CONTEXT2D());
+	return Undefined();
+}
+
+Handle<Value> defDrawImage(const Arguments& args) {
+	LOGFN("drawImage");
+	HandleScope handleScope;
+	int srcTex = args[0]->Int32Value();
+	String::Utf8Value str(args[1]);
+	const char *url = ToCString(str);
+	float srcX = args[2]->NumberValue();
+	float srcY = args[3]->NumberValue();
+	float srcW = args[4]->NumberValue();
+	float srcH = args[5]->NumberValue();
+	float destX = args[6]->NumberValue();
+	float destY = args[7]->NumberValue();
+	float destW = args[8]->NumberValue();
+	float destH = args[9]->NumberValue();
+	int composite_op = args[10]->Int32Value();
+
+	rect_2d src_rect = {srcX, srcY, srcW, srcH};
+	rect_2d dest_rect = {destX, destY, destW, destH};
+
+	context_2d_drawImage(GET_CONTEXT2D(), srcTex, url, &src_rect, &dest_rect, composite_op);
+	LOGFN("endDrawImage");
+	return Undefined();
+}
+
+Handle<Value> defDrawPointSprites(const Arguments& args) {
+	HandleScope handleScope;
+	String::Utf8Value str(args[0]);
+	const char *url = ToCString(str);
+	float point_size = args[1]->NumberValue();
+	float step_size = args[2]->NumberValue();
+
+	String::Utf8Value str_color(args[3]);
+	rgba color;
+	rgba_parse(&color, ToCString(str_color));
+
+	float x1 = args[4]->NumberValue();
+	float y1 = args[5]->NumberValue();
+	float x2 = args[6]->NumberValue();
+	float y2 = args[7]->NumberValue();
+
+	context_2d_draw_point_sprites(GET_CONTEXT2D(), url, point_size, step_size, &color, x1, y1, x2, y2);
+	return Undefined();
+}
+
+Handle<Value> defDestroyImage(const Arguments& args) {
+	// TODO: Can we remove this?
+
+	return Undefined();
+}
+
+Handle<Value> defRotate(const Arguments& args) {
+	LOGFN("rotate");
+	HandleScope handleScope;
+	double angle = args[0]->NumberValue();
+
+	context_2d_rotate(GET_CONTEXT2D(), angle);
+	LOGFN("endrotate");
+	return Undefined();
+
+}
+
+Handle<Value> defTranslate(const Arguments& args) {
+	LOGFN("translate");
+	HandleScope handleScope;
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+
+	context_2d_translate(GET_CONTEXT2D(), x, y);
+
+	LOGFN("endtranslate");
+	return Undefined();
+}
+
+Handle<Value> defScale(const Arguments& args) {
+	LOGFN("scale");
+	HandleScope handleScope;
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+
+	context_2d_scale(GET_CONTEXT2D(), x, y);
+
+	LOGFN("endscale");
+	return Undefined();
+
+}
+
+Handle<Value> defSave(const Arguments& args) {
+	LOGFN("save");
+	HandleScope handleScope;
+	context_2d_save(GET_CONTEXT2D());
+	LOGFN("endsave");
+	return Undefined();
+}
+
+Handle<Value> defRestore(const Arguments& args) {
+	LOGFN("restore");
+	HandleScope handleScope;
+	context_2d_restore(GET_CONTEXT2D());
+	LOGFN("endrestore");
+	return Undefined();
+}
+
+Handle<Value> defClear(const Arguments& args) {
+	LOGFN("clear");
+	HandleScope handleScope;
+	context_2d_clear(GET_CONTEXT2D());
+	LOGFN("endclear");
+	return Undefined();
+}
+
+Handle<Value> defSetGlobalAlpha(const Arguments& args) {
+	LOGFN("setglobalalpha");
+	HandleScope handleScope;
+	double alpha = args[0]->NumberValue();
+	context_2d_setGlobalAlpha(GET_CONTEXT2D(), alpha);
+	LOGFN("endsetglobalalpha");
+	return Undefined();
+}
+
+Handle<Value> defGetGlobalAlpha(const Arguments& args) {
+	LOGFN("getglobalalpha");
+	HandleScope handleScope;
+	double alpha = context_2d_getGlobalAlpha(GET_CONTEXT2D());
+
+	LOGFN("endgetglobalalpha");
+	return Number::New(alpha);
+}
+
+Handle<Value> defLoadImage(const Arguments& args) {
+	LOGFN("loadImage");
+	HandleScope handleScope;
+
+	String::Utf8Value str(args[0]);
+	char *url =(char*) ToCString(str);
+
+	texture_2d *tex = texture_manager_load_texture(texture_manager_get(), url);
+	if (!tex || !tex->loaded) {
+		return False();
+	}
+
+	Local<Object> ret(Object::New());
+
+	ret->Set(String::New("width"), Integer::New(tex->originalWidth));
+	ret->Set(String::New("height"), Integer::New(tex->originalHeight));
+	ret->Set(String::New("name"), Integer::New(tex->name));
+
+	LOGFN("endloadImage");
+	return handleScope.Close(ret);
+}
+
+Handle<Value> defClearRect(const Arguments& args) {
+	LOGFN("clearRect");
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+	double width = args[2]->NumberValue();
+	double height = args[3]->NumberValue();
+
+	rect_2d rect = {x, y, width, height};
+
+	context_2d_clearRect(GET_CONTEXT2D(), &rect);
+
+	LOGFN("endclearRect");
+	return Undefined();
+}
+
+Handle<Value> defFillRect(const Arguments& args) {
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+	double width = args[2]->NumberValue();
+	double height = args[3]->NumberValue();
+
+	String::Utf8Value str_color(args[4]);
+	rgba color;
+	rgba_parse(&color, ToCString(str_color));
+
+	int composite_op = args[5]->Int32Value();
+
+	rect_2d rect = {x, y, width, height};
+
+	context_2d_fillRect(GET_CONTEXT2D(), &rect, &color, composite_op);
+
+	return Undefined();
+}
+
+Handle<Value> defStrokeRect(const Arguments& args) {
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+	double width = args[2]->NumberValue();
+	double height = args[3]->NumberValue();
+	context_2d *ctx = GET_CONTEXT2D();
+
+	String::Utf8Value str_color(args[4]);
+	rgba color;
+	rgba_parse(&color, ToCString(str_color));
+
+	double line_width1 = args[5]->Int32Value();
+	double line_width2 = line_width1 / 2;
+
+	int composite_op = args[6]->Int32Value();
+
+	rect_2d left_rect = {x - line_width2, y - line_width2, line_width1, height + line_width1};
+	context_2d_fillRect(ctx, &left_rect, &color, composite_op);
+
+	rect_2d right_rect = {x + width - line_width2, y - line_width2, line_width1, height + line_width1};
+	context_2d_fillRect(ctx, &right_rect, &color, composite_op);
+
+	rect_2d top_rect = {x + line_width2, y - line_width2, width - line_width1, line_width1};
+	context_2d_fillRect(ctx, &top_rect, &color, composite_op);
+
+	rect_2d bottom_rect = {x + line_width2, y + height - line_width2, width - line_width1, line_width1};
+	context_2d_fillRect(ctx, &bottom_rect, &color, composite_op);
+
+	return Undefined();
+}
+
+#define FONT_SCALE	0.9
+Handle<Value> defMeasureText(const Arguments& args) {
+	LOGFN("measuretext");
+	HandleScope handle_scope;
+	String::Utf8Value text_str(args[0]);
+	const char* text = ToCString(text_str);
+	int size = args[1]->Int32Value();
+	String::Utf8Value font_str(args[2]);
+	const char *font = ToCString(font_str);
+
+	int width = text_manager_measure_text(font, size * FONT_SCALE, text);
+	Handle<Object> metrics =  Object::New();
+	metrics->Set(String::New("width"), Number::New(width));
+
+	LOGFN("endmeasuretext");
+	return handle_scope.Close(metrics);
+}
+
+double measureText(Handle<Object> font_info, char **text) {
+	double width = 0;
+
+	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(String::New("customFont")));
+	if (custom_font.IsEmpty()) {
+		return 0;
+	}
+	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(String::New("dimensions")));
+	if (dimensions.IsEmpty()) {
+		return 0;
+	}
+
+	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(String::New("horizontal")));
+	float scale = font_info->Get(String::New("scale"))->NumberValue();
+
+	float space_width = horizontal->Get(String::New("width"))->NumberValue() * scale;
+	float tracking = horizontal->Get(String::New("tracking"))->NumberValue() * scale;
+	float outline = horizontal->Get(String::New("outline"))->NumberValue() * scale;
+
+	Handle<String> sOW = String::New("ow");
+
+	char c = '\0';
+	for (int i = 0; (c = (*text)[i]) != 0; i++) {
+		if (c == ' ') {
+			width += space_width;
+		} else {
+			Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)c)));
+			if (!dimension.IsEmpty() && dimension->IsObject()) {
+				int ow = dimension->Get(sOW)->Int32Value();
+
+				width += (ow - 2) * scale;
+			} else {
+				width += space_width;
+			}
+		}
+		width += tracking - outline;
+	}
+
+	return width + 2 * scale;
+}
+
+Handle<Value> defMeasureTextBitmap(const Arguments &args) {
+	HandleScope handle_scope;
+
+	String::Utf8Value text_str(args[0]);
+	const char *text = ToCString(text_str);
+	Handle<Object> font_info = args[1]->ToObject();
+	double width = measureText(font_info, (char**)&text);
+
+	Handle<Object> metrics = Object::New();
+	metrics->Set(String::New("width"), Number::New(width));
+
+	return handle_scope.Close(metrics);
+}
+
+double textBaselineValue(Handle<Object> ctx, Handle<Object> custom_font, double scale) {
+	Handle<String> text_baseline = ctx->Get(String::New("textBaseline"))->ToString();
+	if (!text_baseline.IsEmpty()) {
+		String::Utf8Value text_baseline_str(text_baseline);
+		const char *baseline = ToCString(text_baseline_str);
+		Handle<Object> vertical;
+		double b;
+
+		if (!strcmp(baseline, "alphabetic")) {
+			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
+			b = vertical->Get(String::New("baseline"))->NumberValue();
+			return -b * scale;
+		} else if (!strcmp(baseline, "middle")) {
+			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
+			b = vertical->Get(String::New("bottom"))->NumberValue();
+			return -b / 2 * scale;
+		} else if (!strcmp(baseline, "bottom")) {
+			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
+			b = vertical->Get(String::New("bottom"))->NumberValue();
+			return -b * scale;
+		}
+	}
+
+	return 0;
+}
+
+double textAlignValue(Handle<Object> ctx, Handle<Object> font_info, char **text) {
+	Handle<String> text_align = ctx->Get(String::New("textAlign"))->ToString();
+	if (!text_align.IsEmpty()) {
+		String::Utf8Value text_align_str(text_align);
+		const char *align = ToCString(text_align_str);
+		if (!strcmp(align, "center")) {
+			return -measureText(font_info, text) / 2;
+		} else if (!strcmp(align, "right")) {
+			return -measureText(font_info, text);
+		}
+	}
+
+	return 0;
+}
+
+Handle<Value> defFillTextBitmap(const Arguments &args) {
+	Handle<Object> ctx = Handle<Object>::Cast(args[0]);
+	context_2d *context = GET_CONTEXT2D();
+	double x = args[1]->NumberValue();
+	double y = args[2]->NumberValue();
+	String::Utf8Value text_str(args[3]);
+	const char *text = ToCString(text_str);
+
+	Handle<Object> font_info = args[5]->ToObject();
+	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(String::New("customFont")));
+	Handle<Object> images1 = Handle<Object>::Cast(custom_font->Get(String::New("images")));
+	int image_type = args[6]->Int32Value();
+	Handle<Object> images2 = Handle<Object>::Cast(images1->Get(Number::New(image_type)));
+	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(String::New("dimensions")));
+	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(String::New("horizontal")));
+
+	// declare strings that are referenced for each character for performance
+	Handle<String> sI = String::New("i");
+	Handle<String> sX = String::New("x");
+	Handle<String> sY = String::New("y");
+	Handle<String> sW = String::New("w");
+	Handle<String> sH = String::New("h");
+	Handle<String> sOW = String::New("ow");
+	Handle<String> sOH = String::New("oh");
+	Handle<String> sSRC = String::New("_src");
+
+	float scale = font_info->Get(String::New("scale"))->NumberValue();
+	float space_width = horizontal->Get(String::New("width"))->NumberValue() * scale;
+	float tracking = horizontal->Get(String::New("tracking"))->NumberValue() * scale;
+	float outline = horizontal->Get(String::New("outline"))->NumberValue() * scale;
+
+	y += textBaselineValue(ctx, custom_font, scale);
+	x += textAlignValue(ctx, font_info, (char**)&text);
+
+	int current_image_index = -1;
+
+	Handle<Object> image;
+	Handle<String> src_tex;
+	char *url = NULL;
+
+	char c = '\0';
+	for (int i = 0; (c = text[i]) != 0; i++) {
+		if (c == ' ') {
+			x += space_width + tracking - outline;
+		} else {
+			Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)c)));
+			if (!dimension.IsEmpty() && dimension->IsObject()) {
+				int image_index = dimension->Get(sI)->Int32Value();
+				int sx = dimension->Get(sX)->Int32Value();
+				int sy = dimension->Get(sY)->Int32Value();
+				int sw = dimension->Get(sW)->Int32Value();
+				int sh = dimension->Get(sH)->Int32Value();
+				double ow = dimension->Get(sOW)->NumberValue();
+				double oh = dimension->Get(sOH)->NumberValue();
+
+				rect_2d src_rect = {sx, sy, sw, sh};
+				rect_2d dest_rect = {x, y + (oh - 1) * scale, sw * scale, (sh - 2) * scale};
+
+				if (current_image_index != image_index) {
+					current_image_index = image_index;
+					image = Handle<Object>::Cast(images2->Get(Number::New(image_index)));
+					src_tex = image->Get(sSRC)->ToString();
+					free(url);
+					String::Utf8Value src_tex_str(src_tex);
+					url = strdup(ToCString(src_tex_str));
+				}
+
+				context_2d_drawImage(context, 0, url, &src_rect, &dest_rect, source_over);
+
+				x += (ow - 2) * scale + tracking - outline;
+			} else {
+				x += space_width + tracking - outline;
+			}
+		}
+	}
+
+	free(url);
+
+	return Undefined();
+}
+
+Handle<Value> defStrokeText(const Arguments& args) {
+	LOGFN("stroketext");
+	String::Utf8Value text_str(args[0]);
+	const char* text = ToCString(text_str);
+	int x = args[1]->Int32Value();
+	int y = args[2]->Int32Value();
+	int max_width = args[3]->Int32Value();
+
+	String::Utf8Value str_color(args[4]);
+	rgba color;
+	rgba_parse(&color, ToCString(str_color));
+
+	int size = args[5]->Int32Value();
+	String::Utf8Value font_str(args[6]);
+	const char *font = ToCString(font_str);
+	double line_width = args[10]->NumberValue();
+	texture_2d *texture = text_manager_get_stroked_text(font, size * FONT_SCALE, text, &color, max_width, (float)line_width);
+
+	if (texture) {
+		String::Utf8Value str(args[7]);
+		const char *align = ToCString(str);
+
+		int composite_op = args[9]->Int32Value();
+		int x_offset = 0;
+		int y_offset = 0;
+		if (!strcmp(align, "left")) {
+			x_offset = 0;
+		} else if (!strcmp(align, "right")) {
+			x_offset = texture->originalWidth;
+		} else if (!strcmp(align, "center")) {
+			x_offset = texture->originalWidth/2;
+		}
+
+		String::Utf8Value str2(args[8]);
+		const char *baseline = ToCString(str2);
+		if (!strcmp(baseline, "top")) {
+			y_offset = 0;
+		} else if (!strcmp(baseline, "bottom")) {
+			y_offset = texture->originalHeight;
+		} else if (!strcmp(baseline, "middle")) {
+			y_offset = texture->originalHeight/2;
+		} else {
+			//TODO get the real value in Java and store it
+			y_offset = texture->originalHeight * 0.95;
+		}
+		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
+		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+	}
+	LOGFN("endstroketext");
+	return Undefined();
+}
+
+Handle<Value> defFillText(const Arguments& args) {
+	LOGFN("filltext");
+	String::Utf8Value text_str(args[0]);
+	const char* text = ToCString(text_str);
+	int x = args[1]->Int32Value();
+	int y = args[2]->Int32Value();
+	int max_width = args[3]->Int32Value();
+
+	String::Utf8Value str_color(args[4]);
+	rgba color;
+	rgba_parse(&color, ToCString(str_color));
+
+	int size = args[5]->Int32Value();
+	String::Utf8Value font_str(args[6]);
+	const char *font = ToCString(font_str);
+	texture_2d *texture = text_manager_get_filled_text(font, size * FONT_SCALE, text, &color, max_width);
+
+	if (texture) {
+		String::Utf8Value str(args[7]);
+		const char *align = ToCString(str);
+
+		int composite_op = args[9]->Int32Value();
+		int x_offset = 0;
+		int y_offset = 0;
+		if (!strcmp(align, "left")) {
+			x_offset = 0;
+		} else if (!strcmp(align, "right")) {
+			x_offset = texture->originalWidth;
+		} else if (!strcmp(align, "center")) {
+			x_offset = texture->originalWidth/2;
+		}
+
+		String::Utf8Value str2(args[8]);
+		const char *baseline = ToCString(str2);
+		if (!strcmp(baseline, "top")) {
+			y_offset = 0;
+		} else if (!strcmp(baseline, "bottom")) {
+			y_offset = texture->originalHeight;
+		} else if (!strcmp(baseline, "middle")) {
+			y_offset = texture->originalHeight/2;
+		} else {
+			//TODO get the real value in Java and store it
+			y_offset = texture->originalHeight * 0.95;
+		}
+		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
+		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+	}
+	LOGFN("endfilltext");
+	return Undefined();
+}
+
+Handle<Value> defFlushImages(const Arguments& args) {
+	LOGFN("flushImages");
+	draw_textures_flush();
+	LOGFN("endflushImages");
+	return Undefined();
+}
+
+Handle<Value> defNewTexture(const Arguments& args) {
+	LOGFN("newTexture");
+	HandleScope handleScope;
+	int w = args[0]->Int32Value();
+	int h = args[1]->Int32Value();
+
+	texture_2d *tex = texture_manager_new_texture(texture_manager_get(), w, h);
+
+	Handle<Object> tex_data = Object::New();
+	tex_data->Set(String::New("__gl_name"), Number::New(tex->name));
+	tex_data->Set(String::New("_src"), String::New(tex->url));
+	LOGFN("endnewTexture");
+	return tex_data;
+}
+
+Handle<Value> defEnableScissor(const Arguments& args) {
+	LOGFN("enableScissor");
+	double x = args[0]->NumberValue();
+	double y = args[1]->NumberValue();
+	double width = args[2]->NumberValue();
+	double height = args[3]->NumberValue();
+	rect_2d bounds = {x, y, width, height};
+	context_2d_setClip(GET_CONTEXT2D(), bounds);
+	LOGFN("endenableScissor");
+	return Undefined();
+}
+
+Handle<Value> defDisableScissor(const Arguments& args) {
+	disable_scissor(GET_CONTEXT2D());
+	return Undefined();
+}
+
+Handle<Value> defAddFilter(const Arguments &args) {
+	LOGFN("addFilter");
+
+	Handle<Value> filter = args[1];
+	if (filter.IsEmpty() || !filter->IsObject()) {
+		LOG("{context} WARNING: Invalid filter provided");
+	} else {
+		Handle<Object> filter_object = filter->ToObject();
+
+		String::Utf8Value type_str(filter_object->Get(String::New("type")));
+		const char *type = ToCString(type_str);
+		if(strncmp(type,"LinearAdd",strlen("LinearAdd"))==0) {
+			context_2d_set_filter_type(GET_CONTEXT2D(), FILTER_LINEAR_ADD);
+		}
+		else if(strncmp(type,"Multiply",strlen("Multiply"))==0) {
+			context_2d_set_filter_type(GET_CONTEXT2D(), FILTER_MULTIPLY);
+		}
+
+		double r = filter_object->Get(String::New("r"))->NumberValue();
+		double g = filter_object->Get(String::New("g"))->NumberValue();
+		double b = filter_object->Get(String::New("b"))->NumberValue();
+		double a = filter_object->Get(String::New("a"))->NumberValue();
+		//convert the 0-255 values to floats
+		r /= 255;
+		g /= 255;
+		b /= 255;
+		rgba color = {r, g, b, a};
+		context_2d_add_filter(GET_CONTEXT2D(), &color);
+	}
+	return Undefined();
+}
+
+Handle<Value> defClearFilters(const Arguments &args) {
+	GET_CONTEXT2D()->filter_type = FILTER_NONE;
+	context_2d_clear_filters(GET_CONTEXT2D());
+	return Undefined();
+}
+
+Handle<ObjectTemplate> get_context_2d_class_template();
+
+static void context_2d_class_finalize(Persistent<Value> ctx, void *param) {
+	HandleScope handle_scope;
+
+	LOGFN("ctx2d dtor");
+
+	context_2d *_ctx = static_cast<context_2d*>( param );
+	context_2d_delete(_ctx);
+
+	ctx.Dispose();
+	ctx.Clear();
+
+	LOGFN("endctx2d dtor");
+}
+
+Handle<Value> context_2d_class_ctor(const Arguments& args) {
+	LOGFN("ctx2d ctor");
+	Handle<Object> canvas = args[0]->ToObject();
+	String::Utf8Value str(args[1]);
+	const char *url = ToCString(str);
+	int destTex = args[2]->Int32Value();
+	Persistent<Object> ctx = Persistent<Object>::New(get_context_2d_class_template()->NewInstance());
+	ctx->Set(String::New("canvas"), canvas);
+	context_2d *_ctx = context_2d_new(tealeaf_canvas_get(), url, destTex);
+	ctx->SetInternalField(0, External::New(_ctx));
+
+	//now make it weak
+	ctx.MakeWeak(_ctx, context_2d_class_finalize);
+
+	int size = _ctx->backing_width * _ctx->backing_height * 4;
+	V8::AdjustAmountOfExternalAllocatedMemory(size);
+
+	LOGFN("endctx2d ctor");
+	return ctx;
+}
+
+Handle<Value> js_gl_delete_textures(const Arguments& args) {
+	LOGFN("start js_gl_delete_textures");
+	texture_manager_clear_textures(texture_manager_get(), true);
+	LOGFN("end js_gl_delete_textures");
+	return Undefined();
+}
+
+Handle<Value> js_gl_touch_texture(const Arguments& args) {
+	LOGFN("end js_gl_touch_texture");
+	String::Utf8Value url_str(args[0]);
+	const char *url = ToCString(url_str);
+	texture_manager_touch_texture(texture_manager_get(), url);
+	LOGFN("start js_gl_touch_texture");
+	return Undefined();
+}
+
+Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
+	String::Utf8Value str(args[0]);
+	const char *text = ToCString(str);
+	double x = args[1]->NumberValue();
+	double y = args[2]->NumberValue();
+	float scale = args[3]->NumberValue();
+	String::Utf8Value str2(args[4]);
+	const char *src_tex = ToCString(str2);
+	int tex_name = args[5]->Int32Value();
+	Handle<Object> defs = args[6]->ToObject();
+	int composite_op = args[7]->Int32Value();
+
+
+	int space_width = defs->Get(String::New("spaceWidth"))->Int32Value();
+	char c = '\0';
+	char buf[2] = {'\0'};
+	for (int i = 0; (c = text[i]) != 0; i++) {
+		if (c == ' ') {
+			x += space_width * scale;
+		} else {
+			snprintf(buf, sizeof(buf), "%c", c);
+			Handle<Object> def = Handle<Object>::Cast(defs->Get(String::New(buf)));
+			if (!def.IsEmpty()) {
+				int a = def->Get(String::New("a"))->Int32Value();
+				int c = def->Get(String::New("c"))->Int32Value();
+				int x1 = def->Get(String::New("x1"))->Int32Value();
+				int y1 = def->Get(String::New("y1"))->Int32Value();
+				int w = def->Get(String::New("w"))->Int32Value();
+				int h = def->Get(String::New("h"))->Int32Value();
+
+				rect_2d src_rect = {x1, y1, w, h};
+				rect_2d dest_rect = {x, y, w * scale, h * scale};
+				x += a * scale;
+				context_2d_drawImage(GET_CONTEXT2D(), tex_name, src_tex, &src_rect, &dest_rect, composite_op);
+				x += c * scale;
+			}
+		}
+	}
+	return Undefined();
+}
+
+
+void js_gl_init() {
+}
+
+Handle<ObjectTemplate> get_context_2d_class_template() {
+	Handle<ObjectTemplate> context_2d_class_template;
+	context_2d_class_template = ObjectTemplate::New();
+	context_2d_class_template->SetInternalFieldCount(1);
+
+	context_2d_class_template->Set(String::New("loadIdentity"), FunctionTemplate::New(defLoadIdentity));
+	context_2d_class_template->Set(String::New("drawImage"), FunctionTemplate::New(defDrawImage));
+	context_2d_class_template->Set(String::New("flushDrawImage"), FunctionTemplate::New(defFlushImages));
+	context_2d_class_template->Set(String::New("newTexture"), FunctionTemplate::New(defNewTexture));
+	context_2d_class_template->Set(String::New("rotate"), FunctionTemplate::New(defRotate));
+	context_2d_class_template->Set(String::New("scale"), FunctionTemplate::New(defScale));
+	context_2d_class_template->Set(String::New("translate"), FunctionTemplate::New(defTranslate));
+	context_2d_class_template->Set(String::New("save"), FunctionTemplate::New(defSave));
+	context_2d_class_template->Set(String::New("restore"), FunctionTemplate::New(defRestore));
+	context_2d_class_template->Set(String::New("clear"), FunctionTemplate::New(defClear));
+	context_2d_class_template->Set(String::New("setGlobalAlpha"), FunctionTemplate::New(defSetGlobalAlpha));
+	context_2d_class_template->Set(String::New("getGlobalAlpha"), FunctionTemplate::New(defGetGlobalAlpha));
+	context_2d_class_template->Set(String::New("_loadImage"), FunctionTemplate::New(defLoadImage));
+	context_2d_class_template->Set(String::New("clearRect"), FunctionTemplate::New(defClearRect));
+	context_2d_class_template->Set(String::New("fillRect"), FunctionTemplate::New(defFillRect));
+	context_2d_class_template->Set(String::New("strokeRect"), FunctionTemplate::New(defStrokeRect));
+	context_2d_class_template->Set(String::New("measureText"), FunctionTemplate::New(defMeasureText));
+	context_2d_class_template->Set(String::New("fillText"), FunctionTemplate::New(defFillText));
+	context_2d_class_template->Set(String::New("strokeText"), FunctionTemplate::New(defStrokeText));
+	context_2d_class_template->Set(String::New("enableScissor"), FunctionTemplate::New(defEnableScissor));
+	context_2d_class_template->Set(String::New("disableScissor"), FunctionTemplate::New(defDisableScissor));
+	context_2d_class_template->Set(String::New("drawPointSprites"), FunctionTemplate::New(defDrawPointSprites));
+
+	// bitmap fonts
+	context_2d_class_template->Set(String::New("measureTextBitmap"), FunctionTemplate::New(defMeasureTextBitmap));
+	context_2d_class_template->Set(String::New("fillTextBitmap"), FunctionTemplate::New(defFillTextBitmap));
+
+	// deprecated
+	context_2d_class_template->Set(String::New("fillTextBitmapDeprecated"), FunctionTemplate::New(defFillTextBitmapDeprecated));
+
+	context_2d_class_template->Set(String::New("addFilter"), FunctionTemplate::New(defAddFilter));
+	context_2d_class_template->Set(String::New("clearFilters"), FunctionTemplate::New(defClearFilters));
+
+	return context_2d_class_template;
+}
+
+Handle<ObjectTemplate> js_gl_get_template() {
+	Handle<ObjectTemplate> gl = ObjectTemplate::New();
+	gl->Set(String::New("Context2D"), FunctionTemplate::New(context_2d_class_ctor));
+	gl->Set(String::New("flushImages"), FunctionTemplate::New(defFlushImages));
+	gl->Set(String::New("_loadImage"), FunctionTemplate::New(defLoadImage));
+	gl->Set(String::New("newTexture"), FunctionTemplate::New(defNewTexture));
+	gl->Set(String::New("deleteTexture"), FunctionTemplate::New(defDestroyImage));
+	gl->Set(String::New("_fillText"), FunctionTemplate::New(defFillTextBitmap));
+	gl->Set(String::New("deleteAllTextures"), FunctionTemplate::New(js_gl_delete_textures));
+	gl->Set(String::New("touchTexture"), FunctionTemplate::New(js_gl_touch_texture));
+
+	return gl;
+}

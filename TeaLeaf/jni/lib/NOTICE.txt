@@ -1,0 +1,5 @@
+This project makes use of
+libpng: http://www.libpng.org/pub/png/libpng.html
+libjpeg: http://libjpeg.sourceforge.net/
+libzip: http://www.nih.at/libzip/
+jansson: http://www.digip.org/jansson/

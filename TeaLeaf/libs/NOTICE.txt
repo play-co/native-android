@@ -1,0 +1,1 @@
+the libphonenumber-4.6.jar and gson-2.2.1.jar are both under the Apache License, Version 2.0 which can be found at http://www.apache.org/licenses/LICENSE-2.0
