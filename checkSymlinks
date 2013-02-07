@@ -5,7 +5,6 @@
 
 var path = require('path');
 var fs = require('fs');
-var ff = require('ff');
 
 var isWindows = require('os').platform() == 'win32';
 
@@ -14,58 +13,28 @@ var base = path.join(path.dirname(__filename), './');
 exports.check = function (cb) {
 	var cwd = process.cwd();
 	process.chdir(__dirname);
-	var f = ff(function () {
-			var links = require('./links.json');
-			var i = 0;
-			var next = f();
-			var nextLink = function () {
-			var link = links[i];
-			if (!link) {
-			next();
-			} else {
+	var links = require('./links.json');
+	var i = 0;
+	var nextLink = function () {
+		var link = links[i];
+		if (!link) {
+			process.chdir(cwd);
+			cb && cb();
+		} else {
 			++i;
 			var dest = path.join(base, link[1]);
+			//if we are on windows then the src path needs to be provided as a absolute path
+			//in this case the link sources are provided relative to the directory that the destination of the link resides
 			if (isWindows) {
-				console.log(dest,link[0]);
 				var src = path.join(dest,'\\..\\' + link[0]);
 			} else {
 				var src = link[0];
 			}
-			var f = ff(function () {
-				fs.exists(dest, f.slotPlain());
-				}, function (exists) {
-				var next = f();
-				if (!exists) {
-				createLink(src, dest, next);
-				} else {
-				checkLink(src, dest, next);
-				}
-				})
-			.error(next)
-				.success(nextLink);
-			}
-			};
-			nextLink();
-	}).cb(function () {
-		process.chdir(cwd);
-		cb && cb();
-	});
-};
-
-function checkLink (src, dest, next) {
-	fs.readlink(dest, function (err, linkString) {
-		
-		if (err) {
-			console.error(err);
-			createLink(src, dest, next);
-		} else if (linkString != src) {
-			console.log('rewriting link', dest, 'to point to', src);
-			createLink(src, dest, 'junction', next);
-		} else {
-			next();
+			createLink(src, dest, nextLink);
 		}
-	});
-}
+	}
+	nextLink();
+};
 
 function createLink (src, dest, next) {
 	console.log('creating link to', dest);
@@ -105,8 +74,8 @@ function makeDirsSync (dir) {
 			case 'EEXIST':
 				return;
 
-				// recursive case: some directory in the path doesn't exist, so
-				// make this path's parent directory.
+			// recursive case: some directory in the path doesn't exist, so
+			// make this path's parent directory.
 			case 'ENOENT':
 				fs.mkdirSync(path.dirname(dir));
 				fs.mkdirSync(dir);
