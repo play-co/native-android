@@ -29,7 +29,7 @@ public interface IPlugin {
 	public void onStop();
 	public void onDestroy();
 	public void onNewIntent(Intent intent);
-	public void onActivityResult(int request, int result, Intent data);
+	public void onActivityResult(Integer request, Integer result, Intent data);
 	public void onInstallReferrer(String referrer);
 
 }
