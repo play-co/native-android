@@ -45,6 +45,7 @@ var PROP_END_PLUGINS = "#END_PLUGINS";
 var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
 var libraries = [];
+var hasBilling = false;
 
 for (var i in config) {
 
@@ -61,6 +62,10 @@ for (var i in config) {
 
 	}
 
+	if (pluginConfig.hasBilling && pluginConfig.hasBilling == true) {
+		hasBilling = true;
+	}
+
 	if (pluginConfig.library) {
 			libraries.push(path.join(pluginDir, pluginConfig.library.srcPath, pluginConfig.library.libName));
 	}
@@ -70,6 +75,11 @@ for (var i in config) {
 //go through and all library references to project.properties
 var properties = fs.readFileSync(path.join(TEALEAF_DIR, "project.properties"), "utf-8");
 if (properties.length > 0 ) {
+	var sourceDirs = "src";
+	if (hasBilling) {
+		sourceDirs = "src/com/tealeaf";
+	}
+	properties = properties.replace(/source\.dir([^\n]*)/, 'source.dir=' + sourceDirs);
 	var start = properties.indexOf(PROP_START_PLUGINS);		
 	var end = properties.indexOf(PROP_END_PLUGINS);		
 
