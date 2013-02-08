@@ -52,6 +52,7 @@ var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 var manifestXmlManifestStr = "";
 var manifestXmlApplicationStr = "";
 var libraries = [];
+var hasBilling = false;
 
 for (var c in config) {
 
@@ -67,6 +68,10 @@ for (var c in config) {
 		var destFilePath = path.join(__dirname, "../TeaLeaf/src/" ,packageDir ,fileInfo.name);
 		wrench.mkdirSyncRecursive(path.dirname(destFilePath));
 		copyFileSync(path.join(pluginDir, fileInfo.srcPath,  fileInfo.name), destFilePath, "utf-8")
+	}
+
+	if (pluginConfig.hasBilling && pluginConfig.hasBilling == true) {
+		hasBilling = true;
 	}
 
 
@@ -92,6 +97,11 @@ if (xml.length > 0) {
 //go through and all library references to project.properties
 var properties = fs.readFileSync(path.join(TEALEAF_DIR, "project.properties"), "utf-8");
 if (properties.length > 0 ) {
+	var sourceDirs = "src";
+	if (hasBilling) {
+		sourceDirs = "src/com/tealeaf";
+	}
+	properties = properties.replace(/source\.dir([^\n]*)/, 'source.dir=' + sourceDirs);
 	var start = properties.indexOf(PROP_START_PLUGINS);		
 	var end = properties.indexOf(PROP_END_PLUGINS);		
 
@@ -126,7 +136,7 @@ if (properties.length > 0 ) {
 
 }
 
-//remove plugins from tealeaf andoridmanifest
+//remove plugins from tealeaf androidmanifest
 var xml = fs.readFileSync(path.join(__dirname, "/../TeaLeaf/AndroidManifest.xml"), "utf-8");
 if (xml.length > 0) {
 	xml = replaceTextBetween(xml, XML_START_PLUGINS_MANIFEST, XML_END_PLUGINS_MANIFEST, "");
