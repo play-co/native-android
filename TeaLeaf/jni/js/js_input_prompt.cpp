@@ -35,7 +35,7 @@ Handle<Value> js_input_prompt_show(const Arguments &args) {
 
 Handle<ObjectTemplate> js_input_prompt_get_template() {
 	Handle<ObjectTemplate> input = ObjectTemplate::New();
-	input->Set(String::New("show"), FunctionTemplate::New(js_input_prompt_show));
+	input->Set(STRING_CACHE_show, FunctionTemplate::New(js_input_prompt_show));
 	return input;
 }
 

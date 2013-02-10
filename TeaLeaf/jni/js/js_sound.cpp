@@ -90,12 +90,12 @@ Handle<Value> defLoadBackgroundMusic(const Arguments& args) {
 
 Handle<ObjectTemplate> js_sound_get_template() {
 	Handle<ObjectTemplate> sound = ObjectTemplate::New();
-	sound->Set(String::New("playSound"), FunctionTemplate::New(defPlaySound));
-	sound->Set(String::New("loadSound"), FunctionTemplate::New(defLoadSound));
-	sound->Set(String::New("playBackgroundMusic"), FunctionTemplate::New(defPlayBackgroundMusic));
-	sound->Set(String::New("loadBackgroundMusic"), FunctionTemplate::New(defLoadBackgroundMusic));
-	sound->Set(String::New("stopSound"), FunctionTemplate::New(defStopSound));
-	sound->Set(String::New("pauseSound"), FunctionTemplate::New(defPauseSound));
-	sound->Set(String::New("setVolume"), FunctionTemplate::New(defSetVolume));
+	sound->Set(STRING_CACHE_playSound, FunctionTemplate::New(defPlaySound));
+	sound->Set(STRING_CACHE_loadSound, FunctionTemplate::New(defLoadSound));
+	sound->Set(STRING_CACHE_playBackgroundMusic, FunctionTemplate::New(defPlayBackgroundMusic));
+	sound->Set(STRING_CACHE_loadBackgroundMusic, FunctionTemplate::New(defLoadBackgroundMusic));
+	sound->Set(STRING_CACHE_stopSound, FunctionTemplate::New(defStopSound));
+	sound->Set(STRING_CACHE_pauseSound, FunctionTemplate::New(defPauseSound));
+	sound->Set(STRING_CACHE_setVolume, FunctionTemplate::New(defSetVolume));
 	return sound;
 }

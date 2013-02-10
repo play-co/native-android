@@ -46,14 +46,14 @@ Handle<Value> js_profiler_stop_profile(const Arguments &args) {
 Handle<ObjectTemplate> js_profiler_get_template() {
 	Handle<ObjectTemplate> profiler = ObjectTemplate::New();
 
-	profiler->Set(String::New("start"), FunctionTemplate::New(js_profiler_start_profile));
-	profiler->Set(String::New("stop"), FunctionTemplate::New(js_profiler_stop_profile));
+	profiler->Set(STRING_CACHE_start, FunctionTemplate::New(js_profiler_start_profile));
+	profiler->Set(STRING_CACHE_stop, FunctionTemplate::New(js_profiler_stop_profile));
 #ifdef PROFILER_ENABLED
 #define __ENABLED true
 #else
 #define __ENABLED false
 #endif
-	profiler->Set(String::New("enabled"), Boolean::New(__ENABLED));
+	profiler->Set(STRING_CACHE_enabled, Boolean::New(__ENABLED));
 
 	return profiler;
 }

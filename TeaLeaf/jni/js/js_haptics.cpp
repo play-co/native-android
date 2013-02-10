@@ -29,14 +29,14 @@ Handle<Value> js_haptics_cancel(const Arguments &args) {
 
 Handle<Value> js_haptics_vibrate(const Arguments &args) {
 	Handle<Object> opts = Handle<Object>::Cast(args[0]);
-	Handle<Value> milliseconds = opts->Get(String::New("milliseconds"));
+	Handle<Value> milliseconds = opts->Get(STRING_CACHE_milliseconds);
 
 	if ( milliseconds->IsUndefined() ) {
 	
-		Handle<Object> pattern = Handle<Array>::Cast( opts->Get(String::New("pattern")) );
-		int repeat = opts->Get(String::New("repeat"))->Int32Value();
+		Handle<Object> pattern = Handle<Array>::Cast( opts->Get(STRING_CACHE_pattern) );
+		int repeat = opts->Get(STRING_CACHE_repeat)->Int32Value();
 
-		int patternLen = pattern->Get(String::New("length"))->Int32Value();
+		int patternLen = pattern->Get(STRING_CACHE_length)->Int32Value();
 		long long* patternArr = (long long*)malloc(sizeof(long long) * patternLen);
 	
 		for ( int i = 0; i < patternLen; i++ ) {	
@@ -65,9 +65,9 @@ Handle<Value> js_haptics_has_vibrator(Local<String> property, const AccessorInfo
 Handle<ObjectTemplate> js_haptics_get_template() {
 	Handle<ObjectTemplate> haptics = ObjectTemplate::New();
 	
-	haptics->Set(String::New("cancel"), FunctionTemplate::New(js_haptics_cancel));
-	haptics->Set(String::New("vibrate"), FunctionTemplate::New(js_haptics_vibrate));
-	haptics->SetAccessor(String::New("hasVibrator"), js_haptics_has_vibrator);
+	haptics->Set(STRING_CACHE_cancel, FunctionTemplate::New(js_haptics_cancel));
+	haptics->Set(STRING_CACHE_vibrate, FunctionTemplate::New(js_haptics_vibrate));
+	haptics->SetAccessor(STRING_CACHE_hasVibrator, js_haptics_has_vibrator);
 	
 	return haptics;
 }

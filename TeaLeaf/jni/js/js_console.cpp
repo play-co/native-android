@@ -38,7 +38,7 @@ Handle<Value> native_log(const v8::Arguments& args) {
 Handle<ObjectTemplate> js_console_get_template() {
 	Handle<ObjectTemplate> console = ObjectTemplate::New();
 
-	console->Set(String::New("log"), FunctionTemplate::New(native_log));
+	console->Set(STRING_CACHE_log, FunctionTemplate::New(native_log));
 
 	return console;
 }

@@ -61,10 +61,10 @@ Handle<Value> js_purchase_confirm_purchase(const Arguments &args) {
 
 Handle<ObjectTemplate> js_purchase_get_template() {
 	Handle<ObjectTemplate> purchase = ObjectTemplate::New();
-	purchase->Set(String::New("onResult"), FunctionTemplate::New(js_purchase_on_result_default));
-	purchase->Set(String::New("buy"), FunctionTemplate::New(js_purchase_buy));
-	purchase->Set(String::New("restore"), FunctionTemplate::New(js_purchase_restore));
-	purchase->Set(String::New("confirmPurchase"), FunctionTemplate::New(js_purchase_confirm_purchase));
-	purchase->SetAccessor(String::New("supported"), js_purchase_get_supported);
+	purchase->Set(STRING_CACHE_onResult, FunctionTemplate::New(js_purchase_on_result_default));
+	purchase->Set(STRING_CACHE_buy, FunctionTemplate::New(js_purchase_buy));
+	purchase->Set(STRING_CACHE_restore, FunctionTemplate::New(js_purchase_restore));
+	purchase->Set(STRING_CACHE_confirmPurchase, FunctionTemplate::New(js_purchase_confirm_purchase));
+	purchase->SetAccessor(STRING_CACHE_supported, js_purchase_get_supported);
 	return purchase;
 }
