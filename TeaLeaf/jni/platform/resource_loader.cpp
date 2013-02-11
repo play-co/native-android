@@ -55,6 +55,7 @@ CEXPORT void resource_loader_deinitialize() {
 }
 
 resource_p resource_loader_load_url(const char *url) {
+	LOG("CAT: resource_loader_load_url %s", url);
 	// DANGER: This is called from a thread other than GLThread!
 	JNIEnv *env = NULL;
 	native_shim *shim = get_native_thread_shim(&env);
@@ -88,6 +89,7 @@ resource_p resource_loader_load_url(const char *url) {
 }
 
 CEXPORT char *resource_loader_string_from_url(const char *url) {
+	LOG("CAT: resource_loader_string_from_url %s", url);
 	// try loading from a file first
 	char* contents = NULL;
 	unsigned long dummy;
@@ -105,6 +107,7 @@ CEXPORT char *resource_loader_string_from_url(const char *url) {
 
 
 CEXPORT void launch_remote_texture_load(const char *url) {
+	LOG("CAT: launch_remote_texture_load %s", url);
 	// load from java
 	JNIEnv *env = NULL;
 	native_shim *shim = get_native_thread_shim(&env);
@@ -118,6 +121,7 @@ CEXPORT void launch_remote_texture_load(const char *url) {
 }
 
 CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
+	LOG("CAT: resource_loader_load_image_with_c %s", texture->url);
 	texture->pixel_data=NULL;
 
 	bool skip = false;
@@ -167,6 +171,7 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 	if (!url || strlen(url) == 0) {
 		return NULL;
 	}
+	LOG("CAT: resource_loader_read_file %s", url);
 	char *base_path = storage_dir;
 	size_t len = strlen(base_path) + strlen(FILESYSTEM_PREFIX) + strlen(url) + 1;
 	char *path = (char*)malloc(len);
@@ -221,147 +226,3 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 	free(path);
 	return data;
 }
-
-unsigned char *load_texture(texture_2d * texture) { //take in a texture_2d pointer instead
-	unsigned long sz = 0;
-	unsigned char *data = resource_loader_read_file(texture->url, &sz);
-	//if we don't get data back from this, we need to load from java
-	if (!data) {
-		return NULL;
-	}
-	int sw = 0, sh = 0, ch = 0;
-	unsigned char *bits = load_image_from_memory(data, (long)sz, &sw, &sh, &ch);
-
-	//check for image being a power of 2, if not, place it into an image
-	//which is power of 2, in the upper left corner
-	int w_old = sw;
-	int h_old = sh;
-	int w = w_old;
-	int h = h_old;
-
-	unsigned char *copy_image = NULL;
-
-	// bit tricks for checking if w/h is a power of 2
-	if( !(w && !(w & (w - 1))) || !(h && !(h & (h - 1))) ) {
-		w--;
-		w |= w >> 1;
-		w |= w >> 2;
-		w |= w >> 4;
-		w |= w >> 8;
-		w |= w >> 16;
-		w++;
-
-		h--;
-		h |= h >> 1;
-		h |= h >> 2;
-		h |= h >> 4;
-		h |= h >> 8;
-		h |= h >> 16;
-		h++;
-	}
-
-
-	//values to help with modifying image coordinates if halfsizing gets used
-	int scale = 1;
-	int ratio = 1;
-	int div_mod = 1;
-
-	if (use_halfsized_textures && (h > 64 || w > 64)) {
-		scale = 2;
-		ratio = 4;
-		div_mod = ch;
-	}
-
-	int row_bytes = ch * sizeof(unsigned char) * w_old;
-	int old_image_size = row_bytes * h_old;
-	int new_row_bytes = ch * sizeof(unsigned char) * w / scale;
-	int new_image_size = new_row_bytes * h / scale;
-
-	if (new_image_size == 0) {
-		LOG("{resources} WARNING: Trying to load 0 sized image");
-		return NULL;
-	}
-
-	//if old_image_size == new_image_size, we only need to premultiply the alpha channel
-	if (old_image_size == new_image_size) {
-		if (ch == 4) {
-			// 4 channels
-			for(int i = 0; i < h; i++) {
-				for(int j = 0; j < row_bytes; j += ch) {
-					unsigned char a = bits[row_bytes * i + j + 3];
-					bits[row_bytes * i + j] = ((bits[row_bytes * i + j] * a + 128 ) >> 8);
-					bits[row_bytes * i + j + 1] = ((bits[row_bytes * i + j + 1] * a + 128) >> 8);
-					bits[row_bytes * i + j + 2] = ((bits[row_bytes * i + j + 2] * a + 128) >> 8);
-				}
-			}
-		}
-		copy_image = bits;
-
-	} else {
-		copy_image = (unsigned char *) malloc(new_image_size);
-
-		//set copy_image to all zeroes so we can add in for nearest neighbor
-		memset(copy_image, 0, new_image_size);
-
-		// ix - will be the "new" i pos, if using halfsized, i = i / 2, otherwise i is unchanged
-
-		// jx - will be the "new" j pos, it will get adjusted to the proper horizontal position
-		// in the image and is dependant on if the image is halfszied and how many channels it has
-		if (ch == 4) {
-			// 4 channels
-			for(int i = 0; i < h; i++) {
-				int ix = i / scale;
-				if(i < h_old) {
-					for(int j = 0; j < row_bytes; j += ch) {
-						int jx = (j / div_mod) / scale * div_mod;
-						copy_image[new_row_bytes * ix + jx] += ((bits[row_bytes * i + j] * bits[row_bytes * i + j + 3] + 128 ) >> 8) / ratio;
-						copy_image[new_row_bytes * ix + jx + 1] += ((bits[row_bytes * i + j + 1] * bits[row_bytes * i + j + 3] + 128) >> 8) / ratio;
-						copy_image[new_row_bytes * ix + jx + 2] += ((bits[row_bytes * i + j + 2] * bits[row_bytes * i + j + 3] + 128) >> 8) / ratio;
-						copy_image[new_row_bytes * ix + jx + 3] += (bits[row_bytes * i + j + 3]) / ratio;
-
-
-					}
-
-				}
-			}
-
-		} else {
-			// 3 channels
-			for(int i = 0; i < h; i++) {
-				int ix = i / scale;
-				if(i < h_old) {
-					for(int j = 0; j < row_bytes; j += ch) {
-						int jx = (j / div_mod) / scale * div_mod;
-						copy_image[new_row_bytes * ix + jx] += (bits[row_bytes * i + j]) / ratio;
-						copy_image[new_row_bytes * ix + jx + 1] += (bits[row_bytes * i + j + 1]) / ratio;
-						copy_image[new_row_bytes * ix + jx + 2] += (bits[row_bytes * i + j + 2]) / ratio;
-
-
-					}
-				}
-
-			}
-
-
-		}
-
-	}
-
-	//clean up
-	free(data);
-	if (copy_image != bits) {
-		free(bits);
-	}
-
-	//set texture params
-	texture->num_channels = ch;
-	texture->scale = scale;
-	texture->width= w;
-	texture->height = h;
-	texture->originalWidth = w_old;
-	texture->originalHeight = h_old;
-
-	//return the correct bytes
-	return copy_image;
-}
-

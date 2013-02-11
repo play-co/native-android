@@ -48,6 +48,7 @@ public class TeaLeafOptions {
 	private String sdkHash = null;
 	private String androidHash = null;
 	private String gameHash = null;
+	private String splash = null;
 
 	public TeaLeafOptions() {
 		// we want a blank options, so set meta to an empty bundle
@@ -163,6 +164,9 @@ public class TeaLeafOptions {
 	public String getSourceDir() {
 		return sourceDir;
 	}
+	public String getSplash() {
+		return splash;
+	}
 	public String getEntryPoint() {
 		return get("entryPoint", "gc.native.launchClient");
 	}
@@ -216,6 +220,7 @@ public class TeaLeafOptions {
 	public void setBuildIdentifier(String value) { buildID = value; }
 	public void setPushUrl(String value) { pushUrl = value; }
 	public void setSimulateID(String value) { simulateID = value; }
+	public void setSplash(String value) { splash = value; }
 
 	protected static String read(File f) {
 		StringBuffer contents = new StringBuffer(1000);

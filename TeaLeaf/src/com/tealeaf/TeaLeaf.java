@@ -40,10 +40,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -212,6 +215,7 @@ public class TeaLeaf extends FragmentActivity {
 		boolean isTestApp = false;
 		if (bundle != null) {
 		   isTestApp = bundle.getBoolean("isTestApp", false);
+
 		   if (isTestApp) {
 			   options.setAppID(appID);
 			   boolean isPortrait = bundle.getBoolean("isPortrait", false);
@@ -224,6 +228,67 @@ public class TeaLeaf extends FragmentActivity {
 			   options.setCodePort(bundle.getInt("portValue"));
 			   String simulateID = bundle.getString("simulateID");
 			   options.setSimulateID(simulateID);
+		   }
+
+		   // Get screen width and height
+		   int sw = 0, sh = 0;  
+		   Point size = new Point();
+		   WindowManager w = getWindowManager();
+
+		   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+			   w.getDefaultDisplay().getSize(size);
+			   sw = size.x;
+			   sh = size.y; 
+		   } else {
+			   Display d = w.getDefaultDisplay(); 
+			   sw = d.getWidth(); 
+			   sh = d.getHeight(); 
+		   }
+
+		   // Calculate longer screen side
+		   int longerScreenSide = sw;
+		   if (longerScreenSide < sh) {
+			   longerScreenSide = sh;
+		   }
+
+		   int screenLayout = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+		   switch (screenLayout) {
+		   case Configuration.SCREENLAYOUT_SIZE_LARGE:
+		   case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+			   // Tablet:
+			   {
+				   boolean isPortrait;
+
+				   if (isTestApp) {
+					   isPortrait = bundle.getBoolean("isPortrait", false);
+				   } else {
+					   isPortrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+				   }
+
+				   if (isPortrait) {
+					   if (longerScreenSide >= 2048) {
+						   options.setSplash("@root://portrait2048.png");
+					   } else {
+						   options.setSplash("@root://portrait1024.png");
+					   }
+				   } else {
+					   if (longerScreenSide >= 2048) {
+						   options.setSplash("@root://landscape1536.png");
+					   } else {
+						   options.setSplash("@root://landscape768.png");
+					   }
+				   }
+			   }
+			   break;
+		   default:
+			   // Handset:
+			   if (longerScreenSide >= 1136) {
+				   options.setSplash("@root://portrait1136.png");
+			   } else if (longerScreenSide >= 960) {
+				   options.setSplash("@root://portrait960.png");
+			   } else {
+				   options.setSplash("@root://portrait480.png");
+			   }
 		   }
 		}
 
