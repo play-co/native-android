@@ -229,67 +229,6 @@ public class TeaLeaf extends FragmentActivity {
 			   String simulateID = bundle.getString("simulateID");
 			   options.setSimulateID(simulateID);
 		   }
-
-		   // Get screen width and height
-		   int sw = 0, sh = 0;  
-		   Point size = new Point();
-		   WindowManager w = getWindowManager();
-
-		   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-			   w.getDefaultDisplay().getSize(size);
-			   sw = size.x;
-			   sh = size.y; 
-		   } else {
-			   Display d = w.getDefaultDisplay(); 
-			   sw = d.getWidth(); 
-			   sh = d.getHeight(); 
-		   }
-
-		   // Calculate longer screen side
-		   int longerScreenSide = sw;
-		   if (longerScreenSide < sh) {
-			   longerScreenSide = sh;
-		   }
-
-		   int screenLayout = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-		   switch (screenLayout) {
-		   case Configuration.SCREENLAYOUT_SIZE_LARGE:
-		   case Configuration.SCREENLAYOUT_SIZE_XLARGE:
-			   // Tablet:
-			   {
-				   boolean isPortrait;
-
-				   if (isTestApp) {
-					   isPortrait = bundle.getBoolean("isPortrait", false);
-				   } else {
-					   isPortrait = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
-				   }
-
-				   if (isPortrait) {
-					   if (longerScreenSide >= 2048) {
-						   options.setSplash("@root://portrait2048.png");
-					   } else {
-						   options.setSplash("@root://portrait1024.png");
-					   }
-				   } else {
-					   if (longerScreenSide >= 2048) {
-						   options.setSplash("@root://landscape1536.png");
-					   } else {
-						   options.setSplash("@root://landscape768.png");
-					   }
-				   }
-			   }
-			   break;
-		   default:
-			   // Handset:
-			   if (longerScreenSide >= 1136) {
-				   options.setSplash("@root://portrait1136.png");
-			   } else if (longerScreenSide >= 960) {
-				   options.setSplash("@root://portrait960.png");
-			   } else {
-				   options.setSplash("@root://portrait480.png");
-			   }
-		   }
 		}
 
 		group = new FrameLayout(this);

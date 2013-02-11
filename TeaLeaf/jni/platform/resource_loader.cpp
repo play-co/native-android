@@ -55,7 +55,6 @@ CEXPORT void resource_loader_deinitialize() {
 }
 
 resource_p resource_loader_load_url(const char *url) {
-	LOG("CAT: resource_loader_load_url %s", url);
 	// DANGER: This is called from a thread other than GLThread!
 	JNIEnv *env = NULL;
 	native_shim *shim = get_native_thread_shim(&env);
@@ -89,7 +88,6 @@ resource_p resource_loader_load_url(const char *url) {
 }
 
 CEXPORT char *resource_loader_string_from_url(const char *url) {
-	LOG("CAT: resource_loader_string_from_url %s", url);
 	// try loading from a file first
 	char* contents = NULL;
 	unsigned long dummy;
@@ -107,7 +105,6 @@ CEXPORT char *resource_loader_string_from_url(const char *url) {
 
 
 CEXPORT void launch_remote_texture_load(const char *url) {
-	LOG("CAT: launch_remote_texture_load %s", url);
 	// load from java
 	JNIEnv *env = NULL;
 	native_shim *shim = get_native_thread_shim(&env);
@@ -121,7 +118,6 @@ CEXPORT void launch_remote_texture_load(const char *url) {
 }
 
 CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
-	LOG("CAT: resource_loader_load_image_with_c %s", texture->url);
 	texture->pixel_data=NULL;
 
 	bool skip = false;
@@ -171,7 +167,6 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 	if (!url || strlen(url) == 0) {
 		return NULL;
 	}
-	LOG("CAT: resource_loader_read_file %s", url);
 	char *base_path = storage_dir;
 	size_t len = strlen(base_path) + strlen(FILESYSTEM_PREFIX) + strlen(url) + 1;
 	char *path = (char*)malloc(len);

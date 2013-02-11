@@ -44,11 +44,7 @@ public class ResourceManager {
 	}
 
 	public File getFile(String url) {
-		if (url.matches("^@root://.*")) {
-			url = resolveFromRoot(url.substring(8));
-		} else {
-			url = resolve(url);
-		}
+		url = resolve(url);
 		File f = null;
 		if (url.matches("^http(s?)://.*")) {
 			// we're dealing with a url, download it
@@ -91,18 +87,6 @@ public class ResourceManager {
 		}
 	}
 
-	// Resolve from top of resources not resources/resources
-	public String resolveFromRoot(String relative) {
-		if(relative.matches("^(http(s?)://|data).*")) {
-			// actually not a relative url
-			return relative;
-		} else if(options.isDevelop() && options.get("forceURL", false)) {
-			return resolveUrl(relative);
-		} else {
-			return resolveFileFromRoot(relative);
-		}
-	}
-
 	public String resolveUrl(String relative, String base) {
 		return base + encode(relative);
 	}
@@ -124,11 +108,6 @@ public class ResourceManager {
 
 	public String resolveFile(String relative) {
 		String base = getStorageDirectory() + File.separator + "resources";
-		return resolveFileWithBase(relative, base);
-	}
-
-	public String resolveFileFromRoot(String relative) {
-		String base = getStorageDirectory();
 		return resolveFileWithBase(relative, base);
 	}
 

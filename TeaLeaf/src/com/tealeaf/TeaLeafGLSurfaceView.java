@@ -21,15 +21,21 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.opengl.GLES20;
+import android.os.Build;
+import android.os.Bundle;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.tealeaf.event.ImageLoadedEvent;
 import com.tealeaf.event.ResumeEvent;
@@ -525,6 +531,74 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		private int width, height;
 		private TextureLoader textureLoader;
 
+		private void selectSplashScreen() {
+			// Get screen width and height
+			int sw = 0, sh = 0;
+			Point size = new Point();
+			TeaLeaf tealeaf = this.view.context;
+			WindowManager w = tealeaf.getWindowManager();
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				w.getDefaultDisplay().getSize(size);
+				sw = size.x;
+				sh = size.y;
+			} else {
+				Display d = w.getDefaultDisplay();
+				sw = d.getWidth();
+				sh = d.getHeight();
+			}
+
+			// Calculate longer screen side
+			int longerScreenSide = sw;
+			if (longerScreenSide < sh) {
+				longerScreenSide = sh;
+			}
+
+			int screenLayout = tealeaf.getResources().getConfiguration().screenLayout
+					& Configuration.SCREENLAYOUT_SIZE_MASK;
+			switch (screenLayout) {
+			case Configuration.SCREENLAYOUT_SIZE_LARGE:
+			case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+			// Tablet:
+			{
+				boolean isPortrait;
+
+				Bundle bundle = tealeaf.getIntent().getExtras();
+				if (bundle != null && bundle.getBoolean("isTestApp", false)) {
+					isPortrait = bundle.getBoolean("isPortrait", false);
+				} else {
+					isPortrait = (tealeaf.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+				}
+
+				if (isPortrait) {
+					if (longerScreenSide >= 2048) {
+						tealeaf.getOptions().setSplash("portrait2048.png");
+					} else {
+						tealeaf.getOptions().setSplash("portrait1024.png");
+					}
+				} else {
+					if (longerScreenSide >= 2048) {
+						tealeaf.getOptions().setSplash("landscape1536.png");
+					} else {
+						tealeaf.getOptions().setSplash("landscape768.png");
+					}
+				}
+			}
+				break;
+			default:
+				// Handset:
+				if (longerScreenSide >= 1136) {
+					tealeaf.getOptions().setSplash("portrait1136.png");
+				} else if (longerScreenSide >= 960) {
+					tealeaf.getOptions().setSplash("portrait960.png");
+				} else {
+					tealeaf.getOptions().setSplash("portrait480.png");
+				}
+			}
+
+			logger.log("{core} Device screen (", sw, ",", sh, "), using splash '", tealeaf.getOptions().getSplash(), "'");
+		}
+		
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
 
 			if (this.view.context.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -544,6 +618,9 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			if (initJS) {
 				TeaLeafOptions options = view.context.getOptions();
 				logger.log("{js} Initializing JS config");
+
+				this.selectSplashScreen();
+
 				NativeShim.init(nativeShim, view.context.getCodeHost(),
 						options.getTcpHost(), options.getCodePort(),
 						options.getTcpPort(), options.getEntryPoint(),
