@@ -42,7 +42,7 @@ Handle<Value> js_plugins_send_event(const Arguments& args) {
 
 Handle<ObjectTemplate> js_plugins_get_template() {
 	Handle<ObjectTemplate> actions = ObjectTemplate::New();
-	actions->Set(String::New("sendEvent"), FunctionTemplate::New(js_plugins_send_event));
+	actions->Set(STRING_CACHE_sendEvent, FunctionTemplate::New(js_plugins_send_event));
 	return actions;
 }
 

@@ -24,7 +24,7 @@ Handle<Value> js_timestep_events_get(const Arguments& args) {
 	
 	Local<Object> thiz = args.This();
 	//TODO cache this.
-	Handle<Function> input_event_ctor = Handle<Function>::Cast(thiz->Get(String::New("InputEvent")));
+	Handle<Function> input_event_ctor = Handle<Function>::Cast(thiz->Get(STRING_CACHE_InputEvent));
 
 	input_event_list list = timestep_events_get();
 	Handle<v8::Array> arr = Array::New(list.count);

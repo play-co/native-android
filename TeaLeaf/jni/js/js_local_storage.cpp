@@ -64,10 +64,10 @@ Handle<Value> defLocalStorageClear(const Arguments &args) {
 Handle<ObjectTemplate> js_local_storage_get_template() {
 	Handle<ObjectTemplate> localStorage = ObjectTemplate::New();
 
-	localStorage->Set(String::New("setItem"), FunctionTemplate::New(defLocalStorageSetItem));
-	localStorage->Set(String::New("getItem"), FunctionTemplate::New(defLocalStorageGetItem));
-	localStorage->Set(String::New("removeItem"), FunctionTemplate::New(defLocalStorageRemoveItem));
-	localStorage->Set(String::New("clear"), FunctionTemplate::New(defLocalStorageClear));	
+	localStorage->Set(STRING_CACHE_setItem, FunctionTemplate::New(defLocalStorageSetItem));
+	localStorage->Set(STRING_CACHE_getItem, FunctionTemplate::New(defLocalStorageGetItem));
+	localStorage->Set(STRING_CACHE_removeItem, FunctionTemplate::New(defLocalStorageRemoveItem));
+	localStorage->Set(STRING_CACHE_clear, FunctionTemplate::New(defLocalStorageClear));	
 
 	return localStorage;
 }

@@ -34,9 +34,9 @@ Handle<Value> game_hash_getter(Local<String> property, const AccessorInfo &info)
 Handle<ObjectTemplate> js_build_get_template() {
 	Handle<ObjectTemplate> build = ObjectTemplate::New();
 
-	build->SetAccessor(String::New("sdkHash"), sdk_hash_getter);
-	build->SetAccessor(String::New("androidHash"), android_hash_getter);
-	build->SetAccessor(String::New("gameHash"), game_hash_getter);
+	build->SetAccessor(STRING_CACHE_sdkHash, sdk_hash_getter);
+	build->SetAccessor(STRING_CACHE_androidHash, android_hash_getter);
+	build->SetAccessor(STRING_CACHE_gameHash, game_hash_getter);
 
 	return build;
 }

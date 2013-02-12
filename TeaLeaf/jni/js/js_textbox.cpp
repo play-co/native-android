@@ -179,26 +179,26 @@ Handle<ObjectTemplate> js_textbox_get_template() {
 	// TODO: some day, turn this into a real class instead
 	Handle<ObjectTemplate> tmpl = ObjectTemplate::New();
 
-	tmpl->Set(String::New("create"), FunctionTemplate::New(js_textbox_create));
-	tmpl->Set(String::New("destroy"), FunctionTemplate::New(js_textbox_destroy));
-	tmpl->Set(String::New("show"), FunctionTemplate::New(js_textbox_show));
-	tmpl->Set(String::New("hide"), FunctionTemplate::New(js_textbox_hide));
+	tmpl->Set(STRING_CACHE_create, FunctionTemplate::New(js_textbox_create));
+	tmpl->Set(STRING_CACHE_destroy, FunctionTemplate::New(js_textbox_destroy));
+	tmpl->Set(STRING_CACHE_show, FunctionTemplate::New(js_textbox_show));
+	tmpl->Set(STRING_CACHE_hide, FunctionTemplate::New(js_textbox_hide));
 
-	tmpl->Set(String::New("setPosition"), FunctionTemplate::New(js_textbox_set_position));
-	tmpl->Set(String::New("setDimensions"), FunctionTemplate::New(js_textbox_set_dimensions));
-	tmpl->Set(String::New("setValue"), FunctionTemplate::New(js_textbox_set_value));
-	tmpl->Set(String::New("setOpacity"), FunctionTemplate::New(js_textbox_set_opacity));
-	tmpl->Set(String::New("setType"), FunctionTemplate::New(js_textbox_set_type));
-	tmpl->Set(String::New("setVisible"), FunctionTemplate::New(js_textbox_set_visible));
+	tmpl->Set(STRING_CACHE_setPosition, FunctionTemplate::New(js_textbox_set_position));
+	tmpl->Set(STRING_CACHE_setDimensions, FunctionTemplate::New(js_textbox_set_dimensions));
+	tmpl->Set(STRING_CACHE_setValue, FunctionTemplate::New(js_textbox_set_value));
+	tmpl->Set(STRING_CACHE_setOpacity, FunctionTemplate::New(js_textbox_set_opacity));
+	tmpl->Set(STRING_CACHE_setType, FunctionTemplate::New(js_textbox_set_type));
+	tmpl->Set(STRING_CACHE_setVisible, FunctionTemplate::New(js_textbox_set_visible));
 
-	tmpl->Set(String::New("getX"), FunctionTemplate::New(js_textbox_get_x));
-	tmpl->Set(String::New("getY"), FunctionTemplate::New(js_textbox_get_y));
-	tmpl->Set(String::New("getWidth"), FunctionTemplate::New(js_textbox_get_width));
-	tmpl->Set(String::New("getHeight"), FunctionTemplate::New(js_textbox_get_height));
-	tmpl->Set(String::New("getValue"), FunctionTemplate::New(js_textbox_get_value));
-	tmpl->Set(String::New("getOpacity"), FunctionTemplate::New(js_textbox_get_opacity));
-	tmpl->Set(String::New("getType"), FunctionTemplate::New(js_textbox_get_type));
-	tmpl->Set(String::New("getVisible"), FunctionTemplate::New(js_textbox_get_visible));
+	tmpl->Set(STRING_CACHE_getX, FunctionTemplate::New(js_textbox_get_x));
+	tmpl->Set(STRING_CACHE_getY, FunctionTemplate::New(js_textbox_get_y));
+	tmpl->Set(STRING_CACHE_getWidth, FunctionTemplate::New(js_textbox_get_width));
+	tmpl->Set(STRING_CACHE_getHeight, FunctionTemplate::New(js_textbox_get_height));
+	tmpl->Set(STRING_CACHE_getValue, FunctionTemplate::New(js_textbox_get_value));
+	tmpl->Set(STRING_CACHE_getOpacity, FunctionTemplate::New(js_textbox_get_opacity));
+	tmpl->Set(STRING_CACHE_getType, FunctionTemplate::New(js_textbox_get_type));
+	tmpl->Set(STRING_CACHE_getVisible, FunctionTemplate::New(js_textbox_get_visible));
 
 	return tmpl;
 }

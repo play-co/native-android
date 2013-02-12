@@ -6,20 +6,24 @@ Then, return to where you installed native-android, and run ./install.sh"
 command -v android >/dev/null 2>&1 || { echo -e $NDK_MESSAGE; exit 1; }
 command -v ndk-build >/dev/null 2>&1 || { echo -e $NDK_MESSAGE; exit 1; }
 
-if ! git submodule sync; then
-		error "Unable to sync git submodules"
-		exit 1
-fi
-
-git submodule init
-
 remoteurl=`git config --get remote.origin.url`
 
-if [[ "$remoteurl" == *native-android-priv* ]]
-then
-	cd native-core
-	git remote set-url origin "https://github.com/gameclosure/native-core-priv.git"
-	cd ../
+PRIV_SUBMODS=false && [[ "$remoteurl" == *native-android-priv* ]] && PRIV_SUBMODS=true
+
+if $PRIV_SUBMODS; then
+	echo "Using private submodules..."
+	cp .gitmodules.priv .gitmodules
+fi
+
+if ! git submodule sync; then
+	error "Unable to sync git submodules"
+	exit 1
+fi
+
+git submodule update --init --recursive
+
+if $PRIV_SUBMODS; then
+	git checkout .gitmodules
 fi
 
 npm install

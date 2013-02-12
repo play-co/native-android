@@ -2,8 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 
 LOCAL_LDFLAGS := -Wl,-Map,tealeaf.map
 
-APP_ABI := armeabi
-
 -include ${LOCAL_PATH}/profiler/android-ndk-profiler.mk
 
 include $(CLEAR_VARS)
@@ -107,6 +105,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/timestep/timestep_image_map.cpp              \
 			core/timestep/timestep_view.cpp                   \
 			gen/js_timestep_view_template.gen.cpp             \
+			js/js_string_cache.cpp                           \
 			gen/js_timestep_image_map_template.gen.cpp
 
 PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
@@ -117,7 +116,11 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 
 LOCAL_STATIC_LIBRARIES := libzip cpufeatures libjpeg libpng libjansson
 LOCAL_LDLIBS :=-llog -lGLESv2 -lz #-fuse-ld=gold REQUIRES: android-ndk-r8b
-LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -march=armv5te -mtune=arm926ej-s -mfloat-abi=soft
+LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
+
+ifeq ($(APP_ABI),armeabi-v7a)
+	LOCAL_CFLAGS += -march=armv7-a -mfloat-abi=softfp 
+endif
 
 LOCAL_STATIC_LIBRARIES += libv8a
 

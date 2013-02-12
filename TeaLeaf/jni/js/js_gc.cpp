@@ -36,7 +36,7 @@ Handle<Value> native_run_maybe_gc(const Arguments &args) {
 
 Handle<ObjectTemplate> js_gc_get_template() {
 	Handle<ObjectTemplate> gc = ObjectTemplate::New();
-	gc->Set(String::New("runGC"), FunctionTemplate::New(native_run_gc));
-	gc->Set(String::New("runMaybeGC"), FunctionTemplate::New(native_run_maybe_gc));
+	gc->Set(STRING_CACHE_runGC, FunctionTemplate::New(native_run_gc));
+	gc->Set(STRING_CACHE_runMaybeGC, FunctionTemplate::New(native_run_maybe_gc));
 	return gc;
 }

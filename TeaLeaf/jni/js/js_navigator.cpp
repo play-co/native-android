@@ -35,23 +35,23 @@ Handle<Value> js_navigator_get_online_status (Local<String> property, const Acce
 Handle<ObjectTemplate> js_navigator_get_template() {
 	Handle<ObjectTemplate> navigator = ObjectTemplate::New();
 
-	navigator->Set(String::New("width"), Integer::New(config_get_screen_width()), ReadOnly);
-	navigator->Set(String::New("height"), Integer::New(config_get_screen_height()), ReadOnly);
+	navigator->Set(STRING_CACHE_width, Integer::New(config_get_screen_width()), ReadOnly);
+	navigator->Set(STRING_CACHE_height, Integer::New(config_get_screen_height()), ReadOnly);
 
 	navigator_info *info = navigator_info_init();
 	Handle<ObjectTemplate> js_metrics = ObjectTemplate::New();
-	js_metrics->Set(String::New("densityDpi"), Integer::New(info->density_dpi));
-	navigator->Set(String::New("displayMetrics"), js_metrics);
+	js_metrics->Set(STRING_CACHE_densityDpi, Integer::New(info->density_dpi));
+	navigator->Set(STRING_CACHE_displayMetrics, js_metrics);
 	const char *android_hash = build_get_android_hash();
 	const char *sdk_hash = build_get_sdk_hash();
 	int MAX_LEN = 512;
 	char ua[MAX_LEN];
 	snprintf(ua, MAX_LEN - 1, "Android/%s TeaLeaf/%s GC/%s", info->android_version, android_hash, sdk_hash);
-	navigator->Set(String::New("userAgent"), String::New(ua), ReadOnly);
-	navigator->SetAccessor(String::New("onLine"), js_navigator_get_online_status);
+	navigator->Set(STRING_CACHE_userAgent, String::New(ua), ReadOnly);
+	navigator->SetAccessor(STRING_CACHE_onLine, js_navigator_get_online_status);
 
-	navigator->Set(String::New("language"), String::New(info->language), ReadOnly);
-	navigator->Set(String::New("country"), String::New(info->country), ReadOnly);
+	navigator->Set(STRING_CACHE_language, String::New(info->language), ReadOnly);
+	navigator->Set(STRING_CACHE_country, String::New(info->country), ReadOnly);
 	navigator_info_free(info);
 
 	return navigator;
