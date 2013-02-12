@@ -36,8 +36,8 @@ Handle<Value> js_dialog_show_dialog(const Arguments &args) {
 	Handle<Object> buttons = Handle<Array>::Cast(args[3]);
 	Handle<Object> cbs = Handle<Array>::Cast(args[4]);
 
-	int buttonLen = buttons->Get(String::New("length"))->Int32Value(),
-		cbLen = cbs->Get(String::New("length"))->Int32Value();
+	int buttonLen = buttons->Get(STRING_CACHE_length)->Int32Value(),
+		cbLen = cbs->Get(STRING_CACHE_length)->Int32Value();
 
 	char** buttons_str = (char**)malloc(sizeof(char*) * buttonLen);
 	int* callbacks = (int*)malloc(sizeof(int) * cbLen);
@@ -67,6 +67,6 @@ Handle<Value> js_dialog_show_dialog(const Arguments &args) {
 
 Handle<ObjectTemplate> js_dialog_get_template() {
 	Handle<ObjectTemplate> dialog = ObjectTemplate::New();
-	dialog->Set(String::New("_showDialog"), FunctionTemplate::New(js_dialog_show_dialog));
+	dialog->Set(STRING_CACHE__showDialog, FunctionTemplate::New(js_dialog_show_dialog));
 	return dialog;
 }

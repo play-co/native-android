@@ -41,7 +41,7 @@ Handle<Value> xhr_send(const Arguments &args) {
 	if(!args[6].IsEmpty() && !args[6]->IsUndefined() && !args[6]->IsNull()) {
 		Local<Object> requestHeadersObj = args[6]->ToObject();
 		Local<Array> requestHeaderNames = requestHeadersObj->GetPropertyNames();
-		int length = requestHeaderNames->Get(String::New("length"))->Int32Value();
+		int length = requestHeaderNames->Get(STRING_CACHE_length)->Int32Value();
 
 		for (int i = 0; i < length; i++) {
 			request_header * rh = (request_header*) malloc(sizeof(request_header));
@@ -85,6 +85,6 @@ Handle<Value> xhr_send(const Arguments &args) {
 
 Handle<ObjectTemplate> js_xhr_get_template() {
 	Handle<ObjectTemplate> xhr = ObjectTemplate::New();
-	xhr->Set(String::New("send"), FunctionTemplate::New(xhr_send));
+	xhr->Set(STRING_CACHE_send, FunctionTemplate::New(xhr_send));
 	return xhr;
 }

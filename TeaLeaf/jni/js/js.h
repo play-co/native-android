@@ -21,6 +21,8 @@
 
 #include "platform/platform.h"
 
+#include "js/js_string_cache.h"
+
 #define JS_OBJECT_WRAPPER v8::Handle<v8::Object>
 #define PERSISTENT_JS_OBJECT_WRAPPER v8::Persistent<v8::Object>
 

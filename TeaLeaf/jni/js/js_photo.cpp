@@ -25,7 +25,7 @@ Handle<Value> js_camera_get_next_id(const Arguments& args) {
 
 Handle<ObjectTemplate> js_camera_get_template() {
 	Handle<ObjectTemplate> camera = ObjectTemplate::New();
-	camera->Set(String::New("getNextId"), FunctionTemplate::New(js_camera_get_next_id));
+	camera->Set(STRING_CACHE_getNextId, FunctionTemplate::New(js_camera_get_next_id));
 	return camera;
 }
 
@@ -35,6 +35,6 @@ Handle<Value> js_gallery_get_next_id(const Arguments& args) {
 
 Handle<ObjectTemplate> js_gallery_get_template() {
 	Handle<ObjectTemplate> gallery = ObjectTemplate::New();
-	gallery->Set(String::New("getNextId"), FunctionTemplate::New(js_gallery_get_next_id));
+	gallery->Set(STRING_CACHE_getNextId, FunctionTemplate::New(js_gallery_get_next_id));
 	return gallery;
 }

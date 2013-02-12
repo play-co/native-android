@@ -23,7 +23,7 @@ using namespace v8;
 
 Handle<Value> js_socket_send(const Arguments &args) {
 	LOGFN("socket send");
-	int id = args.This()->Get(String::New("__id"))->Int32Value();
+	int id = args.This()->Get(STRING_CACHE___id)->Int32Value();
 	String::Utf8Value data(args[0]);
 	const char *data_str = ToCString(data);
 	socket_send(id, data_str);
@@ -33,7 +33,7 @@ Handle<Value> js_socket_send(const Arguments &args) {
 
 Handle<Value> js_socket_close(const Arguments &args) {
 	LOGFN("socket close");
-	int id = args.This()->Get(String::New("__id"))->Int32Value();
+	int id = args.This()->Get(STRING_CACHE___id)->Int32Value();
 	socket_close(id);
 	LOGFN("end socket close");
 	return Undefined();
@@ -41,11 +41,11 @@ Handle<Value> js_socket_close(const Arguments &args) {
 
 Handle<ObjectTemplate> get_socket_template() {
 	Handle<ObjectTemplate> socket = ObjectTemplate::New();
-	socket->Set(String::New("send"), FunctionTemplate::New(js_socket_send));
-	socket->Set(String::New("close"), FunctionTemplate::New(js_socket_close));
-	socket->Set(String::New("onConnect"), FunctionTemplate::New(js_socket_default_callback));
-	socket->Set(String::New("onRead"), FunctionTemplate::New(js_socket_default_callback));
-	socket->Set(String::New("onClose"), FunctionTemplate::New(js_socket_default_callback));
+	socket->Set(STRING_CACHE_send, FunctionTemplate::New(js_socket_send));
+	socket->Set(STRING_CACHE_close, FunctionTemplate::New(js_socket_close));
+	socket->Set(STRING_CACHE_onConnect, FunctionTemplate::New(js_socket_default_callback));
+	socket->Set(STRING_CACHE_onRead, FunctionTemplate::New(js_socket_default_callback));
+	socket->Set(STRING_CACHE_onClose, FunctionTemplate::New(js_socket_default_callback));
 	return socket;
 }
 
@@ -57,7 +57,7 @@ Handle<Value> js_socket_ctor(const Arguments &args) {
 	int id = socket_create(host_str, port);
 	
 	Handle<Object> socket = get_socket_template()->NewInstance();
-	socket->Set(String::New("__id"), Number::New(id));
+	socket->Set(STRING_CACHE___id, Number::New(id));
 	return socket;
 }
 
