@@ -181,9 +181,9 @@ Handle<Value> defLoadImage(const Arguments& args) {
 
 	Local<Object> ret(Object::New());
 
-	ret->Set(String::New("width"), Integer::New(tex->originalWidth));
-	ret->Set(String::New("height"), Integer::New(tex->originalHeight));
-	ret->Set(String::New("name"), Integer::New(tex->name));
+	ret->Set(STRING_CACHE_width, Integer::New(tex->originalWidth));
+	ret->Set(STRING_CACHE_height, Integer::New(tex->originalHeight));
+	ret->Set(STRING_CACHE_name, Integer::New(tex->name));
 
 	LOGFN("endloadImage");
 	return handleScope.Close(ret);
@@ -266,7 +266,7 @@ Handle<Value> defMeasureText(const Arguments& args) {
 
 	int width = text_manager_measure_text(font, size * FONT_SCALE, text);
 	Handle<Object> metrics =  Object::New();
-	metrics->Set(String::New("width"), Number::New(width));
+	metrics->Set(STRING_CACHE_width, Number::New(width));
 
 	LOGFN("endmeasuretext");
 	return handle_scope.Close(metrics);
@@ -275,23 +275,23 @@ Handle<Value> defMeasureText(const Arguments& args) {
 double measureText(Handle<Object> font_info, char **text) {
 	double width = 0;
 
-	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(String::New("customFont")));
+	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(STRING_CACHE_customFont));
 	if (custom_font.IsEmpty()) {
 		return 0;
 	}
-	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(String::New("dimensions")));
+	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_dimensions));
 	if (dimensions.IsEmpty()) {
 		return 0;
 	}
 
-	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(String::New("horizontal")));
-	float scale = font_info->Get(String::New("scale"))->NumberValue();
+	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_horizontal));
+	float scale = font_info->Get(STRING_CACHE_scale)->NumberValue();
 
-	float space_width = horizontal->Get(String::New("width"))->NumberValue() * scale;
-	float tracking = horizontal->Get(String::New("tracking"))->NumberValue() * scale;
-	float outline = horizontal->Get(String::New("outline"))->NumberValue() * scale;
+	float space_width = horizontal->Get(STRING_CACHE_width)->NumberValue() * scale;
+	float tracking = horizontal->Get(STRING_CACHE_tracking)->NumberValue() * scale;
+	float outline = horizontal->Get(STRING_CACHE_outline)->NumberValue() * scale;
 
-	Handle<String> sOW = String::New("ow");
+	Handle<String> sOW = STRING_CACHE_ow;
 
 	char c = '\0';
 	for (int i = 0; (c = (*text)[i]) != 0; i++) {
@@ -322,13 +322,13 @@ Handle<Value> defMeasureTextBitmap(const Arguments &args) {
 	double width = measureText(font_info, (char**)&text);
 
 	Handle<Object> metrics = Object::New();
-	metrics->Set(String::New("width"), Number::New(width));
+	metrics->Set(STRING_CACHE_width, Number::New(width));
 
 	return handle_scope.Close(metrics);
 }
 
 double textBaselineValue(Handle<Object> ctx, Handle<Object> custom_font, double scale) {
-	Handle<String> text_baseline = ctx->Get(String::New("textBaseline"))->ToString();
+	Handle<String> text_baseline = ctx->Get(STRING_CACHE_textBaseline)->ToString();
 	if (!text_baseline.IsEmpty()) {
 		String::Utf8Value text_baseline_str(text_baseline);
 		const char *baseline = ToCString(text_baseline_str);
@@ -336,16 +336,16 @@ double textBaselineValue(Handle<Object> ctx, Handle<Object> custom_font, double 
 		double b;
 
 		if (!strcmp(baseline, "alphabetic")) {
-			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
-			b = vertical->Get(String::New("baseline"))->NumberValue();
+			vertical = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_vertical));
+			b = vertical->Get(STRING_CACHE_baseline)->NumberValue();
 			return -b * scale;
 		} else if (!strcmp(baseline, "middle")) {
-			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
-			b = vertical->Get(String::New("bottom"))->NumberValue();
+			vertical = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_vertical));
+			b = vertical->Get(STRING_CACHE_bottom)->NumberValue();
 			return -b / 2 * scale;
 		} else if (!strcmp(baseline, "bottom")) {
-			vertical = Handle<Object>::Cast(custom_font->Get(String::New("vertical")));
-			b = vertical->Get(String::New("bottom"))->NumberValue();
+			vertical = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_vertical));
+			b = vertical->Get(STRING_CACHE_bottom)->NumberValue();
 			return -b * scale;
 		}
 	}
@@ -354,7 +354,7 @@ double textBaselineValue(Handle<Object> ctx, Handle<Object> custom_font, double 
 }
 
 double textAlignValue(Handle<Object> ctx, Handle<Object> font_info, char **text) {
-	Handle<String> text_align = ctx->Get(String::New("textAlign"))->ToString();
+	Handle<String> text_align = ctx->Get(STRING_CACHE_textAlign)->ToString();
 	if (!text_align.IsEmpty()) {
 		String::Utf8Value text_align_str(text_align);
 		const char *align = ToCString(text_align_str);
@@ -377,27 +377,27 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 	const char *text = ToCString(text_str);
 
 	Handle<Object> font_info = args[5]->ToObject();
-	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(String::New("customFont")));
-	Handle<Object> images1 = Handle<Object>::Cast(custom_font->Get(String::New("images")));
+	Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(STRING_CACHE_customFont));
+	Handle<Object> images1 = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_images));
 	int image_type = args[6]->Int32Value();
 	Handle<Object> images2 = Handle<Object>::Cast(images1->Get(Number::New(image_type)));
-	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(String::New("dimensions")));
-	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(String::New("horizontal")));
+	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_dimensions));
+	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_horizontal));
 
 	// declare strings that are referenced for each character for performance
-	Handle<String> sI = String::New("i");
-	Handle<String> sX = String::New("x");
-	Handle<String> sY = String::New("y");
-	Handle<String> sW = String::New("w");
-	Handle<String> sH = String::New("h");
-	Handle<String> sOW = String::New("ow");
-	Handle<String> sOH = String::New("oh");
-	Handle<String> sSRC = String::New("_src");
+	Handle<String> sI = STRING_CACHE_i;
+	Handle<String> sX = STRING_CACHE_x;
+	Handle<String> sY = STRING_CACHE_y;
+	Handle<String> sW = STRING_CACHE_w;
+	Handle<String> sH = STRING_CACHE_h;
+	Handle<String> sOW = STRING_CACHE_ow;
+	Handle<String> sOH = STRING_CACHE_oh;
+	Handle<String> sSRC = STRING_CACHE__src;
 
-	float scale = font_info->Get(String::New("scale"))->NumberValue();
-	float space_width = horizontal->Get(String::New("width"))->NumberValue() * scale;
-	float tracking = horizontal->Get(String::New("tracking"))->NumberValue() * scale;
-	float outline = horizontal->Get(String::New("outline"))->NumberValue() * scale;
+	float scale = font_info->Get(STRING_CACHE_scale)->NumberValue();
+	float space_width = horizontal->Get(STRING_CACHE_width)->NumberValue() * scale;
+	float tracking = horizontal->Get(STRING_CACHE_tracking)->NumberValue() * scale;
+	float outline = horizontal->Get(STRING_CACHE_outline)->NumberValue() * scale;
 
 	y += textBaselineValue(ctx, custom_font, scale);
 	x += textAlignValue(ctx, font_info, (char**)&text);
@@ -570,8 +570,8 @@ Handle<Value> defNewTexture(const Arguments& args) {
 	texture_2d *tex = texture_manager_new_texture(texture_manager_get(), w, h);
 
 	Handle<Object> tex_data = Object::New();
-	tex_data->Set(String::New("__gl_name"), Number::New(tex->name));
-	tex_data->Set(String::New("_src"), String::New(tex->url));
+	tex_data->Set(STRING_CACHE___gl_name, Number::New(tex->name));
+	tex_data->Set(STRING_CACHE__src, String::New(tex->url));
 	LOGFN("endnewTexture");
 	return tex_data;
 }
@@ -602,7 +602,7 @@ Handle<Value> defAddFilter(const Arguments &args) {
 	} else {
 		Handle<Object> filter_object = filter->ToObject();
 
-		String::Utf8Value type_str(filter_object->Get(String::New("type")));
+		String::Utf8Value type_str(filter_object->Get(STRING_CACHE_type));
 		const char *type = ToCString(type_str);
 		if(strncmp(type,"LinearAdd",strlen("LinearAdd"))==0) {
 			context_2d_set_filter_type(GET_CONTEXT2D(), FILTER_LINEAR_ADD);
@@ -611,10 +611,10 @@ Handle<Value> defAddFilter(const Arguments &args) {
 			context_2d_set_filter_type(GET_CONTEXT2D(), FILTER_MULTIPLY);
 		}
 
-		double r = filter_object->Get(String::New("r"))->NumberValue();
-		double g = filter_object->Get(String::New("g"))->NumberValue();
-		double b = filter_object->Get(String::New("b"))->NumberValue();
-		double a = filter_object->Get(String::New("a"))->NumberValue();
+		double r = filter_object->Get(STRING_CACHE_r)->NumberValue();
+		double g = filter_object->Get(STRING_CACHE_g)->NumberValue();
+		double b = filter_object->Get(STRING_CACHE_b)->NumberValue();
+		double a = filter_object->Get(STRING_CACHE_a)->NumberValue();
 		//convert the 0-255 values to floats
 		r /= 255;
 		g /= 255;
@@ -654,7 +654,7 @@ Handle<Value> context_2d_class_ctor(const Arguments& args) {
 	const char *url = ToCString(str);
 	int destTex = args[2]->Int32Value();
 	Persistent<Object> ctx = Persistent<Object>::New(get_context_2d_class_template()->NewInstance());
-	ctx->Set(String::New("canvas"), canvas);
+	ctx->Set(STRING_CACHE_canvas, canvas);
 	context_2d *_ctx = context_2d_new(tealeaf_canvas_get(), url, destTex);
 	ctx->SetInternalField(0, External::New(_ctx));
 
@@ -697,7 +697,7 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 	int composite_op = args[7]->Int32Value();
 
 
-	int space_width = defs->Get(String::New("spaceWidth"))->Int32Value();
+	int space_width = defs->Get(STRING_CACHE_spaceWidth)->Int32Value();
 	char c = '\0';
 	char buf[2] = {'\0'};
 	for (int i = 0; (c = text[i]) != 0; i++) {
@@ -707,12 +707,12 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 			snprintf(buf, sizeof(buf), "%c", c);
 			Handle<Object> def = Handle<Object>::Cast(defs->Get(String::New(buf)));
 			if (!def.IsEmpty()) {
-				int a = def->Get(String::New("a"))->Int32Value();
-				int c = def->Get(String::New("c"))->Int32Value();
-				int x1 = def->Get(String::New("x1"))->Int32Value();
-				int y1 = def->Get(String::New("y1"))->Int32Value();
-				int w = def->Get(String::New("w"))->Int32Value();
-				int h = def->Get(String::New("h"))->Int32Value();
+				int a = def->Get(STRING_CACHE_a)->Int32Value();
+				int c = def->Get(STRING_CACHE_c)->Int32Value();
+				int x1 = def->Get(STRING_CACHE_x1)->Int32Value();
+				int y1 = def->Get(STRING_CACHE_y1)->Int32Value();
+				int w = def->Get(STRING_CACHE_w)->Int32Value();
+				int h = def->Get(STRING_CACHE_h)->Int32Value();
 
 				rect_2d src_rect = {x1, y1, w, h};
 				rect_2d dest_rect = {x, y, w * scale, h * scale};
@@ -734,52 +734,52 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 	context_2d_class_template = ObjectTemplate::New();
 	context_2d_class_template->SetInternalFieldCount(1);
 
-	context_2d_class_template->Set(String::New("loadIdentity"), FunctionTemplate::New(defLoadIdentity));
-	context_2d_class_template->Set(String::New("drawImage"), FunctionTemplate::New(defDrawImage));
-	context_2d_class_template->Set(String::New("flushDrawImage"), FunctionTemplate::New(defFlushImages));
-	context_2d_class_template->Set(String::New("newTexture"), FunctionTemplate::New(defNewTexture));
-	context_2d_class_template->Set(String::New("rotate"), FunctionTemplate::New(defRotate));
-	context_2d_class_template->Set(String::New("scale"), FunctionTemplate::New(defScale));
-	context_2d_class_template->Set(String::New("translate"), FunctionTemplate::New(defTranslate));
-	context_2d_class_template->Set(String::New("save"), FunctionTemplate::New(defSave));
-	context_2d_class_template->Set(String::New("restore"), FunctionTemplate::New(defRestore));
-	context_2d_class_template->Set(String::New("clear"), FunctionTemplate::New(defClear));
-	context_2d_class_template->Set(String::New("setGlobalAlpha"), FunctionTemplate::New(defSetGlobalAlpha));
-	context_2d_class_template->Set(String::New("getGlobalAlpha"), FunctionTemplate::New(defGetGlobalAlpha));
-	context_2d_class_template->Set(String::New("_loadImage"), FunctionTemplate::New(defLoadImage));
-	context_2d_class_template->Set(String::New("clearRect"), FunctionTemplate::New(defClearRect));
-	context_2d_class_template->Set(String::New("fillRect"), FunctionTemplate::New(defFillRect));
-	context_2d_class_template->Set(String::New("strokeRect"), FunctionTemplate::New(defStrokeRect));
-	context_2d_class_template->Set(String::New("measureText"), FunctionTemplate::New(defMeasureText));
-	context_2d_class_template->Set(String::New("fillText"), FunctionTemplate::New(defFillText));
-	context_2d_class_template->Set(String::New("strokeText"), FunctionTemplate::New(defStrokeText));
-	context_2d_class_template->Set(String::New("enableScissor"), FunctionTemplate::New(defEnableScissor));
-	context_2d_class_template->Set(String::New("disableScissor"), FunctionTemplate::New(defDisableScissor));
-	context_2d_class_template->Set(String::New("drawPointSprites"), FunctionTemplate::New(defDrawPointSprites));
+	context_2d_class_template->Set(STRING_CACHE_loadIdentity, FunctionTemplate::New(defLoadIdentity));
+	context_2d_class_template->Set(STRING_CACHE_drawImage, FunctionTemplate::New(defDrawImage));
+	context_2d_class_template->Set(STRING_CACHE_flushDrawImage, FunctionTemplate::New(defFlushImages));
+	context_2d_class_template->Set(STRING_CACHE_newTexture, FunctionTemplate::New(defNewTexture));
+	context_2d_class_template->Set(STRING_CACHE_rotate, FunctionTemplate::New(defRotate));
+	context_2d_class_template->Set(STRING_CACHE_scale, FunctionTemplate::New(defScale));
+	context_2d_class_template->Set(STRING_CACHE_translate, FunctionTemplate::New(defTranslate));
+	context_2d_class_template->Set(STRING_CACHE_save, FunctionTemplate::New(defSave));
+	context_2d_class_template->Set(STRING_CACHE_restore, FunctionTemplate::New(defRestore));
+	context_2d_class_template->Set(STRING_CACHE_clear, FunctionTemplate::New(defClear));
+	context_2d_class_template->Set(STRING_CACHE_setGlobalAlpha, FunctionTemplate::New(defSetGlobalAlpha));
+	context_2d_class_template->Set(STRING_CACHE_getGlobalAlpha, FunctionTemplate::New(defGetGlobalAlpha));
+	context_2d_class_template->Set(STRING_CACHE__loadImage, FunctionTemplate::New(defLoadImage));
+	context_2d_class_template->Set(STRING_CACHE_clearRect, FunctionTemplate::New(defClearRect));
+	context_2d_class_template->Set(STRING_CACHE_fillRect, FunctionTemplate::New(defFillRect));
+	context_2d_class_template->Set(STRING_CACHE_strokeRect, FunctionTemplate::New(defStrokeRect));
+	context_2d_class_template->Set(STRING_CACHE_measureText, FunctionTemplate::New(defMeasureText));
+	context_2d_class_template->Set(STRING_CACHE_fillText, FunctionTemplate::New(defFillText));
+	context_2d_class_template->Set(STRING_CACHE_strokeText, FunctionTemplate::New(defStrokeText));
+	context_2d_class_template->Set(STRING_CACHE_enableScissor, FunctionTemplate::New(defEnableScissor));
+	context_2d_class_template->Set(STRING_CACHE_disableScissor, FunctionTemplate::New(defDisableScissor));
+	context_2d_class_template->Set(STRING_CACHE_drawPointSprites, FunctionTemplate::New(defDrawPointSprites));
 
 	// bitmap fonts
-	context_2d_class_template->Set(String::New("measureTextBitmap"), FunctionTemplate::New(defMeasureTextBitmap));
-	context_2d_class_template->Set(String::New("fillTextBitmap"), FunctionTemplate::New(defFillTextBitmap));
+	context_2d_class_template->Set(STRING_CACHE_measureTextBitmap, FunctionTemplate::New(defMeasureTextBitmap));
+	context_2d_class_template->Set(STRING_CACHE_fillTextBitmap, FunctionTemplate::New(defFillTextBitmap));
 
 	// deprecated
-	context_2d_class_template->Set(String::New("fillTextBitmapDeprecated"), FunctionTemplate::New(defFillTextBitmapDeprecated));
+	context_2d_class_template->Set(STRING_CACHE_fillTextBitmapDeprecated, FunctionTemplate::New(defFillTextBitmapDeprecated));
 
-	context_2d_class_template->Set(String::New("addFilter"), FunctionTemplate::New(defAddFilter));
-	context_2d_class_template->Set(String::New("clearFilters"), FunctionTemplate::New(defClearFilters));
+	context_2d_class_template->Set(STRING_CACHE_addFilter, FunctionTemplate::New(defAddFilter));
+	context_2d_class_template->Set(STRING_CACHE_clearFilters, FunctionTemplate::New(defClearFilters));
 
 	return context_2d_class_template;
 }
 
 Handle<ObjectTemplate> js_gl_get_template() {
 	Handle<ObjectTemplate> gl = ObjectTemplate::New();
-	gl->Set(String::New("Context2D"), FunctionTemplate::New(context_2d_class_ctor));
-	gl->Set(String::New("flushImages"), FunctionTemplate::New(defFlushImages));
-	gl->Set(String::New("_loadImage"), FunctionTemplate::New(defLoadImage));
-	gl->Set(String::New("newTexture"), FunctionTemplate::New(defNewTexture));
-	gl->Set(String::New("deleteTexture"), FunctionTemplate::New(defDestroyImage));
-	gl->Set(String::New("_fillText"), FunctionTemplate::New(defFillTextBitmap));
-	gl->Set(String::New("deleteAllTextures"), FunctionTemplate::New(js_gl_delete_textures));
-	gl->Set(String::New("touchTexture"), FunctionTemplate::New(js_gl_touch_texture));
+	gl->Set(STRING_CACHE_Context2D, FunctionTemplate::New(context_2d_class_ctor));
+	gl->Set(STRING_CACHE_flushImages, FunctionTemplate::New(defFlushImages));
+	gl->Set(STRING_CACHE__loadImage, FunctionTemplate::New(defLoadImage));
+	gl->Set(STRING_CACHE_newTexture, FunctionTemplate::New(defNewTexture));
+	gl->Set(STRING_CACHE_deleteTexture, FunctionTemplate::New(defDestroyImage));
+	gl->Set(STRING_CACHE__fillText, FunctionTemplate::New(defFillTextBitmap));
+	gl->Set(STRING_CACHE_deleteAllTextures, FunctionTemplate::New(js_gl_delete_textures));
+	gl->Set(STRING_CACHE_touchTexture, FunctionTemplate::New(js_gl_touch_texture));
 
 	return gl;
 }

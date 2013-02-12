@@ -35,7 +35,7 @@ Handle<Value> js_device_info(Local<String> name, const AccessorInfo &info) {
 
 Handle<ObjectTemplate> js_device_get_template() {
 	Handle<ObjectTemplate> device = ObjectTemplate::New();
-	device->SetAccessor(String::New("globalID"), js_device_global_id);
-	device->SetAccessor(String::New("native_info"), js_device_info);
+	device->SetAccessor(STRING_CACHE_globalID, js_device_global_id);
+	device->SetAccessor(STRING_CACHE_native_info, js_device_info);
 	return device;
 }

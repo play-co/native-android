@@ -79,7 +79,7 @@ CEXPORT void eval_str(const char *str) {
 	}
 	Context::Scope context_scope(m_context);
 	Handle<String> source = String::New(str);
-	Handle<String> file_name = String::New("none");
+	Handle<String> file_name = STRING_CACHE_none;
 	ExecuteString(source, file_name, true);
 }
 
@@ -157,11 +157,11 @@ static inline void log_error(const char *message) {
 	Handle<Object> global = context->Global();
 	bool logged = false;
 	if (!global.IsEmpty()) {
-		Handle<Object> native = Handle<Object>::Cast(global->Get(String::New("NATIVE")));
+		Handle<Object> native = Handle<Object>::Cast(global->Get(STRING_CACHE_NATIVE));
 		if (!native.IsEmpty() && native->IsObject()) {
-			Handle<Function> log = Handle<Function>::Cast(native->Get(String::New("__log")));
+			Handle<Function> log = Handle<Function>::Cast(native->Get(STRING_CACHE___log));
 			if (!log.IsEmpty() && log->IsFunction()) {
-				Handle<Value> args[] = { String::New("ERROR"), String::New(message) };
+				Handle<Value> args[] = { STRING_CACHE_ERROR, String::New(message) };
 				Handle<Value> ret = log->Call(global, 2, args);
 				if (!ret.IsEmpty()) {
 					logged = true;
@@ -178,7 +178,7 @@ static inline void window_on_error(const char *msg, const char *url, int line_nu
 	Handle<Context> context = getContext();
 	Handle<Object> global = context->Global();
 	if (!global.IsEmpty()) {
-		Handle<Function> on_error = Handle<Function>::Cast(global->Get(String::New("onerror")));
+		Handle<Function> on_error = Handle<Function>::Cast(global->Get(STRING_CACHE_onerror));
 		if (!on_error.IsEmpty() && on_error->IsFunction()) {
 			Handle<Value> args[] = { String::New(msg), String::New(url), Number::New(line_number) };
 			on_error->Call(global, 3, args);
@@ -286,11 +286,11 @@ void ReportException(v8::TryCatch* try_catch) {
 Handle<Function> get_on_resize() {
 	Handle<Object> global = getContext()->Global();
 	if(!global.IsEmpty()) {
-		Handle<Object> native = Handle<Object>::Cast(global->Get(String::New("NATIVE")));
+		Handle<Object> native = Handle<Object>::Cast(global->Get(STRING_CACHE_NATIVE));
 		if(!native.IsEmpty()) {
-			Handle<Object> screen = Handle<Object>::Cast(native->Get(String::New("screen")));
+			Handle<Object> screen = Handle<Object>::Cast(native->Get(STRING_CACHE_screen));
 			if(!screen.IsEmpty()) {
-				Handle<Function> on_resize = Handle<Function>::Cast(screen->Get(String::New("onResize")));
+				Handle<Function> on_resize = Handle<Function>::Cast(screen->Get(STRING_CACHE_onResize));
 				return on_resize;
 			}
 		}
@@ -392,12 +392,14 @@ bool init_js(const char *uri, const char *native_hash) {
 	MARK(t);
 	Handle<ObjectTemplate> global = ObjectTemplate::New();
 
+	js_string_cache_init();
+
 	// set the global object's functions *before* Context::New creates an instance, otherwise we just don't get them
-	global->Set(String::New("setTimeout"), FunctionTemplate::New(defSetTimeout));
-	global->Set(String::New("clearTimeout"), FunctionTemplate::New(defClearTimeout));
-	global->Set(String::New("setInterval"), FunctionTemplate::New(defSetInterval));
-	global->Set(String::New("clearInterval"), FunctionTemplate::New(defClearInterval));
-	global->Set(String::New("setLocation"), FunctionTemplate::New(native_set_location));
+	global->Set(STRING_CACHE_setTimeout, FunctionTemplate::New(defSetTimeout));
+	global->Set(STRING_CACHE_clearTimeout, FunctionTemplate::New(defClearTimeout));
+	global->Set(STRING_CACHE_setInterval, FunctionTemplate::New(defSetInterval));
+	global->Set(STRING_CACHE_clearInterval, FunctionTemplate::New(defClearInterval));
+	global->Set(STRING_CACHE_setLocation, FunctionTemplate::New(native_set_location));
 
 	m_context = Context::New(NULL, global);
 
@@ -432,36 +434,36 @@ bool init_js(const char *uri, const char *native_hash) {
 	int height = config_get_screen_height();
 
 	Handle<ObjectTemplate> screen = ObjectTemplate::New();
-	screen->Set(String::New("width"), Number::New(width));
-	screen->Set(String::New("height"), Number::New(height));
+	screen->Set(STRING_CACHE_width, Number::New(width));
+	screen->Set(STRING_CACHE_height, Number::New(height));
 
 	// timer
 	Handle<ObjectTemplate> timer = ObjectTemplate::New();
-	timer->Set(String::New("start"), FunctionTemplate::New(timer_start));
+	timer->Set(STRING_CACHE_start, FunctionTemplate::New(timer_start));
 
 	// navigator
 	Handle<ObjectTemplate> navigator = js_navigator_get_template();
 
 	// native
 	Handle<ObjectTemplate> NATIVE = js_native_get_template(uri, native_hash);
-	NATIVE->Set(String::New("timer"), timer);
+	NATIVE->Set(STRING_CACHE_timer, timer);
 
 	// global_object
 	Local<Object> global_object = m_context->Global();
 
-	global_object->Set(String::New("CONFIG"), config->NewInstance());
-	global_object->Set(String::New("screen"), screen->NewInstance());
-	global_object->Set(String::New("navigator"), navigator->NewInstance());
-	global_object->Set(String::New("window"), global_object);
-	global_object->Set(String::New("NATIVE"), NATIVE->NewInstance());
-	global_object->Set(String::New("GLOBAL"), global_object);
+	global_object->Set(STRING_CACHE_CONFIG, config->NewInstance());
+	global_object->Set(STRING_CACHE_screen, screen->NewInstance());
+	global_object->Set(STRING_CACHE_navigator, navigator->NewInstance());
+	global_object->Set(STRING_CACHE_window, global_object);
+	global_object->Set(STRING_CACHE_NATIVE, NATIVE->NewInstance());
+	global_object->Set(STRING_CACHE_GLOBAL, global_object);
 
-	global_object->SetAccessor(String::New("location"), jsGetLocation, jsSetLocation);
+	global_object->SetAccessor(STRING_CACHE_location, jsGetLocation, jsSetLocation);
 
 #if defined(ENABLE_PROFILER)
 	Handle<ObjectTemplate> PROFILER = ObjectTemplate::New();
 	nodex::InitializeProfiler(PROFILER);
-	global_object->Set(String::New("PROFILER"), PROFILER->NewInstance());
+	global_object->Set(STRING_CACHE_PROFILER, PROFILER->NewInstance());
 #endif // ENABLE_PROFILER
 
 	LOG("{js} Initialized in %dms", ELAPSED(t));

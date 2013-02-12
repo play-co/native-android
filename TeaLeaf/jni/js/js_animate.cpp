@@ -26,10 +26,10 @@ using namespace v8;
 // Handle<Value> js_view_wrap_render(const Arguments &args) {
 
 // 	Handle<Object> thiz = args.This();
-// 	Handle<Object> style = Handle<Object>::Cast(thiz->Get(String::New("style")));
+// 	Handle<Object> style = Handle<Object>::Cast(thiz->Get(STRING_CACHE_style));
 
 // 	if (style.IsEmpty()) { return Undefined(); }
-// 	Handle<Value> visible = Handle<Object>::Cast(style->Get(String::New("visible")));
+// 	Handle<Value> visible = Handle<Object>::Cast(style->Get(STRING_CACHE_visible));
 // 	if (visible.IsEmpty() || !visible->ToBoolean()->Value()) { return Undefined(); }
 
 // 	context_2d *ctx = GET_CONTEXT2D_FROM(args[0]->ToObject());
@@ -190,7 +190,7 @@ Handle<Value> js_animate_constructor(const Arguments &args) {
 	Handle<Object> thiz = Handle<Object>::Cast(args.This());
 	Handle<Object> js_timestep_view = Handle<Object>::Cast(args[0]);
 
-	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(js_timestep_view->Get(String::New("__view"))));
+	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(js_timestep_view->Get(STRING_CACHE___view)));
 	view_animation *anim = view_animation_init(view);
 
 	thiz->SetInternalField(0, External::New(anim));
@@ -210,7 +210,7 @@ void def_animate_finish(Handle<Object> js_anim) {
 	if (anim) {
 		Handle<Object> js_group = anim->js_group;
 		if (!js_group->IsNull() && !js_group->IsUndefined()) {
-			Handle<Value> finishValue = js_group->Get(String::New("onAnimationFinish"));
+			Handle<Value> finishValue = js_group->Get(STRING_CACHE_onAnimationFinish);
 			if (!finishValue->IsNull() && !finishValue->IsUndefined()) {
 				Handle<Object> finish = Handle<Object>::Cast(finishValue);
 				Handle<Value> args[] = {js_anim};

@@ -36,8 +36,8 @@ Handle<Value> js_locale_get_language(Local<String> property, const AccessorInfo 
 
 Handle<ObjectTemplate> js_locale_get_template() {
 	Handle<ObjectTemplate> locale = ObjectTemplate::New();
-	locale->SetAccessor(String::New("language"), js_locale_get_language);
-	locale->SetAccessor(String::New("country"), js_locale_get_country);
+	locale->SetAccessor(STRING_CACHE_language, js_locale_get_language);
+	locale->SetAccessor(STRING_CACHE_country, js_locale_get_country);
 
 	return locale;
 }

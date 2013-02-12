@@ -28,13 +28,13 @@ CEXPORT void js_dispatch_event(const char *event_str) {
 		TryCatch try_catch;
 		Handle<Object> global = context->Global();
 		if(!global.IsEmpty()) {
-			Handle<Object> native = Handle<Object>::Cast(global->Get(String::New("NATIVE")));
+			Handle<Object> native = Handle<Object>::Cast(global->Get(STRING_CACHE_NATIVE));
 
 			if(!native.IsEmpty()) {
-				Handle<Object> events = Handle<Object>::Cast(native->Get(String::New("events")));
+				Handle<Object> events = Handle<Object>::Cast(native->Get(STRING_CACHE_events));
 
 				if(!events.IsEmpty()) {
-					Handle<Value> function_object = events->Get(String::New("dispatchEvent"));
+					Handle<Value> function_object = events->Get(STRING_CACHE_dispatchEvent);
 
 					if (!function_object.IsEmpty()) {
 						Handle<Function> dispatch_event = Handle<Function>::Cast(function_object);

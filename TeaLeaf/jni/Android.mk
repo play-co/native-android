@@ -105,6 +105,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/timestep/timestep_image_map.cpp              \
 			core/timestep/timestep_view.cpp                   \
 			gen/js_timestep_view_template.gen.cpp             \
+			js/js_string_cache.cpp                           \
 			gen/js_timestep_image_map_template.gen.cpp
 
 PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \

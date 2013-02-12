@@ -55,9 +55,9 @@ Handle<Value> defSendOverlayEvent(const Arguments &args) {
 
 Handle<ObjectTemplate> js_overlay_get_template() {
 	Handle<ObjectTemplate> overlay = ObjectTemplate::New();
-	overlay->Set(String::New("load"), FunctionTemplate::New(defLoadOverlay));
-	overlay->Set(String::New("show"), FunctionTemplate::New(defShowOverlay));
-	overlay->Set(String::New("hide"), FunctionTemplate::New(defHideOverlay));
-	overlay->Set(String::New("send"), FunctionTemplate::New(defSendOverlayEvent));
+	overlay->Set(STRING_CACHE_load, FunctionTemplate::New(defLoadOverlay));
+	overlay->Set(STRING_CACHE_show, FunctionTemplate::New(defShowOverlay));
+	overlay->Set(STRING_CACHE_hide, FunctionTemplate::New(defHideOverlay));
+	overlay->Set(STRING_CACHE_send, FunctionTemplate::New(defSendOverlayEvent));
 	return overlay;
 }
