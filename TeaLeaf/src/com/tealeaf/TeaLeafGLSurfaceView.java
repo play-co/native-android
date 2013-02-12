@@ -16,8 +16,13 @@
  */
 package com.tealeaf;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import android.opengl.GLES20;
@@ -31,6 +36,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -531,6 +537,18 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		private int width, height;
 		private TextureLoader textureLoader;
 
+		private boolean trySplashImage(String fileName) {
+			try {
+				TeaLeaf tealeaf = this.view.context;
+				if (Arrays.asList(tealeaf.getResources().getAssets().list("resources")).contains(fileName)) {
+					tealeaf.getOptions().setSplash(fileName);
+					return true;
+				}
+			} catch (Exception e) {
+			}
+			return false;
+		}
+
 		private void selectSplashScreen() {
 			// Get screen width and height
 			int sw = 0, sh = 0;
@@ -554,6 +572,8 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				longerScreenSide = sh;
 			}
 
+			boolean success = false;
+			
 			int screenLayout = tealeaf.getResources().getConfiguration().screenLayout
 					& Configuration.SCREENLAYOUT_SIZE_MASK;
 			switch (screenLayout) {
@@ -571,29 +591,75 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				}
 
 				if (isPortrait) {
-					if (longerScreenSide >= 2048) {
-						tealeaf.getOptions().setSplash("portrait2048.png");
+					if (longerScreenSide > 1024) {
+						success = trySplashImage("portrait2048.png") ||
+						trySplashImage("landscape1536.png") ||
+						trySplashImage("portrait1136.png") ||
+						trySplashImage("portrait1024.png") ||
+						trySplashImage("landscape768.png") ||
+						trySplashImage("portrait960.png") ||
+						trySplashImage("portrait480.png");
 					} else {
-						tealeaf.getOptions().setSplash("portrait1024.png");
+						success = trySplashImage("portrait1024.png") ||
+						trySplashImage("landscape768.png") ||
+						trySplashImage("portrait1136.png") ||
+						trySplashImage("portrait960.png") ||
+						trySplashImage("portrait2048.png") ||
+						trySplashImage("landscape1536.png") ||
+						trySplashImage("portrait480.png");
 					}
 				} else {
-					if (longerScreenSide >= 2048) {
-						tealeaf.getOptions().setSplash("landscape1536.png");
+					if (longerScreenSide > 1024) {
+						success = trySplashImage("landscape1536.png") ||
+						trySplashImage("portrait2048.png") ||
+						trySplashImage("portrait1136.png") ||
+						trySplashImage("portrait1024.png") ||
+						trySplashImage("landscape768.png") ||
+						trySplashImage("portrait960.png") ||
+						trySplashImage("portrait480.png");
 					} else {
-						tealeaf.getOptions().setSplash("landscape768.png");
+						success = trySplashImage("landscape768.png") ||
+						trySplashImage("portrait1024.png") ||
+						trySplashImage("portrait1136.png") ||
+						trySplashImage("landscape1536.png") ||
+						trySplashImage("portrait2048.png") ||
+						trySplashImage("portrait960.png") ||
+						trySplashImage("portrait480.png");
 					}
 				}
 			}
 				break;
 			default:
 				// Handset:
-				if (longerScreenSide >= 1136) {
-					tealeaf.getOptions().setSplash("portrait1136.png");
-				} else if (longerScreenSide >= 960) {
-					tealeaf.getOptions().setSplash("portrait960.png");
+				if (longerScreenSide > 960) {
+					success = trySplashImage("portrait1136.png") ||
+					trySplashImage("portrait2048.png") ||
+					trySplashImage("landscape1536.png") ||
+					trySplashImage("portrait1024.png") ||
+					trySplashImage("landscape768.png") ||
+					trySplashImage("portrait960.png") ||
+					trySplashImage("portrait480.png");
+				} else if (longerScreenSide > 600) {
+					success = trySplashImage("portrait960.png") ||
+					trySplashImage("portrait1136.png") ||
+					trySplashImage("portrait1024.png") ||
+					trySplashImage("landscape768.png") ||
+					trySplashImage("portrait2048.png") ||
+					trySplashImage("landscape1536.png") ||
+					trySplashImage("portrait480.png");
 				} else {
-					tealeaf.getOptions().setSplash("portrait480.png");
+					success = trySplashImage("portrait480.png") ||
+					trySplashImage("portrait1024.png") ||
+					trySplashImage("portrait960.png") ||
+					trySplashImage("landscape768.png") ||
+					trySplashImage("portrait1136.png") ||
+					trySplashImage("portrait2048.png") ||
+					trySplashImage("landscape1536.png");
 				}
+			}
+
+			if (!success) {
+				logger.log("{core} WARNING: Unable to find a suitable splash image");
 			}
 
 			logger.log("{core} Device screen (", sw, ",", sh, "), using splash '", tealeaf.getOptions().getSplash(), "'");
