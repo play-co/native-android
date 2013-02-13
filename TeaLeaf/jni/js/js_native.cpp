@@ -168,60 +168,60 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	Handle<ObjectTemplate> NATIVE = ObjectTemplate::New();
 
 	// functions
-	NATIVE->Set(String::New("getFileSync"), FunctionTemplate::New(native_fetch));
-	NATIVE->Set(String::New("eval"), FunctionTemplate::New(native_eval));
-	NATIVE->Set(String::New("startGame"), FunctionTemplate::New(native_start_game));
-	NATIVE->Set(String::New("doneLoading"), FunctionTemplate::New(native_done_loading));
-	NATIVE->Set(String::New("applyUpdate"), FunctionTemplate::New(native_apply_update));
-	NATIVE->Set(String::New("Socket"), FunctionTemplate::New(js_socket_ctor));
-	NATIVE->Set(String::New("sendActivityToBack"), FunctionTemplate::New(js_native_send_activity_to_back));
-	NATIVE->Set(String::New("uploadDeviceInfo"), FunctionTemplate::New(js_native_upload_device_info));
-	NATIVE->Set(String::New("getCurrentTimeMicroseconds"), FunctionTemplate::New(js_native_get_microseconds));
-	NATIVE->Set(String::New("reload"), FunctionTemplate::New(js_native_reload));
+	NATIVE->Set(STRING_CACHE_getFileSync, FunctionTemplate::New(native_fetch));
+	NATIVE->Set(STRING_CACHE_eval, FunctionTemplate::New(native_eval));
+	NATIVE->Set(STRING_CACHE_startGame, FunctionTemplate::New(native_start_game));
+	NATIVE->Set(STRING_CACHE_doneLoading, FunctionTemplate::New(native_done_loading));
+	NATIVE->Set(STRING_CACHE_applyUpdate, FunctionTemplate::New(native_apply_update));
+	NATIVE->Set(STRING_CACHE_Socket, FunctionTemplate::New(js_socket_ctor));
+	NATIVE->Set(STRING_CACHE_sendActivityToBack, FunctionTemplate::New(js_native_send_activity_to_back));
+	NATIVE->Set(STRING_CACHE_uploadDeviceInfo, FunctionTemplate::New(js_native_upload_device_info));
+	NATIVE->Set(STRING_CACHE_getCurrentTimeMicroseconds, FunctionTemplate::New(js_native_get_microseconds));
+	NATIVE->Set(STRING_CACHE_reload, FunctionTemplate::New(js_native_reload));
 
 	// templates
-	NATIVE->Set(String::New("console"), js_console_get_template());
-	NATIVE->Set(String::New("gl"), js_gl_get_template()->NewInstance());
-	NATIVE->Set(String::New("localStorage"), js_local_storage_get_template()->NewInstance());
-	NATIVE->Set(String::New("sound"), js_sound_get_template()->NewInstance());
-	NATIVE->Set(String::New("overlay"), js_overlay_get_template()->NewInstance());
-	NATIVE->Set(String::New("purchase"), js_purchase_get_template()->NewInstance());
-	NATIVE->Set(String::New("device"), js_device_get_template()->NewInstance());
-	NATIVE->Set(String::New("textbox"), js_textbox_get_template()->NewInstance());
-	NATIVE->Set(String::New("dialogs"), js_dialog_get_template()->NewInstance());
-	NATIVE->Set(String::New("haptics"), js_haptics_get_template()->NewInstance());
-	NATIVE->Set(String::New("camera"), js_camera_get_template()->NewInstance());
-	NATIVE->Set(String::New("gallery"), js_gallery_get_template()->NewInstance());
-	NATIVE->Set(String::New("timestep"), js_timestep_get_template());
-	NATIVE->Set(String::New("xhr"), js_xhr_get_template()->NewInstance());
-	NATIVE->Set(String::New("plugins"),js_plugins_get_template()->NewInstance());
-	NATIVE->Set(String::New("gc"), js_gc_get_template()->NewInstance());
-	NATIVE->Set(String::New("build"), js_build_get_template()->NewInstance());
-	NATIVE->Set(String::New("locale"), js_locale_get_template()->NewInstance());
-	NATIVE->Set(String::New("profiler"), js_profiler_get_template()->NewInstance());
-	NATIVE->Set(String::New("inputPrompt"), js_input_prompt_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_console, js_console_get_template());
+	NATIVE->Set(STRING_CACHE_gl, js_gl_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_localStorage, js_local_storage_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_sound, js_sound_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_overlay, js_overlay_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_purchase, js_purchase_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_device, js_device_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_textbox, js_textbox_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_dialogs, js_dialog_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_haptics, js_haptics_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_camera, js_camera_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_gallery, js_gallery_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_timestep, js_timestep_get_template());
+	NATIVE->Set(STRING_CACHE_xhr, js_xhr_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_plugins,js_plugins_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_gc, js_gc_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_build, js_build_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_locale, js_locale_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_profiler, js_profiler_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_inputPrompt, js_input_prompt_get_template()->NewInstance());
 
 	// market
 	Handle<Object> market = Object::New();
 	const char *marketUrl = get_market_url();
-	market->Set(String::New("url"), String::New(marketUrl), ReadOnly);
+	market->Set(STRING_CACHE_url, String::New(marketUrl), ReadOnly);
 	free((void*)marketUrl);
-	NATIVE->Set(String::New("market"), market);
+	NATIVE->Set(STRING_CACHE_market, market);
 
 	// Values
-	NATIVE->SetAccessor(String::New("deviceUUID"), js_device_global_id);
-	NATIVE->SetAccessor(String::New("installReferrer"), js_install_referrer);
-	NATIVE->SetAccessor(String::New("usedHeap"), js_used_heap);
-	NATIVE->Set(String::New("simulateID"), String::New(config_get_simulate_id()));
-	NATIVE->Set(String::New("screen"), Object::New());
-	NATIVE->Set(String::New("uri"), String::New(uri));
-	NATIVE->Set(String::New("tcpHost"), String::New(config_get_tcp_host()));
-	NATIVE->Set(String::New("tcpPort"), Number::New(config_get_tcp_port()));
+	NATIVE->SetAccessor(STRING_CACHE_deviceUUID, js_device_global_id);
+	NATIVE->SetAccessor(STRING_CACHE_installReferrer, js_install_referrer);
+	NATIVE->SetAccessor(STRING_CACHE_usedHeap, js_used_heap);
+	NATIVE->Set(STRING_CACHE_simulateID, String::New(config_get_simulate_id()));
+	NATIVE->Set(STRING_CACHE_screen, Object::New());
+	NATIVE->Set(STRING_CACHE_uri, String::New(uri));
+	NATIVE->Set(STRING_CACHE_tcpHost, String::New(config_get_tcp_host()));
+	NATIVE->Set(STRING_CACHE_tcpPort, Number::New(config_get_tcp_port()));
 	const char *versionCode = get_version_code(); // versionCode
-	NATIVE->Set(String::New("versionCode"), String::New(versionCode), ReadOnly);
+	NATIVE->Set(STRING_CACHE_versionCode, String::New(versionCode), ReadOnly);
 	free((void*)versionCode);
-	NATIVE->Set(String::New("nativeHash"), String::New(native_hash));
-	NATIVE->SetAccessor(String::New("location"), jsGetLocation, jsSetLocation);
+	NATIVE->Set(STRING_CACHE_nativeHash, String::New(native_hash));
+	NATIVE->SetAccessor(STRING_CACHE_location, jsGetLocation, jsSetLocation);
 
 	return NATIVE;
 }

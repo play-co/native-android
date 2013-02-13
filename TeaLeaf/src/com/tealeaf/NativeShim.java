@@ -442,8 +442,12 @@ public class NativeShim {
 	}
 
 	// plugins
-	public void pluginsCall(String className, String methodName, Object[] params) {
-		PluginManager.call(className, methodName, params);
+	public void pluginsCall(final String className,final String methodName, final Object[] params) {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				PluginManager.call(className, methodName, params);
+			}
+		});
 	}
 
 	// native

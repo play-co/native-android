@@ -53,6 +53,7 @@ if (xml.length > 0) {
 //go through and all library references to project.properties
 var properties = fs.readFileSync(path.join(TEALEAF_DIR, "project.properties"), "utf-8");
 if (properties.length > 0 ) {
+	properties = properties.replace(/source\.dir([^\n]*)/, 'source.dir=src');
 	var start = properties.indexOf("#START_PLUGINS");		
 	var end = properties.indexOf("#END_PLUGINS");		
 

@@ -43,7 +43,7 @@ static void cb_js_finalize(Persistent<Value> ctx, void *param) {
 	HandleScope handle_scope;
 
 	// Get object _view reference to backing from front-end view object
-	Handle<Value> _view = Persistent<Object>::Cast(ctx)->Get(String::New("__view"));
+	Handle<Value> _view = Persistent<Object>::Cast(ctx)->Get(STRING_CACHE___view);
 
 	// If the reference has not been cleared,
 	if (_view->IsObject()) {
@@ -153,19 +153,19 @@ Handle<Value> def_timestep_view_constructor(const Arguments& args) {
 	// Add an internal C reference to the front-end view object in the view backing
 	view->js_view = js_ref;
 
-	Handle<Value> render = js_view->GetRealNamedPropertyInPrototypeChain(String::New("render"));
+	Handle<Value> render = js_view->GetRealNamedPropertyInPrototypeChain(STRING_CACHE_render);
 	bool has_js_render = false;
 	if (!render.IsEmpty() && render->IsFunction()) {
-		Handle<Value> type = render->ToObject()->Get(String::New("HAS_NATIVE_IMPL"));
+		Handle<Value> type = render->ToObject()->Get(STRING_CACHE_HAS_NATIVE_IMPL);
 		has_js_render = !type->IsBoolean() || !type->BooleanValue();
 	}
 
 	view->has_jsrender = has_js_render;
 
-	Handle<Value> tick = js_view->GetRealNamedPropertyInPrototypeChain(String::New("tick"));
+	Handle<Value> tick = js_view->GetRealNamedPropertyInPrototypeChain(STRING_CACHE_tick);
 	view->has_jstick = !tick.IsEmpty() && tick->IsFunction();
 
-	unsigned int type = js_view->GetRealNamedPropertyInPrototypeChain(String::New("__type"))->Int32Value();
+	unsigned int type = js_view->GetRealNamedPropertyInPrototypeChain(STRING_CACHE___type)->Int32Value();
 
 	timestep_view_set_type(view, type);
 
@@ -306,7 +306,7 @@ void timestep_view_set_opacity (Local<String> property, Local<Value> value, cons
 }
 
 void def_timestep_view_render(Handle<Object> js_view, Handle<Object> js_ctx, Handle<Object> js_opts) {
-	Handle<Function> render = Handle<Function>::Cast(js_view->Get(String::New("render")));
+	Handle<Function> render = Handle<Function>::Cast(js_view->Get(STRING_CACHE_render));
 	if (!render.IsEmpty() && render->IsFunction()) {
 		Handle<Value> args[] = {js_ctx, js_opts};
 		render->Call(js_view, 2, args);
@@ -314,18 +314,18 @@ void def_timestep_view_render(Handle<Object> js_view, Handle<Object> js_ctx, Han
 }
 
 Handle<Object> def_get_viewport(Handle<Object> js_opts) {
-	return Handle<Object>::Cast(js_opts->Get(String::New("viewport")));
+	return Handle<Object>::Cast(js_opts->Get(STRING_CACHE_viewport));
 }
 
 void def_restore_viewport(Handle<Object> js_opts, Handle<Object> js_viewport) {
 	if (!js_viewport.IsEmpty()) {
-		js_opts->Set(String::New("viewport"), js_viewport);
+		js_opts->Set(STRING_CACHE_viewport, js_viewport);
 	}
 }
 
 void def_timestep_view_needs_reflow(Handle<Object> js_view, bool force) {
 	if (force && !js_view.IsEmpty()) {
-		Handle<Function> needs_reflow = Handle<Function>::Cast(js_view->Get(String::New("needsReflow")));
+		Handle<Function> needs_reflow = Handle<Function>::Cast(js_view->Get(STRING_CACHE_needsReflow));
 		if (!needs_reflow.IsEmpty() && needs_reflow->IsFunction()) {
 			Handle<Value> args[] = {Boolean::New(force)};
 			needs_reflow->Call(js_view, 1, args);
@@ -334,7 +334,7 @@ void def_timestep_view_needs_reflow(Handle<Object> js_view, bool force) {
 }
 
 void def_timestep_view_tick(Handle<Object> js_view, double dt) {
-	Handle<Function> tick = Handle<Function>::Cast(js_view->Get(String::New("tick")));
+	Handle<Function> tick = Handle<Function>::Cast(js_view->Get(STRING_CACHE_tick));
 	if (!tick.IsEmpty() && tick->IsFunction()) {
 		Handle<Value> args[] = {Number::New(dt)};
 		tick->Call(js_view, 1, args);
@@ -343,14 +343,14 @@ void def_timestep_view_tick(Handle<Object> js_view, double dt) {
 
 Handle<Value> def_timestep_view_addSubview(const Arguments &args) {
 	Handle<Object> subview = args[0]->ToObject();
-	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(subview->Get(String::New("__view"))));
+	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(subview->Get(STRING_CACHE___view)));
 	bool result = timestep_view_add_subview(GET_TIMESTEP_VIEW(args.This()), view);
 	return Boolean::New(result);
 }
 
 Handle<Value> def_timestep_view_removeSubview(const Arguments &args) {
 	Handle<Object> subview = args[0]->ToObject();
-	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(subview->Get(String::New("__view"))));
+	timestep_view *view = GET_TIMESTEP_VIEW(Handle<Object>::Cast(subview->Get(STRING_CACHE___view)));
 	bool result = timestep_view_remove_subview(GET_TIMESTEP_VIEW(args.This()), view);
 	return Boolean::New(result);
 }
@@ -370,7 +370,7 @@ Handle<Value> def_timestep_view_getSuperview(const Arguments &args) {
 Handle<Value> def_timestep_view_wrapRender(const Arguments &args) {
 	Handle<Object> js_ctx = Handle<Object>::Cast(args[0]);
 	Handle<Object> js_opts = Handle<Object>::Cast(args[1]);
-	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(String::New("_ctx")));
+	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(STRING_CACHE__ctx));
 	context_2d *ctx = GET_CONTEXT2D_FROM(_ctx);
 	timestep_view_wrap_render(GET_TIMESTEP_VIEW(args.This()), ctx, js_ctx, js_opts);
 	return Undefined();
@@ -415,8 +415,8 @@ Handle<Value> def_timestep_view_getSubviews(const Arguments &args) {
 Handle<Value> def_timestep_view_localizePoint(const Arguments &args) {
 	timestep_view *v = GET_TIMESTEP_VIEW(args.This());
 	Handle<Object> pt = args[0]->ToObject();
-	double x = pt->Get(String::New("x"))->NumberValue();
-	double y = pt->Get(String::New("y"))->NumberValue();
+	double x = pt->Get(STRING_CACHE_x)->NumberValue();
+	double y = pt->Get(STRING_CACHE_y)->NumberValue();
 
 	x -= v->x + v->anchor_x + v->offset_x;
 	y -= v->y + v->anchor_y + v->offset_y;
@@ -439,8 +439,8 @@ Handle<Value> def_timestep_view_localizePoint(const Arguments &args) {
 	x += v->anchor_x;
 	y += v->anchor_y;
 
-	pt->Set(String::New("x"), Number::New(x));
-	pt->Set(String::New("y"), Number::New(y));
+	pt->Set(STRING_CACHE_x, Number::New(x));
+	pt->Set(STRING_CACHE_y, Number::New(y));
 
 	return pt;
 }
