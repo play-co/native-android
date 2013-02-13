@@ -100,10 +100,15 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 		http.getFile(URI.create(url), nativejsPath);
 
 		//get loading.png
-		url = simulateUrl + "loading.png";
+		url = simulateUrl + "splash/portrait960";
 		String loadingPngPath = storageDir + "/" + "loading.png";
-		http.getFile(URI.create(url), loadingPngPath);
-
+		File splash = http.getFile(URI.create(url), loadingPngPath);
+		//try again if we couldn't find the higher res splash
+		if(!splash.exists()) {
+			url = simulateUrl + "splash/portrait480";
+			http.getFile(URI.create(url), loadingPngPath);	
+		}
+		
 		HashMap<String, String> requestHeaders = new HashMap<String, String>();
 		//get new resource list
 		String body  = null;

@@ -48,7 +48,7 @@ public class TeaLeafOptions {
 	private String sdkHash = null;
 	private String androidHash = null;
 	private String gameHash = null;
-	private String splash = null;
+	private String splash = "loading.png";
 
 	public TeaLeafOptions() {
 		// we want a blank options, so set meta to an empty bundle

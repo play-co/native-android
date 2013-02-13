@@ -96,7 +96,8 @@ public class AppFinder {
 								isExample = group.equals("examples");
 							}
 							//try and fail gracefully if no icons exist, use default
-							JSONObject icons = manifest.has("icons") ? manifest.getJSONObject("icons") : new JSONObject();
+							JSONObject androidObj = manifest.getJSONObject("android");
+							JSONObject icons = androidObj.has("icons") ? androidObj.getJSONObject("icons") : new JSONObject();
 							JSONArray iconNames = null;
 							int iconIndex = 0;
 							if (icons.names() != null) {
@@ -151,7 +152,7 @@ public class AppFinder {
 						//a non example app and is moved to the bottom of the list
 						return lhs.isExample ? 1 : -1;
 					}
-					
+
 				});
 				createAdapter(activity, appInfos, host, port);
 			}
