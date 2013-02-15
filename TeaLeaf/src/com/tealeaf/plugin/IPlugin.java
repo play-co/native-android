@@ -19,10 +19,12 @@ package com.tealeaf.plugin;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Context;
 
 public interface IPlugin {
 
 	public void onCreate(Activity activity, Bundle savedInstanceState);
+	public void onCreateApplication(Context applicationContext);
 	public void onResume();
 	public void onStart();
 	public void onPause();
