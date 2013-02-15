@@ -574,88 +574,16 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 
 			boolean success = false;
 			
-			int screenLayout = tealeaf.getResources().getConfiguration().screenLayout
-					& Configuration.SCREENLAYOUT_SIZE_MASK;
-			switch (screenLayout) {
-			case Configuration.SCREENLAYOUT_SIZE_LARGE:
-			case Configuration.SCREENLAYOUT_SIZE_XLARGE:
-			// Tablet:
-			{
-				boolean isPortrait;
-
-				Bundle bundle = tealeaf.getIntent().getExtras();
-				if (bundle != null && bundle.getBoolean("isTestApp", false)) {
-					isPortrait = bundle.getBoolean("isPortrait", false);
-				} else {
-					isPortrait = (tealeaf.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
-				}
-
-				if (isPortrait) {
-					if (longerScreenSide > 1024) {
-						success = trySplashImage("portrait2048.png") ||
-						trySplashImage("landscape1536.png") ||
-						trySplashImage("portrait1136.png") ||
-						trySplashImage("portrait1024.png") ||
-						trySplashImage("landscape768.png") ||
-						trySplashImage("portrait960.png") ||
-						trySplashImage("portrait480.png");
-					} else {
-						success = trySplashImage("portrait1024.png") ||
-						trySplashImage("landscape768.png") ||
-						trySplashImage("portrait1136.png") ||
-						trySplashImage("portrait960.png") ||
-						trySplashImage("portrait2048.png") ||
-						trySplashImage("landscape1536.png") ||
-						trySplashImage("portrait480.png");
-					}
-				} else {
-					if (longerScreenSide > 1024) {
-						success = trySplashImage("landscape1536.png") ||
-						trySplashImage("portrait2048.png") ||
-						trySplashImage("portrait1136.png") ||
-						trySplashImage("portrait1024.png") ||
-						trySplashImage("landscape768.png") ||
-						trySplashImage("portrait960.png") ||
-						trySplashImage("portrait480.png");
-					} else {
-						success = trySplashImage("landscape768.png") ||
-						trySplashImage("portrait1024.png") ||
-						trySplashImage("portrait1136.png") ||
-						trySplashImage("landscape1536.png") ||
-						trySplashImage("portrait2048.png") ||
-						trySplashImage("portrait960.png") ||
-						trySplashImage("portrait480.png");
-					}
-				}
+			if (longerScreenSide > 1024) {
+				success = trySplashImage("splash-2068x1300.png");
 			}
-				break;
-			default:
-				// Handset:
-				if (longerScreenSide > 960) {
-					success = trySplashImage("portrait1136.png") ||
-					trySplashImage("portrait2048.png") ||
-					trySplashImage("landscape1536.png") ||
-					trySplashImage("portrait1024.png") ||
-					trySplashImage("landscape768.png") ||
-					trySplashImage("portrait960.png") ||
-					trySplashImage("portrait480.png");
-				} else if (longerScreenSide > 600) {
-					success = trySplashImage("portrait960.png") ||
-					trySplashImage("portrait1136.png") ||
-					trySplashImage("portrait1024.png") ||
-					trySplashImage("landscape768.png") ||
-					trySplashImage("portrait2048.png") ||
-					trySplashImage("landscape1536.png") ||
-					trySplashImage("portrait480.png");
-				} else {
-					success = trySplashImage("portrait480.png") ||
-					trySplashImage("portrait1024.png") ||
-					trySplashImage("portrait960.png") ||
-					trySplashImage("landscape768.png") ||
-					trySplashImage("portrait1136.png") ||
-					trySplashImage("portrait2048.png") ||
-					trySplashImage("landscape1536.png");
-				}
+			
+			if (!success && longerScreenSide > 512) {
+				success = trySplashImage("splash-1024x768.png");
+			} 
+			
+			if (!success) {
+				success = trySplashImage("splash-512x300.png");
 			}
 
 			if (!success) {
