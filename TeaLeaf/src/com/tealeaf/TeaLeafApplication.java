@@ -16,11 +16,14 @@
  */
 package com.tealeaf;
 import android.app.Application;
+import android.content.Context;
+import com.tealeaf.plugin.PluginManager;
 
-public class TeaLeafApplication extends Application {
+public class TeaLeafApplication extends  Application {
 	@Override
 	public void onCreate() {
-		Settings.build(this.getApplicationContext());
+		PluginManager.init(this);
+		PluginManager.callAll("onCreateApplication", this.getApplicationContext());
 	}
-	
+
 }
