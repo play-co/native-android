@@ -203,7 +203,6 @@ public class TeaLeaf extends FragmentActivity {
 		String appID = findAppID();
 		options = new TeaLeafOptions(this);
 
-		PluginManager.init(this);
 		PluginManager.callAll("onCreate", this, savedInstanceState);
 
 
@@ -473,7 +472,6 @@ public class TeaLeaf extends FragmentActivity {
 		if (consume) {
 			EventQueue.pushEvent(new BackButtonEvent());
 		} else {
-			super.onBackPressed();
 			PluginManager.callAll("onBackPressed");
 		}
 	}
