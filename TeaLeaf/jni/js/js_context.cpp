@@ -304,7 +304,7 @@ double measureText(Handle<Object> font_info, char **text) {
 
 				width += (ow - 2) * scale;
 			} else {
-				width += space_width;
+				return -1;
 			}
 		}
 		width += tracking - outline;
@@ -323,6 +323,7 @@ Handle<Value> defMeasureTextBitmap(const Arguments &args) {
 
 	Handle<Object> metrics = Object::New();
 	metrics->Set(STRING_CACHE_width, Number::New(width));
+	metrics->Set(STRING_CACHE_failed, Boolean::New(width < 0));
 
 	return handle_scope.Close(metrics);
 }
@@ -383,6 +384,16 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 	Handle<Object> images2 = Handle<Object>::Cast(images1->Get(Number::New(image_type)));
 	Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_dimensions));
 	Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_horizontal));
+
+	char ch;
+	for (int i = 0; (ch = text[i]) != 0; i++) {
+		if (ch != ' ') {
+			Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)ch)));
+			if (dimension.IsEmpty() || !dimension->IsObject()) {
+				return Boolean::New(false);
+			}
+		}
+	}
 
 	// declare strings that are referenced for each character for performance
 	Handle<String> sI = STRING_CACHE_i;
@@ -446,7 +457,7 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 
 	free(url);
 
-	return Undefined();
+	return Boolean::New(true);
 }
 
 Handle<Value> defStrokeText(const Arguments& args) {
