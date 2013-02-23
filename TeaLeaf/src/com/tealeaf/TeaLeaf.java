@@ -40,10 +40,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -211,6 +214,7 @@ public class TeaLeaf extends FragmentActivity {
 		boolean isTestApp = false;
 		if (bundle != null) {
 		   isTestApp = bundle.getBoolean("isTestApp", false);
+
 		   if (isTestApp) {
 			   options.setAppID(appID);
 			   boolean isPortrait = bundle.getBoolean("isPortrait", false);

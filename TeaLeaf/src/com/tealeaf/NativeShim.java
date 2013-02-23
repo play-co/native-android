@@ -632,7 +632,7 @@ public class NativeShim {
 
 	//Initialization and Running JS
 	public static native boolean initIsolate();
-	public static native void init(Object shim, String codeHost, String tcpHost, int codePort, int tcpPort, String entryPoint, String sourceDir, int width, int height, boolean remote_loading, String simulateID);
+	public static native void init(Object shim, String codeHost, String tcpHost, int codePort, int tcpPort, String entryPoint, String sourceDir, int width, int height, boolean remote_loading, String splash, String simulateID);
 	public static native boolean initJS(String uri, String androidHash);
 	public static native void destroy();
 	public static native void reset();

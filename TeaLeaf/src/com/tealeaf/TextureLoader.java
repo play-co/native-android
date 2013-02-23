@@ -264,16 +264,14 @@ public class TextureLoader implements Runnable {
 					for (Pair<Integer, Integer> pair : ids) {
 						int id = pair.first;
 						int size = pair.second;
-						Bitmap bmp = photoPicker.getResult(tag.toLowerCase(),
-								id);
+						Bitmap bmp = photoPicker.getResult(tag.toLowerCase(), id);
 						if (bmp != null) {
 							Bitmap bitmap = scaleTo(size, bmp);
 							bmp.recycle();
 							bmp = null;
 							loadTexture("@" + tag.toUpperCase() + id + "-" + size, bitmap);
 						} else {
-							loadingError("@" + tag.toUpperCase() + id + "-"
-									+ size);
+							loadingError("@" + tag.toUpperCase() + id + "-" + size);
 						}
 					}
 				} catch (InterruptedException e) {
