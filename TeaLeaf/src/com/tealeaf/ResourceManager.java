@@ -46,7 +46,7 @@ public class ResourceManager {
 	public File getFile(String url) {
 		url = resolve(url);
 		File f = null;
-		if(url.matches("^http(s?)://.*")) {
+		if (url.matches("^http(s?)://.*")) {
 			// we're dealing with a url, download it
 			URI uri = URI.create(url);
 			f = http.getFile(uri, getCacheDirectory() + encode(uri.getPath()));
@@ -102,13 +102,13 @@ public class ResourceManager {
 		return resolveUrl(relative, base);
 	}
 
-	public String resolveFile(String relative, String base) {
+	public String resolveFileWithBase(String relative, String base) {
 		return base + File.separator + encode(relative);
 	}
 
 	public String resolveFile(String relative) {
 		String base = getStorageDirectory() + File.separator + "resources";
-		return resolveFile(relative, base);
+		return resolveFileWithBase(relative, base);
 	}
 
 	public String encode(String url) {
