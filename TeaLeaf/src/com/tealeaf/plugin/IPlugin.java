@@ -32,6 +32,6 @@ public interface IPlugin {
 	public void onDestroy();
 	public void onNewIntent(Intent intent);
 	public void onActivityResult(Integer request, Integer result, Intent data);
-	public void onInstallReferrer(String referrer);
+	public void setInstallReferrer(String referrer);
 
 }
