@@ -102,26 +102,29 @@ extern "C" {
 											jint width,
 											jint height,
 											jboolean remote_loading,
+											jstring splash,
 											jstring simulate_id) {
 		if (0 != env->GetJavaVM(&static_vm)) {
 			LOG("{native} ERROR: Unable to get Java VM");
 		}
 		set_native_shim(shim);
 
-		char *entry_str = NULL, *tcp_str, *host_str, *source_str, *simulate_id_str;
+		char *entry_str = NULL, *tcp_str, *host_str, *source_str, *simulate_id_str, *splash_str;
 		GET_STR(env, entry_point, entry_str);
 		GET_STR(env, tcp_host, tcp_str);
 		GET_STR(env, code_host, host_str);
 		GET_STR(env, source_dir, source_str);
 		GET_STR(env, simulate_id, simulate_id_str);
+		GET_STR(env, splash, splash_str);
 
-		core_init(entry_str, tcp_str, host_str, tcp_port, code_port, source_str, width, height, remote_loading, simulate_id_str);
+		core_init(entry_str, tcp_str, host_str, tcp_port, code_port, source_str, width, height, remote_loading, splash_str, simulate_id_str);
 
 		free(entry_str);
 		free(tcp_str);
 		free(host_str);
 		free(source_str);
 		free(simulate_id_str);
+		free(splash_str);
 #ifndef DEBUG
 		struct sigaction action;
 		memset(&action, 0, sizeof(struct sigaction));

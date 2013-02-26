@@ -44,3 +44,8 @@ CEXPORT int device_total_memory() {
 	jint result = shim->env->CallIntMethod(shim->instance, method);
 	return result;
 }
+
+CEXPORT void device_hide_splash() {
+	// On Android there is no pre-splash stuff, just the core OpenGL splash so
+	// this is a no-op.
+}
