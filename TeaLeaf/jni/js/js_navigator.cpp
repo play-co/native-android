@@ -41,7 +41,7 @@ Handle<ObjectTemplate> js_navigator_get_template() {
 	navigator_info *info = navigator_info_init();
 	//add the pixel ratio to the window object
 	Local<Object> window = getContext()->Global();
-	window->Set(String::New("devicePixelRatio"), Number::New(info->density_dpi / 160));
+	window->Set(STRING_CACHE_devicePixelRatio, Number::New(info->density_dpi / 160.0));
 
 	Handle<ObjectTemplate> js_metrics = ObjectTemplate::New();
 	js_metrics->Set(STRING_CACHE_densityDpi, Integer::New(info->density_dpi));

@@ -211,6 +211,7 @@ Persistent<String> STRING_CACHE_installReferrer;
 Persistent<String> STRING_CACHE_y;
 Persistent<String> STRING_CACHE_doneLoading;
 Persistent<String> STRING_CACHE_failed;
+Persistent<String> STRING_CACHE_devicePixelRatio;
 
 
 void js_string_cache_init() {
@@ -421,4 +422,5 @@ void js_string_cache_init() {
 	STRING_CACHE_y = Persistent<String>::New(String::New("y"));
 	STRING_CACHE_doneLoading = Persistent<String>::New(String::New("doneLoading"));
 	STRING_CACHE_failed = Persistent<String>::New(String::New("failed"));
+	STRING_CACHE_devicePixelRatio = Persistent<String>::New(String::New("devicePixelRatio"));
 }
