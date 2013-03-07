@@ -285,7 +285,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	public void pauseGL() {
 		if (glView != null && !glViewPaused) {
-			glView.waitForLastFrame();
 			glView.onPause();
 			glViewPaused = true;
 		}
