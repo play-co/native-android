@@ -468,12 +468,14 @@ public class TeaLeaf extends FragmentActivity {
 	public void onBackPressed() {
 		Object [] objs = PluginManager.callAll("consumeOnBackPressed");
 
+
 		boolean consume = true;
 		for (Object o : objs) {
 			if (((Boolean) o).booleanValue()) {
-				consume = false;
+				consume = true;
 				break;
 			}
+			consume = false;
 		}
 
 		if (consume) {
