@@ -55,6 +55,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private ArrayList<TextureData> loadedImages = new ArrayList<TextureData>();
 	protected boolean saveTextures = false;
 	protected Object lastFrame = new Object();
+	public boolean queuePause = false;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
@@ -106,17 +107,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		renderer.state = renderer.RELOADING;
 	}
 
-	public void waitForLastFrame() {
-		saveTextures = true;
-		synchronized (lastFrame) {
-			try {
-				lastFrame.wait();
-			} catch (InterruptedException e) {
-				logger.log(e);
-			}
-		}
-	}
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (started) {
@@ -136,8 +126,8 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		logger.log("{gl} Pause");
 
 		if (started) {
-			renderer.onPause();
-			super.onPause();
+			saveTextures = true;
+			this.queuePause = true;
 		}
 	}
 
@@ -462,12 +452,17 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			if (state != FIRST_RUN) {
 				step();
 			}
-			if (view.saveTextures) {
-				view.saveTextures = false;
-				NativeShim.saveTextures();
-				synchronized (view.lastFrame) {
-					view.lastFrame.notify();
+
+			if (view.queuePause) {
+				view.queuePause = false;
+				//save textures
+				if (view.saveTextures) {
+					view.saveTextures = false;
+					NativeShim.saveTextures();
 				}
+				//pause the renderer and glview
+				this.onPause();
+				view.onPause();
 			}
 		}
 
