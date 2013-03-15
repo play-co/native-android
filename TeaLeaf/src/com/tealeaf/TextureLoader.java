@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.tealeaf.event.ImageLoadedEvent;
 import com.tealeaf.event.ImageErrorEvent;
 import com.tealeaf.event.LogEvent;
 
@@ -134,6 +135,39 @@ public class TextureLoader implements Runnable {
 	// DANGER: This thread is called from threads other than GLThread!
 	// In particular, it is called by the Android Native code from the texture loading thread
 	public synchronized void loadTexture(String url) {
+		// Handle @TEXT in GL thread specially to avoid flickering setText()
+		// The trade-off is that memory management isn't applied on this frame but
+		// text is typically essential for a game to look correct and small enough
+		// to avoid causing problems.
+		if (url.startsWith("@TEXT")) {
+			if (tealeaf.glView.isGLThread()) {
+				Bitmap bmp = null;
+				try {
+					bmp = textManager.getText(url);
+					if (bmp == null) {
+						loadingError(url);
+					} else {
+						TextureData td = getTextureData(url, bmp);
+						if (td == null) {
+							return;
+						}
+						finishLoadingTexture(td);
+						EventQueue.pushEvent((new ImageLoadedEvent(td.url,
+								td.width, td.height, td.originalWidth,
+								td.originalHeight, td.name)));
+						// Number of channels (last argument) is always 4 for now
+						// (RGBA8888)
+						NativeShim.onTextureLoaded(td.url, td.name, td.width,
+								td.height, td.originalWidth, td.originalHeight, 4);
+					}
+				} catch (OutOfMemoryError e) {
+					logger.log(e);
+					loadTexture(url);
+				}
+				return;
+			}
+		}
+
 		synchronized (monitor) {
 			texturesToLoad.add(url);
 			monitor.notify();
