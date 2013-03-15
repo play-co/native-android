@@ -55,10 +55,15 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private ArrayList<TextureData> loadedImages = new ArrayList<TextureData>();
 	protected boolean saveTextures = false;
 	protected Object lastFrame = new Object();
+	protected long glThreadId = 0;
 	public boolean queuePause = false;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
+	}
+
+	public boolean isGLThread() {
+		return Thread.currentThread().getId() == glThreadId;
 	}
 
 	public TeaLeafGLSurfaceView(TeaLeaf context) {
@@ -467,6 +472,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		}
 
 		private void runJS() {
+			this.view.glThreadId = Thread.currentThread().getId();
 			NativeShim.resizeScreen(width, height);
 			NativeShim.run();
 			state = READY;
