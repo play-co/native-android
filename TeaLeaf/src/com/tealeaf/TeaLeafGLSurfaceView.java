@@ -551,7 +551,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			TeaLeaf tealeaf = this.view.context;
 			WindowManager w = tealeaf.getWindowManager();
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
 				w.getDefaultDisplay().getSize(size);
 				sw = size.x;
 				sh = size.y;
