@@ -32,6 +32,8 @@ import com.tealeaf.event.SoundLoadedEvent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.media.SoundPool.OnLoadCompleteListener;
+import android.util.SparseArray;
 
 public class SoundManager implements Runnable {
 	private ConcurrentHashMap<String, SoundSpec> sounds = new ConcurrentHashMap<String, SoundSpec>();
@@ -65,9 +67,29 @@ public class SoundManager implements Runnable {
 		}
 	}
 
+	private SparseArray<SoundSpec> id2spec = new SparseArray<SoundSpec>();
+
 	public SoundManager(TeaLeaf context, ResourceManager resourceManager) {
 		this.context = context;
 		this.resourceManager = resourceManager;
+		soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
+			@Override
+			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+				SoundSpec spec = id2spec.get(sampleId);
+				synchronized (spec) {
+					if (status == 0) { // success
+						spec.loaded = true;
+						spec.failed = false;
+						SoundManager.this.sendLoadedEvent(spec.url);
+					} else { // failure
+						spec.failed = true;
+						spec.loaded = false;
+						SoundManager.this.sendErrorEvent(spec.url);
+					}
+					spec.notifyAll();
+				}
+			}
+		});
 
 		new Thread(this).start();
 	}
@@ -88,8 +110,7 @@ public class SoundManager implements Runnable {
 						// not on the file system, try loading from assets
 						AssetFileDescriptor afd = context.getAssets().openFd("resources/" + spec.url);
 						spec.id = soundPool.load(afd, 1);
-						spec.loaded = true;
-						spec.failed = false;
+						id2spec.put(spec.id, spec);
 					} catch(IOException e) {
 						spec.id = -1;
 						spec.failed = true;
@@ -97,15 +118,12 @@ public class SoundManager implements Runnable {
 					}
 				} else {
 					spec.id = soundPool.load(sound.getAbsolutePath(), 1);
-					spec.loaded = true;
-					spec.failed = false;
+					id2spec.put(spec.id, spec);
 				}
-				if (spec.loaded) {
-					sendLoadedEvent(spec.url);
-				} else {
+				if (spec.failed) {
 					sendErrorEvent(spec.url);
+					spec.notifyAll();
 				}
-				spec.notifyAll();
 			}
 		}
 	}
