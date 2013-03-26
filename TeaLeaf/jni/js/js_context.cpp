@@ -506,7 +506,7 @@ Handle<Value> defStrokeText(const Arguments& args) {
 			y_offset = texture->originalHeight * 0.95;
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
-		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
+		rect_2d dest_rect = {x - x_offset - (int)line_width, y - y_offset, texture->originalWidth, texture->originalHeight};
 		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
 	}
 	LOGFN("endstroketext");
