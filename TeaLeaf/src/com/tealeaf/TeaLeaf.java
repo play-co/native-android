@@ -285,7 +285,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	public void pauseGL() {
 		if (glView != null && !glViewPaused) {
-			glView.waitForLastFrame();
 			glView.onPause();
 			glViewPaused = true;
 		}
@@ -468,9 +467,14 @@ public class TeaLeaf extends FragmentActivity {
 	public void onBackPressed() {
 		Object [] objs = PluginManager.callAll("consumeOnBackPressed");
 
-		boolean consume = false;
+
+		boolean consume = true;
 		for (Object o : objs) {
-			 consume |= ((Boolean) o).booleanValue();
+			if (((Boolean) o).booleanValue()) {
+				consume = true;
+				break;
+			}
+			consume = false;
 		}
 
 		if (consume) {
