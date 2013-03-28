@@ -188,7 +188,7 @@ public class TextManager {
 
 		Bitmap bitmap = Bitmap.createBitmap((int)width, height, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
-		canvas.drawText(text, 0, -ascent, textPaint);
+		canvas.drawText(text, strokeWidth, -ascent, textPaint);
 
 		return bitmap;
 	}

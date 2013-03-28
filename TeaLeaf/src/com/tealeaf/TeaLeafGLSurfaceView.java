@@ -55,9 +55,15 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private ArrayList<TextureData> loadedImages = new ArrayList<TextureData>();
 	protected boolean saveTextures = false;
 	protected Object lastFrame = new Object();
+	protected long glThreadId = 0;
+	public boolean queuePause = false;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
+	}
+
+	public boolean isGLThread() {
+		return Thread.currentThread().getId() == glThreadId;
 	}
 
 	public TeaLeafGLSurfaceView(TeaLeaf context) {
@@ -106,17 +112,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		renderer.state = renderer.RELOADING;
 	}
 
-	public void waitForLastFrame() {
-		saveTextures = true;
-		synchronized (lastFrame) {
-			try {
-				lastFrame.wait();
-			} catch (InterruptedException e) {
-				logger.log(e);
-			}
-		}
-	}
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		if (started) {
@@ -136,8 +131,8 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		logger.log("{gl} Pause");
 
 		if (started) {
-			renderer.onPause();
-			super.onPause();
+			saveTextures = true;
+			this.queuePause = true;
 		}
 	}
 
@@ -462,16 +457,22 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			if (state != FIRST_RUN) {
 				step();
 			}
-			if (view.saveTextures) {
-				view.saveTextures = false;
-				NativeShim.saveTextures();
-				synchronized (view.lastFrame) {
-					view.lastFrame.notify();
+
+			if (view.queuePause) {
+				view.queuePause = false;
+				//save textures
+				if (view.saveTextures) {
+					view.saveTextures = false;
+					NativeShim.saveTextures();
 				}
+				//pause the renderer and glview
+				this.onPause();
+				view.onPause();
 			}
 		}
 
 		private void runJS() {
+			this.view.glThreadId = Thread.currentThread().getId();
 			NativeShim.resizeScreen(width, height);
 			NativeShim.run();
 			state = READY;
@@ -556,7 +557,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			TeaLeaf tealeaf = this.view.context;
 			WindowManager w = tealeaf.getWindowManager();
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
 				w.getDefaultDisplay().getSize(size);
 				sw = size.x;
 				sh = size.y;
