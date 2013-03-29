@@ -18,6 +18,7 @@ package com.tealeaf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -32,6 +33,7 @@ public class TeaLeafSocket implements Runnable{
 	private String address;
 	private int port;
 	private Socket socket;
+	private InputStream is;
 	private BufferedReader in;
 	private OutputStreamWriter out;
 	private int id;
@@ -83,7 +85,8 @@ public class TeaLeafSocket implements Runnable{
 		}
 		if (socket != null) {
 			try {
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				is = socket.getInputStream();
+				in = new BufferedReader(new InputStreamReader(is));
 				out = new OutputStreamWriter(socket.getOutputStream());
 			} catch (IOException e) {
 				error(e.toString());
@@ -114,15 +117,19 @@ public class TeaLeafSocket implements Runnable{
 
 	public synchronized void read() {
 		if (in == null) { return; }
-		String data = null;
+		int cLen = 0;
+		char[] cData = null;
 		try {
-			data = in.readLine();
+			cLen = is.available();
+			cData = new char[cLen];
+			in.read(cData, 0, cLen);
 		} catch (IOException e) {
 			//die
 		}
-		if (data != null) {
-			String line = data + "\r\n";
-			EventQueue.pushEvent(new SocketReadEvent(this.id, line));
+		if (cLen > 0) {
+			String data = new String(cData);
+			logger.log("{socket} read:", data);
+			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
 		}
 	}
 	
