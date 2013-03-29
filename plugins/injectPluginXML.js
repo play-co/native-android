@@ -70,10 +70,11 @@ for (var i in config) {
 	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 
 	//collect plugins xml text to replace and inject after going through all plugins
-	var pluginXml = fs.readFileSync(path.join(pluginDir, pluginConfig.injectionXML.srcPath, pluginConfig.injectionXML.name), "utf-8");
-	manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
-	manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
-
+	if (pluginConfig.injectionXML) {
+		var pluginXml = fs.readFileSync(path.join(pluginDir, pluginConfig.injectionXML.srcPath, pluginConfig.injectionXML.name), "utf-8");
+		manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
+		manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
+	}
 }
 
 //inject and write all the collected plugin xml to AndroidManifest.xml

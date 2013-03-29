@@ -45,11 +45,12 @@ var PROP_END_PLUGINS = "#END_PLUGINS";
 var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 
 var libraries = [];
+var jars = [];
 var hasBilling = false;
 
-for (var i in config) {
+for (var p in config) {
 
-	var pluginDir = path.resolve(__dirname, config[i]);
+	var pluginDir = path.resolve(__dirname, config[p]);
 	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 
 	var copyFiles = pluginConfig.copyFiles;
@@ -68,6 +69,12 @@ for (var i in config) {
 
 	if (pluginConfig.library) {
 			libraries.push(path.join(pluginDir, pluginConfig.library.srcPath, pluginConfig.library.libName));
+	}
+
+	if (pluginConfig.jars) {
+		for (var i = 0; i < pluginConfig.jars.length; i++) {
+			jars.push(path.join(pluginDir, pluginConfig.jars[i]));
+		}
 	}
 
 }
@@ -112,5 +119,11 @@ if (properties.length > 0 ) {
 	properties = replaceTextBetween(properties, PROP_START_PLUGINS, PROP_END_PLUGINS, libStr);
 	fs.writeFileSync(path.join(TEALEAF_DIR, "project.properties"), properties, "utf-8");
 
+	//copy libary jars
+	for (var i = 0; i < jars.length; i++) {
+		var jarName = path.basename(jars[i]);
+		var copyPath = path.join(__dirname, '..', 'TeaLeaf', 'libs', jarName);
+		fs.createReadStream(jars[i]).pipe(fs.createWriteStream(copyPath));
+	}
 }
 
