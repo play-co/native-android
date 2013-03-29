@@ -576,15 +576,15 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			boolean success = false;
 			
 			if (longerScreenSide > 1024) {
-				success = trySplashImage("splash-2048x1536.png");
+				success = trySplashImage("splash-2048.png");
 			}
 			
 			if (!success && longerScreenSide > 512) {
-				success = trySplashImage("splash-1024x768.png");
+				success = trySplashImage("splash-1024.png");
 			} 
 			
 			if (!success) {
-				success = trySplashImage("splash-512x384.png");
+				success = trySplashImage("splash-512.png");
 			}
 
 			if (!success) {
