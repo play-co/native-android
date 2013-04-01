@@ -36,6 +36,7 @@ extern "C" {
 
 static JavaVM* static_vm = NULL;
 static native_shim shim;
+static int m_initialized = 0;
 
 static JNIEnv* get_env() {
 	JNIEnv* env;
@@ -102,26 +103,29 @@ extern "C" {
 											jint width,
 											jint height,
 											jboolean remote_loading,
+											jstring splash,
 											jstring simulate_id) {
 		if (0 != env->GetJavaVM(&static_vm)) {
 			LOG("{native} ERROR: Unable to get Java VM");
 		}
 		set_native_shim(shim);
 
-		char *entry_str = NULL, *tcp_str, *host_str, *source_str, *simulate_id_str;
+		char *entry_str = NULL, *tcp_str, *host_str, *source_str, *simulate_id_str, *splash_str;
 		GET_STR(env, entry_point, entry_str);
 		GET_STR(env, tcp_host, tcp_str);
 		GET_STR(env, code_host, host_str);
 		GET_STR(env, source_dir, source_str);
 		GET_STR(env, simulate_id, simulate_id_str);
+		GET_STR(env, splash, splash_str);
 
-		core_init(entry_str, tcp_str, host_str, tcp_port, code_port, source_str, width, height, remote_loading, simulate_id_str);
+		core_init(entry_str, tcp_str, host_str, tcp_port, code_port, source_str, width, height, remote_loading, splash_str, simulate_id_str);
 
 		free(entry_str);
 		free(tcp_str);
 		free(host_str);
 		free(source_str);
 		free(simulate_id_str);
+		free(splash_str);
 #ifndef DEBUG
 		struct sigaction action;
 		memset(&action, 0, sizeof(struct sigaction));
@@ -137,18 +141,23 @@ extern "C" {
 #endif
 
 		LOG("{native} Initialized native JNI bridge");
+
+		m_initialized = 1;
 	}
 	void Java_com_tealeaf_NativeShim_run(JNIEnv*  env, jobject  thiz) {
 		core_run();
 	}
 
 	void Java_com_tealeaf_NativeShim_destroy(JNIEnv *env, jobject thiz) {
-		core_destroy();
+		if (m_initialized) {
+			core_destroy();
+		}
 	}
 
-
 	void Java_com_tealeaf_NativeShim_reset(JNIEnv *env, jobject thiz) {
-		core_reset();
+		if (m_initialized) {
+			core_reset();
+		}
 	}
 
 	void Java_com_tealeaf_NativeShim_setSingleShader(JNIEnv *env, jobject thiz, jboolean on) {
@@ -280,6 +289,8 @@ extern "C" {
 	}
 
 	void native_leave_thread() {
-		static_vm->DetachCurrentThread();
+		if (static_vm != NULL) {
+			static_vm->DetachCurrentThread();
+		}
 	}
 }

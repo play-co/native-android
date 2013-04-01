@@ -40,10 +40,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -203,7 +206,6 @@ public class TeaLeaf extends FragmentActivity {
 		String appID = findAppID();
 		options = new TeaLeafOptions(this);
 
-		PluginManager.init(this);
 		PluginManager.callAll("onCreate", this, savedInstanceState);
 
 
@@ -212,6 +214,7 @@ public class TeaLeaf extends FragmentActivity {
 		boolean isTestApp = false;
 		if (bundle != null) {
 		   isTestApp = bundle.getBoolean("isTestApp", false);
+
 		   if (isTestApp) {
 			   options.setAppID(appID);
 			   boolean isPortrait = bundle.getBoolean("isPortrait", false);
@@ -282,7 +285,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	public void pauseGL() {
 		if (glView != null && !glViewPaused) {
-			glView.waitForLastFrame();
 			glView.onPause();
 			glViewPaused = true;
 		}
@@ -465,15 +467,19 @@ public class TeaLeaf extends FragmentActivity {
 	public void onBackPressed() {
 		Object [] objs = PluginManager.callAll("consumeOnBackPressed");
 
-		boolean consume = false;
+
+		boolean consume = true;
 		for (Object o : objs) {
-			 consume |= ((Boolean) o).booleanValue();
+			if (((Boolean) o).booleanValue()) {
+				consume = true;
+				break;
+			}
+			consume = false;
 		}
 
 		if (consume) {
 			EventQueue.pushEvent(new BackButtonEvent());
 		} else {
-			super.onBackPressed();
 			PluginManager.callAll("onBackPressed");
 		}
 	}
