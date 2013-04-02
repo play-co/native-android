@@ -76,3 +76,4 @@ setup:
 	android update project -p TeaLeaf --target android-15 --subprojects
 	android update project -p GCTestApp --target android-15 --subprojects
 	node plugins/updatePlugins.js
+	node checkSymlinks
