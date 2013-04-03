@@ -128,7 +128,6 @@ public class TeaLeafSocket implements Runnable{
 		}
 		if (cLen > 0) {
 			String data = new String(cData);
-			logger.log("{socket} read:", data);
 			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
 		}
 	}
