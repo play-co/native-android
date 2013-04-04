@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Queue;
 
 import com.tealeaf.event.SocketErrorEvent;
@@ -38,6 +39,7 @@ public class TeaLeafSocket implements Runnable{
 	private OutputStreamWriter out;
 	private int id;
 	private boolean connected = false;
+	private char[] cData = new char[512];
 
 	private Thread writeThread = new Thread(new Runnable() {
 		public void run() {
@@ -72,7 +74,7 @@ public class TeaLeafSocket implements Runnable{
 		this.port = port;
 		this.id = id;
 	}
-	
+
 	public void connect() {
 		boolean error = false;
 		try {
@@ -98,7 +100,7 @@ public class TeaLeafSocket implements Runnable{
 			EventQueue.pushEvent(new SocketOpenEvent(this.id));
 		}
 	}
-	
+
 	public int getID() {
 		return id;
 	}
@@ -118,20 +120,20 @@ public class TeaLeafSocket implements Runnable{
 	public synchronized void read() {
 		if (in == null) { return; }
 		int cLen = 0;
-		char[] cData = null;
 		try {
-			cLen = is.available();
-			cData = new char[cLen];
-			in.read(cData, 0, cLen);
+			cLen = in.read(cData);
 		} catch (IOException e) {
-			//die
+			// socket timeout -- don't worry about it
 		}
-		if (cLen > 0) {
-			String data = new String(cData);
+		if (cLen == -1) {
+			// socket error -- trigger error event and close
+			error("socket error on read");
+		} else if (cLen != 0) {
+			String data = new String(Arrays.copyOfRange(cData, 0, cLen));
 			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
 		}
 	}
-	
+
 	public void close() {
 		connected = false;
 		try {
