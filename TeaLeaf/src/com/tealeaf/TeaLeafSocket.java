@@ -124,10 +124,10 @@ public class TeaLeafSocket implements Runnable{
 		int cLen = 0;
 		try {
 			cLen = in.read(cData);
+		} catch (SocketTimeoutException e) {
+			// do nothing
 		} catch (IOException e) {
-			if (! (e instanceof SocketTimeoutException)) {
-				error("read error: " + e.toString());
-			}
+			error("read error: " + e.toString());
 		}
 		if (cLen == -1) {
 			close();
