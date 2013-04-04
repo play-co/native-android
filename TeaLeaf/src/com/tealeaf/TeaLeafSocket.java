@@ -22,11 +22,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Queue;
 
 import com.tealeaf.event.SocketErrorEvent;
 import com.tealeaf.event.SocketOpenEvent;
+import com.tealeaf.event.SocketCloseEvent;
 import com.tealeaf.event.SocketReadEvent;
 
 //TODO get rid of the reference in NativeShim when one of these goes out of scope
@@ -123,10 +125,12 @@ public class TeaLeafSocket implements Runnable{
 		try {
 			cLen = in.read(cData);
 		} catch (IOException e) {
-			// socket timeout -- don't worry about it
+			if (! (e instanceof SocketTimeoutException)) {
+				error("read error: " + e.toString());
+			}
 		}
 		if (cLen == -1) {
-			error("socket error on read");
+			close();
 		} else if (cLen > 0) {
 			String data = new String(Arrays.copyOfRange(cData, 0, cLen));
 			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
@@ -135,6 +139,7 @@ public class TeaLeafSocket implements Runnable{
 
 	public void close() {
 		connected = false;
+		EventQueue.pushEvent(new SocketCloseEvent(this.id));
 		try {
 			if (socket != null) {
 				socket.close();
