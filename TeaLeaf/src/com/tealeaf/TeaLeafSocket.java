@@ -127,7 +127,7 @@ public class TeaLeafSocket implements Runnable{
 		}
 		if (cLen == -1) {
 			error("socket error on read");
-		} else if (cLen != 0) {
+		} else if (cLen > 0) {
 			String data = new String(Arrays.copyOfRange(cData, 0, cLen));
 			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
 		}
