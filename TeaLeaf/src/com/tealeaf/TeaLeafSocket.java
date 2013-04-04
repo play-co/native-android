@@ -126,7 +126,6 @@ public class TeaLeafSocket implements Runnable{
 			// socket timeout -- don't worry about it
 		}
 		if (cLen == -1) {
-			// socket error -- trigger error event and close
 			error("socket error on read");
 		} else if (cLen != 0) {
 			String data = new String(Arrays.copyOfRange(cData, 0, cLen));
