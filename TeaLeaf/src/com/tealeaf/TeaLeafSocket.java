@@ -18,13 +18,17 @@ package com.tealeaf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Queue;
 
 import com.tealeaf.event.SocketErrorEvent;
 import com.tealeaf.event.SocketOpenEvent;
+import com.tealeaf.event.SocketCloseEvent;
 import com.tealeaf.event.SocketReadEvent;
 
 //TODO get rid of the reference in NativeShim when one of these goes out of scope
@@ -32,10 +36,12 @@ public class TeaLeafSocket implements Runnable{
 	private String address;
 	private int port;
 	private Socket socket;
+	private InputStream is;
 	private BufferedReader in;
 	private OutputStreamWriter out;
 	private int id;
 	private boolean connected = false;
+	private char[] cData = new char[512];
 
 	private Thread writeThread = new Thread(new Runnable() {
 		public void run() {
@@ -70,7 +76,7 @@ public class TeaLeafSocket implements Runnable{
 		this.port = port;
 		this.id = id;
 	}
-	
+
 	public void connect() {
 		boolean error = false;
 		try {
@@ -83,7 +89,8 @@ public class TeaLeafSocket implements Runnable{
 		}
 		if (socket != null) {
 			try {
-				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				is = socket.getInputStream();
+				in = new BufferedReader(new InputStreamReader(is));
 				out = new OutputStreamWriter(socket.getOutputStream());
 			} catch (IOException e) {
 				error(e.toString());
@@ -95,7 +102,7 @@ public class TeaLeafSocket implements Runnable{
 			EventQueue.pushEvent(new SocketOpenEvent(this.id));
 		}
 	}
-	
+
 	public int getID() {
 		return id;
 	}
@@ -114,20 +121,25 @@ public class TeaLeafSocket implements Runnable{
 
 	public synchronized void read() {
 		if (in == null) { return; }
-		String data = null;
+		int cLen = 0;
 		try {
-			data = in.readLine();
+			cLen = in.read(cData);
+		} catch (SocketTimeoutException e) {
+			// do nothing
 		} catch (IOException e) {
-			//die
+			error("read error: " + e.toString());
 		}
-		if (data != null) {
-			String line = data + "\r\n";
-			EventQueue.pushEvent(new SocketReadEvent(this.id, line));
+		if (cLen == -1) {
+			close();
+		} else if (cLen > 0) {
+			String data = new String(Arrays.copyOfRange(cData, 0, cLen));
+			EventQueue.pushEvent(new SocketReadEvent(this.id, data));
 		}
 	}
-	
+
 	public void close() {
 		connected = false;
+		EventQueue.pushEvent(new SocketCloseEvent(this.id));
 		try {
 			if (socket != null) {
 				socket.close();
