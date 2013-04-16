@@ -467,7 +467,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				}
 				//pause the renderer and glview
 				this.onPause();
-				view.onPause();
 			}
 		}
 
