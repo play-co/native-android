@@ -80,14 +80,6 @@
 			</intent-filter>
 		</receiver>
 
-		<receiver android:name="com.tealeaf.ReferrerReceiver" android:exported="true">
-			<intent-filter>
-				<action android:name="com.android.vending.INSTALL_REFERRER"></action>
-			</intent-filter>
-
-			<meta-data android:name="forward.google" android:value="com.google.ads.InstallReceiver" />
-		</receiver>
-
 		<receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
 		<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />
 
