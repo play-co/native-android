@@ -41,6 +41,17 @@ for (var i in config) {
 
 	}
 
+	if (pluginConfig.jars) {
+		for (var j = 0; j < pluginConfig.jars.length; j++) {
+			var jarName = path.basename(pluginConfig.jars[j]);
+			try {
+				var jarPath = path.join(__dirname, '..', 'TeaLeaf', 'libs', jarName);
+				fs.unlinkSync(jarPath)
+			} catch (err) {
+				//do nothing with the error
+			}
+		}
+	}
 }
 
 var xml = fs.readFileSync(path.join(__dirname, "../GCTestApp/AndroidManifest.xml"), "utf-8");
