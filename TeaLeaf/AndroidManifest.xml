@@ -67,12 +67,6 @@
 
 		<service android:name="com.tealeaf.TeaLeafService" android:enabled="true" exported="false" />
 
-		<receiver android:name="com.tealeaf.NotificationReceiver" android:enabled="true">
-			<intent-filter>
-				<action android:name="com.tealeaf.ALARM_TIMER" />
-			</intent-filter>
-		</receiver>
-
 		<receiver android:name="com.tealeaf.MarketBroadcastReceiver" android:enabled="true"> <intent-filter>
 				<action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
 				<action android:name="com.android.vending.billing.RESPONSE_CODE" />
