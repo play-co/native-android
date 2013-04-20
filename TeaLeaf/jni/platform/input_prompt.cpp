@@ -17,15 +17,15 @@
 #include "platform/input_prompt.h"
 #include "platform/platform.h"
 
-int input_prompt_show(const char *title, const char *message, const char *value, bool auto_show_keyboard) {
+int input_prompt_show(const char *title, const char *message, const char *value, bool auto_show_keyboard, bool is_password) {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jstring jtitle = env->NewStringUTF(title);
 	jstring jmessage = env->NewStringUTF(message);
 	jstring jvalue = env->NewStringUTF(value);
 
-	jmethodID method = env->GetMethodID(shim->type, "showInputPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)I");
-	jint id = env->CallIntMethod(shim->instance, method, jtitle, jmessage, jvalue, auto_show_keyboard);
+	jmethodID method = env->GetMethodID(shim->type, "showInputPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)I");
+	jint id = env->CallIntMethod(shim->instance, method, jtitle, jmessage, jvalue, auto_show_keyboard, is_password);
 
 	env->DeleteLocalRef(jtitle);
 	env->DeleteLocalRef(jmessage);

@@ -24,12 +24,13 @@ Handle<Value> js_input_prompt_show(const Arguments &args) {
 	String::Utf8Value message_str(args[1]);
 	String::Utf8Value value_str(args[2]);
 	bool auto_show_keyboard = args[3]->BooleanValue();
+	bool is_password = args[4]->BooleanValue();
 	
 	const char *title = ToCString(title_str);
 	const char *message = ToCString(message_str);
 	const char *value = ToCString(value_str);
 	
-	int id = input_prompt_show(title, message, value, auto_show_keyboard);
+	int id = input_prompt_show(title, message, value, auto_show_keyboard, is_password);
 	return Number::New(id);
 }
 

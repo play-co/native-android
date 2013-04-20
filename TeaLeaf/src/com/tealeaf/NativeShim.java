@@ -196,8 +196,8 @@ public class NativeShim {
 	}
 
 	private int textInputId = 0;
-	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard) {
-		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard);
+	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
+		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
 	}
 	//TextInputView
 	public int createTextBox() {
