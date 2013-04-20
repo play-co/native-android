@@ -19,6 +19,7 @@ package com.tealeaf;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
+import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.view.MotionEvent;
 import android.os.SystemClock;
@@ -39,7 +40,7 @@ public class InputPrompt {
 		}
 	}
 	
-	public int showInputPrompt(final TeaLeaf context, final String title, final String message, final String value, final boolean autoShowKeyboard) {
+	public int showInputPrompt(final TeaLeaf context, final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
 		final int id = textInputId++;
 		context.runOnUiThread(new Runnable() {
 			public void run() {
@@ -54,6 +55,10 @@ public class InputPrompt {
 				}
 
 				final EditText input = new EditText(context);
+
+				if (isPassword) {
+					input.setTransformationMethod(PasswordTransformationMethod.getInstance());
+				}
 
 				if (value != null) {
 					input.setText(value);
