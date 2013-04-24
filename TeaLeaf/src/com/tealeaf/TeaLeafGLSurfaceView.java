@@ -50,7 +50,7 @@ import com.tealeaf.event.RedrawOffscreenBuffersEvent;
 public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private TeaLeaf context;
 	private Renderer renderer;
-	public boolean started = false;
+	private boolean started = false;
 	public boolean sendResumeEvent = false;
 	private ArrayList<TextureData> loadedImages = new ArrayList<TextureData>();
 	protected boolean saveTextures = false;
