@@ -441,11 +441,10 @@ public class TeaLeaf extends FragmentActivity {
 			}
 		}
 
-		resumeGL();
-
 		if (ActivityState.hasResumed(true)) {
 			if (glView != null) {
 				glView.queueResumeEvent();
+				resumeGL();
 				soundQueue.onResume();
 				soundQueue.playSound(SoundQueue.LOADING_SOUND);
 				PluginManager.callAll("onResume");
