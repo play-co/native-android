@@ -16,10 +16,6 @@
  */
 package com.tealeaf;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,23 +23,22 @@ import java.util.Date;
 
 import android.opengl.GLES20;
 import android.os.Build;
-import android.os.Bundle;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.tealeaf.event.ImageLoadedEvent;
+import com.tealeaf.event.OrientationEvent;
 import com.tealeaf.event.ResumeEvent;
 import com.tealeaf.event.RedrawOffscreenBuffersEvent;
 
@@ -57,6 +52,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	protected Object lastFrame = new Object();
 	protected long glThreadId = 0;
 	public boolean queuePause = false;
+	private OrientationEventListener orientationListener;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
@@ -76,6 +72,32 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		this.context = context;
 		renderer = new Renderer(this);
 		this.setOnTouchListener(renderer);
+
+		orientationListener = new OrientationEventListener(context) {
+			private String lastOrientation = "unknown";
+			@Override
+			public void onOrientationChanged(int orientation) {
+				String newOrientation = "";
+				if (orientation == -1) {
+					newOrientation = "unknown";
+				} else if (orientation > 315 || orientation <= 45) {
+					newOrientation = "portrait";
+				} else if (orientation > 45 && orientation <= 135) {
+					newOrientation = "landscapeRight";
+				} else if (orientation > 135 && orientation <= 225) {
+					newOrientation = "portraitUpsideDown";
+				} else if (orientation > 225 && orientation <= 315) {
+					newOrientation = "landscapeLeft";
+				}
+				
+				if (newOrientation != lastOrientation) {
+					lastOrientation = newOrientation;
+					String[] events = { new OrientationEvent(newOrientation).pack() };
+					NativeShim.dispatchEvents(events);
+				}
+			}
+		};
+		orientationListener.enable();
 	}
 
 	public void queueResumeEvent() {
