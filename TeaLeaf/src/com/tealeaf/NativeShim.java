@@ -347,7 +347,6 @@ public class NativeShim {
 		soundQueue.setVolume(url, volume);
 	}
 	public void seekTo(String url, float position) {
-		logger.log("MAR NativeShim seekTo " + position);
 		soundQueue.seekTo(url, position);
 	}
 

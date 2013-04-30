@@ -89,12 +89,12 @@ Handle<Value> defLoadBackgroundMusic(const Arguments& args) {
 }
 
 Handle<Value> defSeekTo(const Arguments& args) {
-	LOGFN("MAR js_sound seek to position");
+	LOGFN("seek to position");
 	String::Utf8Value str(args[0]);
 	float position = args[1]->NumberValue();
 	const char *url = ToCString(str);
 	sound_manager_seek_to(url, position);
-	LOGFN("MAR js_sound end seek to position");
+	LOGFN("end seek to position");
 	return Undefined();
 }
 
