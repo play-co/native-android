@@ -79,3 +79,13 @@ void sound_manager_load_background_music(const char *url) {
 	do_call(url, "loadBackgroundMusic");
 }
 
+void sound_manager_seek_to(const char *url, float position) {
+	native_shim *shim = get_native_shim();
+	JNIEnv *env = shim->env;
+	jobject manager = shim->instance;
+	jclass type = shim->type;
+	jmethodID method = env->GetMethodID(type, "seekTo", "(Ljava/lang/String;F)V");
+	jstring s = env->NewStringUTF(url);
+	env->CallVoidMethod(manager, method, s, position);
+	env->DeleteLocalRef(s);
+}

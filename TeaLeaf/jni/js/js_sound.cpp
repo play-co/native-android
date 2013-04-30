@@ -88,6 +88,16 @@ Handle<Value> defLoadBackgroundMusic(const Arguments& args) {
 	return Undefined();
 }
 
+Handle<Value> defSeekTo(const Arguments& args) {
+	LOGFN("MAR js_sound seek to position");
+	String::Utf8Value str(args[0]);
+	float position = args[1]->NumberValue();
+	const char *url = ToCString(str);
+	sound_manager_seek_to(url, position);
+	LOGFN("MAR js_sound end seek to position");
+	return Undefined();
+}
+
 Handle<ObjectTemplate> js_sound_get_template() {
 	Handle<ObjectTemplate> sound = ObjectTemplate::New();
 	sound->Set(STRING_CACHE_playSound, FunctionTemplate::New(defPlaySound));
@@ -97,5 +107,6 @@ Handle<ObjectTemplate> js_sound_get_template() {
 	sound->Set(STRING_CACHE_stopSound, FunctionTemplate::New(defStopSound));
 	sound->Set(STRING_CACHE_pauseSound, FunctionTemplate::New(defPauseSound));
 	sound->Set(STRING_CACHE_setVolume, FunctionTemplate::New(defSetVolume));
+	sound->Set(STRING_CACHE_seekTo, FunctionTemplate::New(defSeekTo));
 	return sound;
 }
