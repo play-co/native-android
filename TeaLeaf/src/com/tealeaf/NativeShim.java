@@ -346,6 +346,10 @@ public class NativeShim {
 	public void setVolume(String url, float volume) {
 		soundQueue.setVolume(url, volume);
 	}
+	public void seekTo(String url, float position) {
+		logger.log("MAR NativeShim seekTo " + position);
+		soundQueue.seekTo(url, position);
+	}
 
 	// Sockets
 	public void sendData(int id, String data) {

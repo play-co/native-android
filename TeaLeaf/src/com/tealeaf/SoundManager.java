@@ -322,6 +322,15 @@ public class SoundManager implements Runnable {
 		}
 	}
 
+	public void seekTo(String url, float position) {
+		logger.log("MAR SoundManager seekTo " + position);
+		if (url.equals(backgroundMusicUrl) && backgroundMusic != null) {
+			int pos = (int) (position * 1000);
+			logger.log("MAR setting position to: " + pos);
+			backgroundMusic.seekTo(pos);
+		}
+	}
+
 	public void destroy(String url) {
 		SoundSpec sound = sounds.get(url);
 		sounds.remove(url);
