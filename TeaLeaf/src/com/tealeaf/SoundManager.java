@@ -166,7 +166,7 @@ public class SoundManager implements Runnable {
 		if (dur == null) {
 			dur = mp.getDuration();
 			durations.put(url, dur);
-			sendDurationEvent(url, dur);
+			sendDurationEvent(url, dur / 1000.0);
 		}
 	}
 	
@@ -421,7 +421,7 @@ public class SoundManager implements Runnable {
 		return sound;
 	}
 
-	private void sendDurationEvent(String url, Integer dur) {
+	private void sendDurationEvent(String url, double dur) {
 		SoundDurationEvent event = new SoundDurationEvent(url, dur);
 		EventQueue.pushEvent(event);
 	}

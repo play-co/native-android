@@ -21,9 +21,9 @@ public class SoundDurationEvent extends Event {
 	@SuppressWarnings("unused")
 	private String url;
 	@SuppressWarnings("unused")
-	private Integer duration;
+	private double duration;
 	
-	public SoundDurationEvent(String url, Integer dur) {
+	public SoundDurationEvent(String url, double dur) {
 		super("soundDuration");
 		this.url = url;
 		this.duration = dur;
