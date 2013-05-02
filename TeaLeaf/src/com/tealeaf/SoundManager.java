@@ -20,12 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.content.res.AssetFileDescriptor;
 
+import com.tealeaf.event.SoundDurationEvent;
 import com.tealeaf.event.SoundErrorEvent;
 import com.tealeaf.event.SoundLoadedEvent;
 
@@ -38,7 +40,7 @@ import android.util.SparseArray;
 public class SoundManager implements Runnable {
 	private ConcurrentHashMap<String, SoundSpec> sounds = new ConcurrentHashMap<String, SoundSpec>();
 	private final LinkedBlockingQueue<SoundSpec> loadingQueue = new LinkedBlockingQueue<SoundSpec>();
-
+	private HashMap<String, Integer> durations = new HashMap<String, Integer>();
 	private HashSet<SoundSpec> pausedSounds = new HashSet<SoundSpec>();
 	private SoundPool soundPool = new SoundPool(15, AudioManager.STREAM_MUSIC, 0);
 	private MediaPlayer backgroundMusic = null, loadingSound = null;
@@ -159,6 +161,15 @@ public class SoundManager implements Runnable {
 		}
 	}
 
+	private void setDuration(String url, MediaPlayer mp) {
+		Integer dur = durations.get(url);
+		if (dur == null) {
+			dur = mp.getDuration();
+			durations.put(url, dur);
+			sendDurationEvent(url, dur);
+		}
+	}
+	
 	public void playBackgroundMusic(String url, float volume, boolean loop) {
 		shouldResumeBackgroundMusic = true;
 		// this means we probably paused it. Just resume, don't start over
@@ -216,6 +227,7 @@ public class SoundManager implements Runnable {
 			logger.log(e);
 		}
 
+		setDuration(url, backgroundMusic);
 		backgroundMusic.setVolume(volume, volume);
 		backgroundMusic.start();
 		backgroundMusic.setLooping(loop);
@@ -240,6 +252,7 @@ public class SoundManager implements Runnable {
 			try {
 				backgroundMusic.setDataSource(fileInputStream.getFD());
 				backgroundMusic.prepareAsync();
+				setDuration(url, backgroundMusic);
 			} catch (Exception e) {
 				logger.log(e);
 			}
@@ -257,6 +270,7 @@ public class SoundManager implements Runnable {
 					backgroundMusic = new MediaPlayer();
 					backgroundMusic.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 					backgroundMusic.prepareAsync();
+					setDuration(url, backgroundMusic);
 				} catch (Exception e) {
 					logger.log(e);
 				}
@@ -405,6 +419,11 @@ public class SoundManager implements Runnable {
 		}
 
 		return sound;
+	}
+
+	private void sendDurationEvent(String url, Integer dur) {
+		SoundDurationEvent event = new SoundDurationEvent(url, dur);
+		EventQueue.pushEvent(event);
 	}
 
 	private void sendLoadedEvent(String url) {
