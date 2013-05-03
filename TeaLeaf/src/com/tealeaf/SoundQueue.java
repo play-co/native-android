@@ -31,7 +31,8 @@ public class SoundQueue implements Runnable {
 		APP_PAUSED,
 		APP_RESUMED,
 		SET_VOLUME,
-		LOAD_BG_MUSIC
+		LOAD_BG_MUSIC,
+		SEEK_TO
 	};
 	
 	static final public String LOADING_SOUND = "loadingsound";  
@@ -41,15 +42,18 @@ public class SoundQueue implements Runnable {
 		String url;
 		float volume;
 		boolean loop;
+		float position;
 		
 		public Event(EventType type) { this(type, null); }
 		public Event(EventType type, String url) { this(type, url, 0); }
 		public Event(EventType type, String url, float volume) { this(type, url, volume, false); }
-		public Event(EventType type, String url, float volume, boolean loop) {
+		public Event(EventType type, String url, float volume, boolean loop) { this(type, url, volume, loop, 0); }
+		public Event(EventType type, String url, float volume, boolean loop, float position) {
 			this.type = type;
 			this.url = url;
 			this.volume = volume;
 			this.loop = loop;
+			this.position = position;
 		}
 	}
 	
@@ -86,6 +90,10 @@ public class SoundQueue implements Runnable {
 	
 	public void setVolume(String url, float volume) { 
 		addEvent(new Event(EventType.SET_VOLUME, url, volume));
+	}
+	
+	public void seekTo(String url, float position) { 
+		addEvent(new Event(EventType.SEEK_TO, url, 0, false, position));
 	}
 	
 	public void onPause() { addEvent(new Event(EventType.APP_PAUSED)); }
@@ -128,6 +136,9 @@ public class SoundQueue implements Runnable {
 							break;
 						case SET_VOLUME:
 							soundManager.setVolume(e.url, e.volume);
+							break;
+						case SEEK_TO:
+							soundManager.seekTo(e.url, e.position);
 							break;
 					}
 				} catch (IllegalStateException ex) {

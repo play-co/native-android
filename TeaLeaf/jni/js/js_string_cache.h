@@ -215,5 +215,6 @@ extern Persistent<String> STRING_CACHE_y;
 extern Persistent<String> STRING_CACHE_doneLoading;
 extern Persistent<String> STRING_CACHE_failed;
 extern Persistent<String> STRING_CACHE_devicePixelRatio;
+extern Persistent<String> STRING_CACHE_seekTo;
 
 #endif

@@ -242,7 +242,7 @@ void gc_start(GCType type, GCCallbackFlags flags) {
 
 void gc_end(GCType type, GCCallbackFlags flags) {
 #ifndef RELEASE
-	LOG("{js} GC took %dms (%s)", ELAPSED(gc_bench), m_gc_type);
+	LOGDEBUG("{jsdebug} GC took %dms (%s)", ELAPSED(gc_bench), m_gc_type);
 #endif
 }
 
