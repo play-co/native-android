@@ -21,11 +21,14 @@
 
 #include <android/log.h>
 #define LOG_TAG "JS"
+#define DEBUG_TAG "JSDEBUG"
 
 #ifndef RELEASE 
 #define LOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define LOGDEBUG(...) __android_log_print(ANDROID_LOG_INFO,DEBUG_TAG,__VA_ARGS__)
 #else
 #define LOG(...) 
+#define LOGDEBUG(...)
 #endif
 
 
@@ -42,6 +45,7 @@ void nop_log(const char *f, ...);
 
 #include <stdio.h>
 #define LOG(...) printf(__VA_ARGS__)
+#define LOGDEBUG(...) printf(__VA_ARGS__)
 
 #endif // ARCH
 #endif // LOG_H
