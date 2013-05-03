@@ -22,6 +22,7 @@ import android.util.Log;
 
 public class logger {
 
+	public static boolean DISABLE_DEBUG = false;
 	public static boolean DISABLE_LOG = false;
 	public static boolean SHOW_DIALOGS = false;
 	private static ILogger remoteLogger;
@@ -32,6 +33,15 @@ public class logger {
 		//		DISABLE_LOG = tealeaf.getOptions().get("disableLogs", false);
 		logger.remoteLogger = remoteLogger;
 	}
+	public static void debug(Object... text) {
+		if (DISABLE_DEBUG) { return; }
+		String s = "";
+		for (Object t : text) {
+			s += t + " ";
+		}
+		Log.e("JSDEBUG", s);
+	}
+
 	public static void log(Object... text) {
 		if (DISABLE_LOG) { return; }
 		String s = "";
