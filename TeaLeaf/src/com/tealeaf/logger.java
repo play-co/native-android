@@ -22,7 +22,7 @@ import android.util.Log;
 
 public class logger {
 
-	public static boolean DISABLE_DEBUG = false;
+	public static boolean DISABLE_DEBUG = true;
 	public static boolean DISABLE_LOG = false;
 	public static boolean SHOW_DIALOGS = false;
 	private static ILogger remoteLogger;
