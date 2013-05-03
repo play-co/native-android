@@ -613,7 +613,7 @@ public class TextureLoader implements Runnable {
 		// Use the Android GLUtils to specify a two-dimensional texture image
 		// from our bitmap
 		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, td.bitmap, 0);
-		logger.log("{texture} Done loading", td.url, "(", td.bitmap.getWidth(), ",", td.bitmap.getHeight(), ")");
+		logger.debug("{texture} Done loading", td.url, "(", td.bitmap.getWidth(), ",", td.bitmap.getHeight(), ")");
 		td.bitmap.recycle();
 		td.bitmap = null;
 		td.name = textureIds[0];
