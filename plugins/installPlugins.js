@@ -53,6 +53,10 @@ for (var p in config) {
 	var pluginDir = path.resolve(__dirname, config[p]);
 	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 
+	// Remove old Java plugins
+	var tealeafPluginsPath = path.join(__dirname, "../TeaLeaf/src/com/tealeaf/plugin/plugins");
+	wrench.rmdirSyncRecursive(tealeafPluginsPath, true);
+
 	var copyFiles = pluginConfig.copyFiles;
 	for (var i = 0; i < copyFiles.length; i++) {
 		var fileInfo = copyFiles[i];
@@ -60,7 +64,18 @@ for (var p in config) {
 		var destFilePath = path.join(__dirname, "../TeaLeaf/src/" ,packageDir ,fileInfo.name);
 		wrench.mkdirSyncRecursive(path.dirname(destFilePath));
 		copyFileSync(path.join(pluginDir, fileInfo.srcPath,  fileInfo.name), destFilePath, "utf-8")
+	}
 
+	// Remove old JavaScript plugins
+	var timestepPluginsPath = path.join(__dirname, "../../../lib/timestep/src/plugins");
+	wrench.rmdirSyncRecursive(timestepPluginsPath, true);
+
+	var copyJS = pluginConfig.copyJS;
+	for (var i = 0; i < copyJS.length; ++i) {
+		var fileInfo = copyJS[i];
+		var destFilePath = path.join(__dirname, "../../../lib/timestep/src/plugins", fileInfo.name);
+		wrench.mkdirSyncRecursive(path.dirname(destFilePath));
+		copyFileSync(path.join(pluginDir, fileInfo.srcPath,  fileInfo.name), destFilePath, "utf-8")
 	}
 
 	if (pluginConfig.hasBilling && pluginConfig.hasBilling == true) {
