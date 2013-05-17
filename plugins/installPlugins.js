@@ -67,13 +67,13 @@ for (var p in config) {
 	}
 
 	// Remove old JavaScript plugins
-	var timestepPluginsPath = path.join(__dirname, "../../../lib/timestep/src/plugins");
+	var timestepPluginsPath = path.join(__dirname, "../../../lib/timestep/src/platforms/native/addons");
 	wrench.rmdirSyncRecursive(timestepPluginsPath, true);
 
 	var copyJS = pluginConfig.copyJS;
 	for (var i = 0; i < copyJS.length; ++i) {
 		var fileInfo = copyJS[i];
-		var destFilePath = path.join(__dirname, "../../../lib/timestep/src/plugins", fileInfo.name);
+		var destFilePath = path.join(__dirname, "../../../lib/timestep/src/platforms/native/addons", fileInfo.name);
 		wrench.mkdirSyncRecursive(path.dirname(destFilePath));
 		copyFileSync(path.join(pluginDir, fileInfo.srcPath,  fileInfo.name), destFilePath, "utf-8")
 	}
