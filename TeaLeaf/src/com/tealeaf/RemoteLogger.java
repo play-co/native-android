@@ -66,15 +66,15 @@ public class RemoteLogger implements ILogger {
 	protected static class LogEvent {
 		public LogEvent(Context context, String id, String appID) {
 			eventID = id;
-			deviceID = Device.getDeviceID(context, TeaLeaf.get().getSettings());
 			eventTime = Long.toString(System.currentTimeMillis());
 			// NB we'll fill this in later
 			sentTime = "SENTTIMEFILLINLATER";
 			this.appID = appID;
 		}
 
+		// NB we don't log device id because TeaLeaf
+		// isn't always ready in time to determine it
 		public String eventID;
-		public String deviceID;
 		public String appID;
 		public String eventTime;
 		public String sentTime;
