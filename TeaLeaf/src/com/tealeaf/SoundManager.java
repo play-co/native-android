@@ -77,7 +77,10 @@ public class SoundManager implements Runnable {
 		soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 			@Override
 			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-				SoundSpec spec = id2spec.get(sampleId);
+				SoundSpec spec;
+				synchronized (this) {
+					spec = id2spec.get(sampleId);
+				}
 				synchronized (spec) {
 					if (status == 0) { // success
 						spec.loaded = true;
@@ -111,16 +114,20 @@ public class SoundManager implements Runnable {
 					try {
 						// not on the file system, try loading from assets
 						AssetFileDescriptor afd = context.getAssets().openFd("resources/" + spec.url);
-						spec.id = soundPool.load(afd, 1);
-						id2spec.put(spec.id, spec);
+						synchronized (this) {
+							spec.id = soundPool.load(afd, 1);
+							id2spec.put(spec.id, spec);
+						}
 					} catch(IOException e) {
 						spec.id = -1;
 						spec.failed = true;
 						spec.loaded = false;
 					}
 				} else {
-					spec.id = soundPool.load(sound.getAbsolutePath(), 1);
-					id2spec.put(spec.id, spec);
+					synchronized (this) {
+						spec.id = soundPool.load(sound.getAbsolutePath(), 1);
+						id2spec.put(spec.id, spec);
+					}
 				}
 				if (spec.failed) {
 					sendErrorEvent(spec.url);
