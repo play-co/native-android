@@ -23,22 +23,20 @@ var XML_START_PLUGINS_APPLICATION = "<!--START_PLUGINS_APPLICATION-->";
 var XML_END_PLUGINS_APPLICATION = "<!--END_PLUGINS_APPLICATION-->";
 
 //read config
-var config = JSON.parse(fs.readFileSync(__dirname + "/config.json"));
+var config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json")));
 
 //set up blank strs for injection of xml
 
 for (var i in config) {
-
 	var pluginDir = config[i];
-	var pluginConfig = JSON.parse(fs.readFileSync(path.join(__dirname, pluginDir, "/config.json")));
+	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 
 	var copyFiles = pluginConfig.copyFiles;
 	for (var cf in copyFiles) {
 		var fileInfo = copyFiles[cf];
 		var packageDir = fileInfo.packageName.replace(/\./g, "/");
-		var destFilePath = path.join(__dirname, "../TeaLeaf/src/" ,packageDir ,fileInfo.name);
+		var destFilePath = path.join(__dirname, "../TeaLeaf/src/", packageDir, fileInfo.name);
 		fs.unlink(destFilePath, function(err) {});
-
 	}
 
 	if (pluginConfig.jars) {
@@ -70,6 +68,5 @@ if (properties.length > 0 ) {
 
 	properties = replaceTextBetween(properties, "#START_PLUGINS", "#END_PLUGINS", "");
 	fs.writeFileSync(path.join(TEALEAF_DIR, "project.properties"), properties, "utf-8");
-
 }
 
