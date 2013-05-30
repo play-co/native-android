@@ -418,7 +418,7 @@ function copySplash(builder, project, destDir, next) {
 				var splash = splashes[i];
 				var splashOut = path.join(destPath, splash.outFile);
 
-				logger.log("Creating splash:  " + splashOut + " from: "  + splashFile);
+				logger.log("Creating splash: " + splashOut + " from: " + splashFile);
 
 				builder.jvmtools.exec('splasher', [
 					"-i", splashFile,
@@ -613,9 +613,10 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 					//if no android plugin exists, continue...
 					if (pluginConfig.injectionXSL) {
-						var xslPath = path.join(__dirname, "plugins", paths[a], pluginConfig.injectionXSL);
+						var xslPath = path.join(paths[a], pluginConfig.injectionXSL);
 
 						if (!fs.existsSync(xslPath)) {
+							logger.error("TEST");
 							continue;
 						}
 
