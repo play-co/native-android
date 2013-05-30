@@ -21,7 +21,6 @@ var copyFileSync = function(srcFile, destFile, encoding) {
 }
 
 var getTextBetween = function(text, startToken, endToken) {
-
 	var start = text.indexOf(startToken);
 	var end = text.indexOf(endToken);
 	if (start == -1 || end == -1) {
@@ -57,15 +56,13 @@ var XML_END_PLUGINS_APPLICATION = "<!--END_PLUGINS_APPLICATION-->";
 var PROP_START_PLUGINS = "#START_PLUGINS";
 var PROP_END_PLUGINS = "#END_PLUGINS";
 
-//read config
-var config = JSON.parse(fs.readFileSync(androidPluginDir + "/config.json"));
+var config = JSON.parse(fs.readFileSync(path.join(androidPluginDir, "config.json")));
 
 //set up blank strs for injection of xml
 var manifestXmlManifestStr = "";
 var manifestXmlApplicationStr = "";
 
 for (var i in config) {
-
 	var pluginDir = path.resolve(androidPluginDir, config[i]);
 	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 

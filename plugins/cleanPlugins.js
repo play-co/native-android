@@ -8,7 +8,7 @@ var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
 
 for (var i in config) {
 	var pluginDir = path.resolve(__dirname, config[i]);
-	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "/config.json")));
+	var pluginConfig = JSON.parse(fs.readFileSync(path.join(pluginDir, "config.json")));
 
 	if (pluginConfig.library) {
 		var libDir = path.join(pluginDir, pluginConfig.library.srcPath, pluginConfig.library.libName);
