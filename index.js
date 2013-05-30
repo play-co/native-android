@@ -669,10 +669,10 @@ exports.build = function(builder, project, opts, next) {
 	});
 
 	// Load paths.
-	var keystore = common.config.get('android.keystore');
-	var storepass = common.config.get('android.storepass');
-	var keypass = common.config.get('android.keypass');
-	var key = common.config.get('android.key');
+	var keystore = builder.common.config.get('android.keystore');
+	var storepass = builder.common.config.get('android.storepass');
+	var keypass = builder.common.config.get('android.keypass');
+	var key = builder.common.config.get('android.key');
 	if (!debug && (!keystore || !storepass || !keypass || !key)) {
 		throw new Error('Release builds require valid keystore, storepass, keypass, and key in the config.json android key');
 	}
@@ -727,15 +727,14 @@ exports.build = function(builder, project, opts, next) {
 		var addons = project.manifest.addons;
 		if (addons) {
 			for (var ii = 0; ii < addons.length; ++ii) {
-				config_data.push(common.paths.addons(addons[ii], "android"));
+				config_data.push(builder.common.paths.addons(addons[ii], "android"));
 			}
 		}
 
 		config_data = JSON.stringify(config_data, undefined, 4);
 		fs.writeFileSync(config_path, config_data);
 	}, function() {
-		var plug_path = path.join(__dirname, "plugins/installPlugins.js");
-		require(plug_path).install(project, opts, f.waitPlain());
+		require(path.join(__dirname, "plugins/installPlugins")).install(project, opts, f.waitPlain());
 
 		require('./native').writeNativeResources(project, opts, f.waitPlain());
 
@@ -743,8 +742,8 @@ exports.build = function(builder, project, opts, next) {
 			shortName, opts.version, debug, destDir, servicesURL, metadata,
 			studioName, f.waitPlain());
 
-		var cleanProj = (common.config.get("lastBuildWasDebug") != debug) || clean;
-		common.config.set("lastBuildWasDebug", debug);
+		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
+		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, project, destDir, debug, cleanProj, f.waitPlain());
 	}, function () {
 		copyFonts(builder, project, destDir);
