@@ -66,7 +66,7 @@ for (var p in config) {
 		var packageDir = fileInfo.packageName.replace(/\./g, "/");
 		var destFilePath = path.join(__dirname, "../TeaLeaf/src/", packageDir, path.basename(fileInfo.name));
 		wrench.mkdirSyncRecursive(path.dirname(destFilePath));
-		copyFileSync(path.join(pluginDir, fileInfo.srcPath, fileInfo.name), destFilePath, "utf-8")
+		copyFileSync(path.join(pluginDir, fileInfo.name), destFilePath, "utf-8")
 	}
 
 	if (pluginConfig.hasBilling && pluginConfig.hasBilling == true) {

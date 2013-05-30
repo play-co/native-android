@@ -734,9 +734,9 @@ exports.build = function(builder, project, opts, next) {
 		config_data = JSON.stringify(config_data, undefined, 4);
 		fs.writeFileSync(config_path, config_data);
 	}, function() {
-		require(path.join(__dirname, "plugins/installPlugins")).install(project, opts, f.waitPlain());
+		builder.common.child("node", [path.join(__dirname, "plugins/installPlugins.js")], {}, f.waitPlain());
 
-		require('./native').writeNativeResources(project, opts, f.waitPlain());
+		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
 
 		makeAndroidProject(builder, project, packageName, activity, title, appID,
 			shortName, opts.version, debug, destDir, servicesURL, metadata,
