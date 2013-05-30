@@ -65,9 +65,81 @@ exports.testapp = function(opts, next) {
 }
 
 
-/**
- * Utilities
- */
+//// Addons
+
+var installAddons = function(builder, project, opts, addonConfig, next) {
+	var paths = builder.common.paths;
+	var addons = project && project.manifest && project.manifest.addons;
+
+	var f = ff(this, function() {
+		var config_path = path.join(__dirname, "plugins/config.json");
+		var config_data = [];
+
+		if (addons) {
+			for (var ii = 0; ii < addons.length; ++ii) {
+				config_data.push(builder.common.paths.addons(addons[ii], "android"));
+			}
+		}
+
+		config_data = JSON.stringify(config_data, undefined, 4);
+		fs.writeFileSync(config_path, config_data);
+	}, function() {
+		// For each addon,
+		if (addons) {
+			for (var ii = 0; ii < addons.length; ++ii) {
+				var addon = addons[ii];
+
+				// Prefer paths in this order:
+				var addon_js_android = paths.addons(addon, 'js', 'android');
+				var addon_js_native = paths.addons(addon, 'js', 'native');
+				var addon_js = paths.addons(addon, 'js');
+
+				if (fs.existsSync(addon_js_android)) {
+					logger.log("Installing addon:", addon, "-- Adding ./js/android to jsio path");
+					require(paths.root('src', 'AddonManager')).registerPath(addon_js_android);
+				} else if (fs.existsSync(addon_js_native)) {
+					logger.log("Installing addon:", addon, "-- Adding ./js/native to jsio path");
+					require(paths.root('src', 'AddonManager')).registerPath(addon_js_native);
+				} else if (fs.existsSync(addon_js)) {
+					logger.log("Installing addon:", addon, "-- Adding ./js to jsio path");
+					require(paths.root('src', 'AddonManager')).registerPath(addon_js);
+				} else {
+					logger.warn("Installing addon:", addon, "-- No js directory so no JavaScript will be installed");
+				}
+			}
+		}
+	}, function() {
+		var group = f.group();
+
+		// For each addon,
+		if (addons) {
+			for (var ii = 0; ii < addons.length; ++ii) {
+				var addon = addons[ii];
+				var addonConfig = paths.addons(addon, 'android', 'config.json');
+
+				if (fs.existsSync(addonConfig)) {
+					fs.readFile(addonConfig, 'utf8', group.slot());
+				} else {
+					logger.warn("Unable to find Android addon config file", addonConfig);
+				}
+			}
+		}
+	}, function(results) {
+		if (results) {
+			for (var ii = 0; ii < results.length; ++ii) {
+				var addon = addons[ii];
+				addonConfig[addon] = JSON.parse(results[ii]);
+
+				logger.log("Configured addon:", addon);
+			}
+		}
+	}).error(function(err) {
+		logger.error(err);
+	}).cb(next);
+}
+
+
+//// Utilities
 
 function nextStep() {
 	var func = arguments[arguments.length - 1];
@@ -432,7 +504,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 	var f = ff(function() {
 		builder.packager.getGameHash(project, f.slotPlain());
 		builder.packager.getSDKHash(f.slotPlain());
-		getAndroidHash(f.slotPlain());
+		getAndroidHash(builder, f.slotPlain());
 		versionCode(project, debug, f.slotPlain());
 	}, function(gameHash, sdkHash, androidHash, versionCode) {
 		var orientations = project.manifest.supportedOrientations;
@@ -517,7 +589,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 			f(params);
 			//do xsl for all plugins first
 
-			var  relativePluginPaths = [];
+			var relativePluginPaths = [];
 			f(relativePluginPaths);
             f(pluginsConfig);
 
@@ -526,7 +598,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 				var relativePluginPath = pluginsConfig[i];
 				relativePluginPaths.push(relativePluginPath);
 
-				var pluginConfigFile = path.join(__dirname, "plugins", relativePluginPath, "config.json");
+				var pluginConfigFile = path.join(relativePluginPath, "config.json");
 				fs.readFile(pluginConfigFile, "utf-8", group());
 			}
 		}, function(params, paths, pluginsConfig, arr) {
@@ -541,7 +613,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 					//if no android plugin exists, continue...
 					if (pluginConfig.injectionXSL) {
-						var xslPath = path.join(__dirname, "plugins", paths[a], pluginConfig.injectionXSL.name);
+						var xslPath = path.join(__dirname, "plugins", paths[a], pluginConfig.injectionXSL);
 
 						if (!fs.existsSync(xslPath)) {
 							continue;
@@ -565,7 +637,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 			//and now the final xsl
 			var xmlPath = hasPluginXsl ? path.join(destDir,".AndroidManifest.xml") : path.join(__dirname, "TeaLeaf/AndroidManifest.xml");
-			transformXSL(xmlPath,
+			transformXSL(builder, xmlPath,
 					path.join(destDir, "AndroidManifest.xml"),
 					path.join(__dirname, "AndroidManifest.xsl"),
 					params,
@@ -573,13 +645,12 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
         },function(pluginsConfig, a) {
 			for (var i in pluginsConfig) {
 				var relativePluginPath = pluginsConfig[i];
-				var transformFile = path.join(__dirname, "plugins", relativePluginPath, "transformXmls.js");
+				var transformFile = path.join(relativePluginPath, "transformXmls.js");
 
 				if (fs.existsSync(transformFile)) {
 					builder.common.child("node", [transformFile, path.join(destDir, "AndroidManifest.xml")], {}, f());
 				}
 			}
-
         }).error(function(err) {
 			logger.error("Error transforming XSL for AndroidManifest.xml:", err);
 			process.exit(2);
@@ -668,15 +739,6 @@ exports.build = function(builder, project, opts, next) {
 		process.exit(2);
 	});
 
-	// Load paths.
-	var keystore = builder.common.config.get('android.keystore');
-	var storepass = builder.common.config.get('android.storepass');
-	var keypass = builder.common.config.get('android.keypass');
-	var key = builder.common.config.get('android.key');
-	if (!debug && (!keystore || !storepass || !keypass || !key)) {
-		throw new Error('Release builds require valid keystore, storepass, keypass, and key in the config.json android key');
-	}
-
 	// Extract manifest properties.
 	var appID = project.manifest.appID;
 	var shortName = project.manifest.shortName;
@@ -720,19 +782,10 @@ exports.build = function(builder, project, opts, next) {
 
 	// Parallelize android project setup and sprite building.
 	var apkPath;
+	var addonConfig = {};
+
 	var f = ff(function () {
-		var config_path = path.join(__dirname, "plugins/config.json");
-		var config_data = [];
-
-		var addons = project.manifest.addons;
-		if (addons) {
-			for (var ii = 0; ii < addons.length; ++ii) {
-				config_data.push(builder.common.paths.addons(addons[ii], "android"));
-			}
-		}
-
-		config_data = JSON.stringify(config_data, undefined, 4);
-		fs.writeFileSync(config_path, config_data);
+		installAddons(builder, project, opts, addonConfig, f());
 	}, function() {
 		builder.common.child("node", [path.join(__dirname, "plugins/installPlugins.js")], {}, f.waitPlain());
 
