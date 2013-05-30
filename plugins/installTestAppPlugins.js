@@ -76,10 +76,11 @@ for (var c in config) {
 
 
 	//collect plugins xml text to replace and inject after going through all plugins
-	var pluginXml = fs.readFileSync(path.join(pluginDir, pluginConfig.injectionXML.srcPath, pluginConfig.injectionXML.name), "utf-8");
-	manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
-	manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
-
+	if (pluginConfig.injectionXML) {
+		var pluginXml = fs.readFileSync(path.join(pluginDir, pluginConfig.injectionXML), "utf-8");
+		manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
+		manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
+	}
 
 	//collect library names to inject / add later
 	libraries.push(path.join(pluginDir, pluginConfig.library.srcPath, pluginConfig.library.libName));
