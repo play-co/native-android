@@ -72,18 +72,6 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 	var addons = project && project.manifest && project.manifest.addons;
 
 	var f = ff(this, function() {
-		var config_path = path.join(__dirname, "plugins/config.json");
-		var config_data = [];
-
-		if (addons) {
-			for (var ii = 0; ii < addons.length; ++ii) {
-				config_data.push(builder.common.paths.addons(addons[ii], "android"));
-			}
-		}
-
-		config_data = JSON.stringify(config_data, undefined, 4);
-		fs.writeFileSync(config_path, config_data);
-	}, function() {
 		// For each addon,
 		if (addons) {
 			for (var ii = 0; ii < addons.length; ++ii) {
