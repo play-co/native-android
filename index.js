@@ -169,7 +169,7 @@ function injectPluginXML(builder, opts, next) {
 
 		fs.readFile(manifestXml, "utf-8", f());
 	}, function(results, xml) {
-		if (results.length > 0 && xml.length > 0) {
+		if (results && results.length > 0 && xml && xml.length > 0) {
 			var XML_START_PLUGINS_MANIFEST = "<!--START_PLUGINS_MANIFEST-->";
 			var XML_END_PLUGINS_MANIFEST = "<!--END_PLUGINS_MANIFEST-->";
 			var XML_START_PLUGINS_APPLICATION = "<!--START_PLUGINS_APPLICATION-->";
@@ -188,6 +188,8 @@ function injectPluginXML(builder, opts, next) {
 			xml = replaceTextBetween(xml, XML_START_PLUGINS_MANIFEST, XML_END_PLUGINS_MANIFEST, manifestXmlManifestStr);
 			xml = replaceTextBetween(xml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION, manifestXmlApplicationStr);
 			fs.writeFile(manifestXml, xml, "utf-8", f.wait());
+		} else {
+			logger.log("No plugin XML to inject");
 		}
 	}).success(next).error(function(err) {
 		logger.error("Inject plugin XML failure:", err);
@@ -255,23 +257,27 @@ var installAddonCode = function(builder, opts, next) {
 			jarPaths.push(jar);
 		}
 	}, function(results, properties, jarResults) {
-		for (var ii = 0; ii < results.length; ++ii) {
-			var data = results[ii];
-			var filePath = filePaths[ii];
+		if (results && results.length > 0) {
+			for (var ii = 0; ii < results.length; ++ii) {
+				var data = results[ii];
+				var filePath = filePaths[ii];
 
-			if (data) {
-				var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
-				var pkgDir = pkgName.replace(/\./g, "/");
-				var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
+				if (data) {
+					var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
+					var pkgDir = pkgName.replace(/\./g, "/");
+					var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
 
-				logger.log("Installing Java package", pkgName, "to", outFile);
+					logger.log("Installing Java package", pkgName, "to", outFile);
 
-				wrench.mkdirSyncRecursive(path.dirname(outFile));
+					wrench.mkdirSyncRecursive(path.dirname(outFile));
 
-				fs.writeFile(outFile, data, 'utf-8', f.wait());
-			} else {
-				logger.warn("Unable to read Java package", filePath);
+					fs.writeFile(outFile, data, 'utf-8', f.wait());
+				} else {
+					logger.warn("Unable to read Java package", filePath);
+				}
 			}
+		} else {
+			logger.log("No Java packages to add");
 		}
 
 		if (properties && properties.length > 0) {
