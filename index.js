@@ -138,6 +138,223 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 	}).cb(next);
 }
 
+var getTextBetween = function(text, startToken, endToken) {
+	var start = text.indexOf(startToken);
+	var end = text.indexOf(endToken);
+	if (start == -1 || end == -1) {
+		return "";
+	}
+	var offset = text.substring(start).indexOf("\n") + 1;
+	var afterStart = start + offset;
+	return text.substring(afterStart, end);
+	
+}
+
+var replaceTextBetween = function(text, startToken, endToken, replaceText) {
+	var newText = "";
+	var start = text.indexOf(startToken);
+	var end = text.indexOf(endToken);
+	if (start == -1 || end == -1) {
+		return text;
+	}
+	var offset = text.substring(start).indexOf("\n") + 1;
+	var afterStart = start + offset;
+	newText += text.substring(0, afterStart);
+	newText += replaceText;
+	newText += text.substring(end);
+	return newText;
+}
+
+function injectPluginXML(builder, opts, next) {
+	var addonConfig = opts.addonConfig;
+	var destDir = opts.destDir;
+	var manifestXml = path.join(destDir, "AndroidManifest.xml");
+
+	var f = ff(function() {
+		var group = f.group();
+
+		for (var key in addonConfig) {
+			var addonAndroidDir = builder.common.paths.addons(key, "android");
+
+			fs.readFile(path.join(addonAndroidDir, addonConfig[key].injectionXML), "utf-8", group());
+		}
+
+		fs.readFile(manifestXml, "utf-8", f());
+	}, function(results, xml) {
+		if (results.length > 0 && xml.length > 0) {
+			var XML_START_PLUGINS_MANIFEST = "<!--START_PLUGINS_MANIFEST-->";
+			var XML_END_PLUGINS_MANIFEST = "<!--END_PLUGINS_MANIFEST-->";
+			var XML_START_PLUGINS_APPLICATION = "<!--START_PLUGINS_APPLICATION-->";
+			var XML_END_PLUGINS_APPLICATION = "<!--END_PLUGINS_APPLICATION-->";
+
+			var manifestXmlManifestStr = "";
+			var manifestXmlApplicationStr = "";
+
+			for (var i = 0; i < results.length; ++i) {
+				var pluginXml = results[i];
+
+				manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
+				manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
+			}
+
+			xml = replaceTextBetween(xml, XML_START_PLUGINS_MANIFEST, XML_END_PLUGINS_MANIFEST, manifestXmlManifestStr);
+			xml = replaceTextBetween(xml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION, manifestXmlApplicationStr);
+			fs.writeFile(manifestXml, xml, "utf-8", f.wait());
+		}
+	}).success(next).error(function(err) {
+		logger.error(err);
+		process.exit(1);
+	});
+}
+
+var installAddonCode = function(builder, opts, next) {
+	var addonConfig = opts.addonConfig;
+	var destDir = opts.destDir;
+
+	var filePaths = [];
+	var libraries = [];
+	var jars = [];
+	var jarPaths = [];
+
+	var f = ff(function() {
+		var group = f.group();
+
+		for (var addon in addonConfig) {
+			var config = addonConfig[addon];
+
+			if (config.copyFiles) {
+				for (var ii = 0; ii < config.copyFiles.length; ++ii) {
+					var filePath = builder.common.paths.addons(addon, 'android', config.copyFiles[ii]);
+
+					logger.log("Installing addon Java code:", filePath);
+
+					filePaths.push(filePath);
+
+					fs.readFile(filePath, "utf-8", group.slot());
+				}
+			}
+
+			if (config.libraries) {
+				for (var ii = 0; ii < config.libraries.length; ++ii) {
+					var library = builder.common.paths.addons(addon, 'android', config.libraries[ii]);
+
+					logger.log("Installing addon library:", library);
+
+					libraries.push(library);
+				}
+			}
+
+			if (config.jars) {
+				for (var ii = 0; ii < config.jars.length; ++ii) {
+					var jar = builder.common.paths.addons(addon, 'android', config.jars[ii]);
+
+					logger.log("Installing addon JAR:", jar);
+
+					jars.push(jar);
+				}
+			}
+		}
+
+		fs.readFile(path.join(__dirname, "TeaLeaf/project.properties"), "utf-8", f());
+
+		var jarGroup = f.group();
+
+		for (var ii = 0; ii < jars.length; ++ii) {
+			var jar = jars[ii];
+
+			fs.readFile(jar, "binary", jarGroup.slot());
+
+			jarPaths.push(jar);
+		}
+	}, function(results, properties, jarResults) {
+		for (var ii = 0; ii < results.length; ++ii) {
+			var data = results[ii];
+			var filePath = filePaths[ii];
+
+			if (data) {
+				var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
+				var pkgDir = pkgName.replace(/\./g, "/");
+				var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
+
+				logger.log("Installing Java package", pkgName, "to", outFile);
+
+				wrench.mkdirSyncRecursive(path.dirname(outFile));
+
+				fs.writeFile(outFile, data, 'utf-8', f.wait());
+			} else {
+				logger.warn("Unable to read Java package", filePath);
+			}
+		}
+
+		if (properties && properties.length > 0) {
+			var PROP_START_PLUGINS = "#START_PLUGINS";
+			var PROP_END_PLUGINS = "#END_PLUGINS";
+
+			// TODO: Not sure what Jared was doing here
+			//properties = properties.replace(/source\.dir([^\n]*)/, 'source.dir=' + "src");
+
+			var start = properties.indexOf(PROP_START_PLUGINS);
+			var end = properties.indexOf(PROP_END_PLUGINS);
+
+			//find largest uncommented library reference number
+			var i = 0;
+			var refStr = "android.library.reference.";
+			var refNum = 1;
+			for (;;) {
+				var offset = properties.substring(i).indexOf("android.library.reference.");
+				i = offset + i;
+				if (offset == -1) {
+					break;
+				}
+				if (i > start) {
+					break;
+				}
+				if (properties[i - 1] == "#") {
+					i += refStr.length;
+					continue;
+				}
+				i += refStr.length;
+				refNum++;
+			}
+
+			var libStr = "";
+			for (var i = 0; i < libraries.length; i ++)	{
+				var libProp = refStr + refNum + "=" + path.relative(destDir, libraries[i]);
+
+				logger.log("Installing library property:", libProp);
+
+				libStr += libProp + "\n";
+				refNum++;
+			}
+
+			properties = replaceTextBetween(properties, PROP_START_PLUGINS, PROP_END_PLUGINS, libStr);
+			fs.writeFile(path.join(destDir, "project.properties"), properties, "utf-8", f.wait());
+		} else {
+			logger.log("No library properties to add");
+		}
+
+		if (jarResults && jarResults.length > 0) {
+			for (var ii = 0; ii < jarResults.length; ++ii) {
+				var data = jarResults[ii];
+
+				if (data) {
+					var jarPath = jarPaths[ii];
+					var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
+
+					logger.log("Installing JAR file:", jarDestPAth);
+
+					fs.writeFile(jarDestPath, data, "binary", f.wait());
+				}
+			}
+		} else {
+			logger.log("No JAR file data to install");
+		}
+	}).success(next).error(function(err) {
+		logger.error(err);
+		process.exit(1);
+	});
+}
+
 
 //// Utilities
 
@@ -147,32 +364,40 @@ function nextStep() {
 }
 
 function transformXSL(builder, inFile, outFile, xslFile, params, next) {
-	for (var key in params) {
-		if (typeof params[key] != 'string') {
-			if (params[key] == undefined || typeof params[key] == 'object') {
-				logger.error("settings for AndroidManifest: value for", clc.yellow.bright(key), "is not a string");
+	var outFileTemp = outFile + ".temp";
+
+	var f = ff(function() {
+		for (var key in params) {
+			if (typeof params[key] != 'string') {
+				if (params[key] == undefined || typeof params[key] == 'object') {
+					logger.error("settings for AndroidManifest: value for", clc.yellow.bright(key), "is not a string");
+				}
+
+				params[key] = JSON.stringify(params[key]);
 			}
-
-			params[key] = JSON.stringify(params[key]);
 		}
-	}
 
-	builder.jvmtools.exec('xslt', [
-		"--in", inFile,
-		"--out", outFile,
-		"--stylesheet", xslFile,
-		"--params", JSON.stringify(params)
-	], function (xslt) {
+		builder.jvmtools.exec('xslt', [
+			"--in", inFile,
+			"--out", outFileTemp,
+			"--stylesheet", xslFile,
+			"--params", JSON.stringify(params)
+			], f.slotPlain());
+	}, function(xslt) {
 		var formatter = new builder.common.Formatter('xslt');
+
 		xslt.on('out', formatter.out);
 		xslt.on('err', formatter.err);
-		xslt.on('end', function (data) {
-			var dat = fs.readFileSync(outFile).toString();
-			dat = dat.replace(/android:label=\"[^\"]*\"/g, "android:label=\""+params.title+"\"");
-			fs.writeFileSync(outFile, dat);
+		xslt.on('end', f.slotPlain());
+	}, function(data) {
+		fs.readFile(outFileTemp, 'utf-8', f());
+	}, function(dat) {
+		dat = dat.replace(/android:label=\"[^\"]*\"/g, "android:label=\""+params.title+"\"");
 
-			next();
-		})
+		fs.writeFile(outFile, dat, 'utf-8', f.wait());
+	}).success(next).error(function(err) {
+		logger.error(err);
+		process.exit(1);
 	});
 }
 
@@ -230,18 +455,12 @@ function buildSupportProjects(builder, project, destDir, debug, clean, next) {
 function buildAndroidProject(builder, destDir, debug, next) {
 	builder.common.child('ant', [(debug ? "debug" : "release")], {
 		cwd: destDir
-	}, function (err) {
-		if (err) {
-			return next(err);
-		}
-
-		builder.common.child("node", [path.join(__dirname, "plugins/uninstallPlugins.js")], {}, next);
-	});
+	}, next);
 }
 
 function makeAndroidProject(builder, project, namespace, activity, title, appID,
 		shortName, version, debug,
-		destDir, servicesURL, metadata, studioName, next)
+		destDir, servicesURL, metadata, studioName, addonConfig, next)
 {
 	var target = "android-15";
 	var f = ff(function () {
@@ -259,7 +478,7 @@ function makeAndroidProject(builder, project, namespace, activity, title, appID,
 	}, function () {
 		fs.appendFile( path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\n',f());
 	}, function () {
-		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, f.waitPlain());
+		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
 	}).error(function (code) {
 		if (code != 0) {
@@ -478,7 +697,7 @@ function getAndroidHash(builder, next) {
 	});
 }
 
-function updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, next) {
+function updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, next) {
 	var defaults = {
 		// Empty defaults
 		installShortcut: "false",
@@ -565,93 +784,42 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 		}, function(params) {
 			f(params);
+
 			fs.readFile(path.join(__dirname, "TeaLeaf/AndroidManifest.xml"), "utf-8", f());
 		}, function(params, xmlContent) {
 			f(params);
+
 			fs.writeFile(path.join(destDir, "AndroidManifest.xml"), xmlContent, "utf-8", f.wait());
 		}, function(params) {
 			f(params);
-			//read and copy AndroidManifest.xml to the destination 
-			fs.readFile(path.join(__dirname, "TeaLeaf/AndroidManifest.xml"), "utf-8", f());
-		}, function(params, xmlContent) {
-			f(params);
-			fs.writeFile(path.join(destDir, "AndroidManifest.xml"), xmlContent, "utf-8", f.wait());
+
+			injectPluginXML(builder, {
+				addonConfig: addonConfig,
+				destDir: destDir
+			}, f());
 		}, function(params) {
-			f(params)
-			//read in the plugins config
-			fs.readFile(path.join(__dirname, "plugins", "config.json"), "utf-8", f());
-		}, function(params, pluginsConfig) {
 			f(params);
-			pluginsConfig = JSON.parse(pluginsConfig);
-			f(pluginsConfig);
-			builder.common.child("node", [path.join(__dirname, "plugins/injectPluginXML.js"), path.join(__dirname, "plugins"), path.join(destDir, "AndroidManifest.xml")], {}, f.wait());
-		},  function(params, pluginsConfig) {
-			f(params);
-			//do xsl for all plugins first
 
-			var relativePluginPaths = [];
-			f(relativePluginPaths);
-            f(pluginsConfig);
+			var xmlPath = path.join(destDir, "AndroidManifest.xml");
 
-			var group = f.group();
-			for (var i in pluginsConfig) {
-				var relativePluginPath = pluginsConfig[i];
-				relativePluginPaths.push(relativePluginPath);
+			for (var key in addonConfig) {
+				var addon = addonConfig[key];
 
-				var pluginConfigFile = path.join(relativePluginPath, "config.json");
-				fs.readFile(pluginConfigFile, "utf-8", group());
-			}
-		}, function(params, paths, pluginsConfig, arr) {
-			f(params);
-			var hasPluginXsl = false;
+				if (addon.injectionXSL) {
+					var xslPath = builder.common.paths.addons(key, "android", addon.injectionXSL);
 
-			if (arr && arr.length > 0) {
-				var pluginConfigArr = [];
-
-				for (var a in arr) {
-					var pluginConfig = JSON.parse(arr[a]);
-
-					//if no android plugin exists, continue...
-					if (pluginConfig.injectionXSL) {
-						var xslPath = path.join(paths[a], pluginConfig.injectionXSL);
-
-						if (!fs.existsSync(xslPath)) {
-							logger.error("TEST");
-							continue;
-						}
-
-						hasPluginXsl = true;
-						transformXSL(builder, path.join(destDir, "AndroidManifest.xml"),
-								path.join(destDir, ".AndroidManifest.xml"),
-								xslPath,
-								params,
-								f.wait()
-								);
-					}
+					transformXSL(builder, xmlPath, xmlPath, xslPath, params, f());
 				}
 			}
+		}, function(params) {
+			f(params);
 
-			f(hasPluginXsl);
-			f(pluginsConfig);
-		}, function(params, hasPluginXsl, pluginsConfig) {
-            f(pluginsConfig);
+			var xmlPath = path.join(destDir, "AndroidManifest.xml");
 
-			//and now the final xsl
-			var xmlPath = hasPluginXsl ? path.join(destDir,".AndroidManifest.xml") : path.join(__dirname, "TeaLeaf/AndroidManifest.xml");
-			transformXSL(builder, xmlPath,
-					path.join(destDir, "AndroidManifest.xml"),
+			transformXSL(builder, xmlPath, xmlPath,
 					path.join(__dirname, "AndroidManifest.xsl"),
 					params,
                     f());
-        },function(pluginsConfig, a) {
-			for (var i in pluginsConfig) {
-				var relativePluginPath = pluginsConfig[i];
-				var transformFile = path.join(relativePluginPath, "transformXmls.js");
-
-				if (fs.existsSync(transformFile)) {
-					builder.common.child("node", [transformFile, path.join(destDir, "AndroidManifest.xml")], {}, f());
-				}
-			}
         }).error(function(err) {
 			logger.error("Error transforming XSL for AndroidManifest.xml:", err);
 			process.exit(2);
@@ -788,24 +956,27 @@ exports.build = function(builder, project, opts, next) {
 	var f = ff(function () {
 		installAddons(builder, project, opts, addonConfig, f());
 	}, function() {
-		builder.common.child("node", [path.join(__dirname, "plugins/installPlugins.js")], {}, f.waitPlain());
-
 		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
 
 		makeAndroidProject(builder, project, packageName, activity, title, appID,
 			shortName, opts.version, debug, destDir, servicesURL, metadata,
-			studioName, f.waitPlain());
+			studioName, addonConfig, f.waitPlain());
 
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
 		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, project, destDir, debug, cleanProj, f.waitPlain());
-	}, function () {
+	}, function() {
 		copyFonts(builder, project, destDir);
 		copyIcons(builder, project, destDir);
 		copyMusic(builder, project, destDir);
 		copyResDir(project, destDir);
 		copySplash(builder, project, destDir, f());
-	}, function () {
+
+		installAddonCode(builder, {
+			addonConfig: addonConfig,
+			destDir: destDir
+		}, f());
+	}, function() {
 		var onDoneBuilding = f();
 
 		buildAndroidProject(builder, destDir, debug, function (success) {
@@ -836,13 +1007,13 @@ exports.build = function(builder, project, opts, next) {
 
 			});
 		});
-	}, function () {
+	}, function() {
 		if (argv.install || argv.open) {
 			var cmd = 'adb uninstall "' + packageName + '"';
 			logger.log('Install: Running ' + cmd + '...');
 			builder.common.child('adb', ['uninstall', packageName], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 		}
-	}, function () {
+	}, function() {
 		if (argv.install || argv.open) {
 			var cmd = 'adb install -r "' + apkPath + '"';
 			logger.log('Install: Running ' + cmd + '...');
