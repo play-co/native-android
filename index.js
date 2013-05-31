@@ -202,7 +202,7 @@ function injectPluginXML(builder, opts, next) {
 			fs.writeFile(manifestXml, xml, "utf-8", f.wait());
 		}
 	}).success(next).error(function(err) {
-		logger.error(err);
+		logger.error("Inject plugin XML failure:", err);
 		process.exit(1);
 	});
 }
@@ -339,7 +339,7 @@ var installAddonCode = function(builder, opts, next) {
 			logger.log("No JAR file data to install");
 		}
 	}).success(next).error(function(err) {
-		logger.error("Error while installing addon code:",err);
+		logger.error("Error while installing addon code:", err);
 		process.exit(1);
 	});
 }
@@ -385,7 +385,7 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 
 		fs.writeFile(outFile, dat, 'utf-8', f.wait());
 	}).success(next).error(function(err) {
-		logger.error(err);
+		logger.error("Transform XSL failure:", err);
 		process.exit(1);
 	});
 }
@@ -417,7 +417,7 @@ function validateSubmodules(next) {
 			f.fail("One of the submodules was not found.  Make sure you have run submodule update --init on your clone of the Android repo");
 		}
 	}).success(next).error(function(err) {
-		logger.error(err);
+		logger.error("Validate submodule failure:", err);
 		process.exit(1);
 	});
 }
@@ -885,7 +885,7 @@ exports.build = function(builder, project, opts, next) {
 	var f = ff(this, function() {
 		validateSubmodules(f());
 	}).error(function(err) {
-		logger.error('ERROR:', err);
+		logger.error("Failure to validate submodules:", err);
 		process.exit(2);
 	});
 
@@ -1010,7 +1010,7 @@ exports.build = function(builder, project, opts, next) {
 	}, function () {
 		next(0);
 	}).error(function (err) {
-		console.error(err);
+		logger.error("Build failure:", err);
 	});
 };
 
