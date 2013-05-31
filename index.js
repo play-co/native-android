@@ -134,7 +134,7 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 			}
 		}
 	}).error(function(err) {
-		logger.error(err);
+		logger.error("Failure to install addons:", err);
 	}).cb(next);
 }
 
@@ -255,7 +255,7 @@ var installAddonCode = function(builder, opts, next) {
 			}
 		}
 
-		fs.readFile(path.join(__dirname, "TeaLeaf/project.properties"), "utf-8", f());
+		fs.readFile(path.join(destDir, "project.properties"), "utf-8", f());
 
 		var jarGroup = f.group();
 
@@ -287,15 +287,6 @@ var installAddonCode = function(builder, opts, next) {
 		}
 
 		if (properties && properties.length > 0) {
-			var PROP_START_PLUGINS = "#START_PLUGINS";
-			var PROP_END_PLUGINS = "#END_PLUGINS";
-
-			// TODO: Not sure what Jared was doing here
-			//properties = properties.replace(/source\.dir([^\n]*)/, 'source.dir=' + "src");
-
-			var start = properties.indexOf(PROP_START_PLUGINS);
-			var end = properties.indexOf(PROP_END_PLUGINS);
-
 			//find largest uncommented library reference number
 			var i = 0;
 			var refStr = "android.library.reference.";
@@ -304,9 +295,6 @@ var installAddonCode = function(builder, opts, next) {
 				var offset = properties.substring(i).indexOf("android.library.reference.");
 				i = offset + i;
 				if (offset == -1) {
-					break;
-				}
-				if (i > start) {
 					break;
 				}
 				if (properties[i - 1] == "#") {
@@ -327,7 +315,8 @@ var installAddonCode = function(builder, opts, next) {
 				refNum++;
 			}
 
-			properties = replaceTextBetween(properties, PROP_START_PLUGINS, PROP_END_PLUGINS, libStr);
+			properties += libStr;
+
 			fs.writeFile(path.join(destDir, "project.properties"), properties, "utf-8", f.wait());
 		} else {
 			logger.log("No library properties to add");
@@ -350,7 +339,7 @@ var installAddonCode = function(builder, opts, next) {
 			logger.log("No JAR file data to install");
 		}
 	}).success(next).error(function(err) {
-		logger.error(err);
+		logger.error("Error while installing addon code:",err);
 		process.exit(1);
 	});
 }
@@ -436,19 +425,18 @@ function validateSubmodules(next) {
 function buildSupportProjects(builder, project, destDir, debug, clean, next) {
 	var tealeafDir;
 	
-	var f = ff(this, function () {
+	var f = ff(this, function() {
 		tealeafDir = path.join(__dirname, "TeaLeaf");
 		if (clean) {
 			builder.common.child('make', ['clean'], {cwd: __dirname}, f.slot());
 		}
-	}, function () {
+	}, function() {
 		builder.common.child('ndk-build', ["-j", "8", (debug ? "DEBUG=1" : "RELEASE=1")], { cwd: tealeafDir }, f.wait()); 
-	}, function () {
+	}, function() {
 		builder.common.child('ant', [(debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
-	}).failure(function (e) {
-		logger.error("Could not build support projects.");
-		console.log(e);
-		process.exit();
+	}).failure(function(e) {
+		logger.error("Could not build support projects:", e);
+		process.exit(2);
 	}).success(next);
 }
 
@@ -463,32 +451,26 @@ function makeAndroidProject(builder, project, namespace, activity, title, appID,
 		destDir, servicesURL, metadata, studioName, addonConfig, next)
 {
 	var target = "android-15";
-	var f = ff(function () {
+	var f = ff(function() {
 		builder.common.child('android', [
 			"create", "project", "--target", target, "--name", shortName,
 			"--path", destDir, "--activity", activity,
 			"--package", namespace
 		], {}, f());
-	}, function () {
+	}, function() {
 		builder.common.child('android', [
 			"update", "project", "--target", target,
 			"--path", destDir,
 			"--library", "../../TeaLeaf"
 		], {}, f());
-	}, function () {
-		fs.appendFile( path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\n',f());
-	}, function () {
+	}, function() {
+		fs.appendFile(path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
+	}, function() {
 		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
-	}).error(function (code) {
-		if (code != 0) {
-			logger.error("build failed creating android project");
-			logger.error(code);
-			process.exit(2);
-		} else {
-			logger.error("an unknown error occurred");
-			console.error(code);
-		}
+	}).error(function(code) {
+		logger.error("Build failed creating android project:", code);
+		process.exit(2);
 	}).success(next);
 }
 
@@ -504,8 +486,7 @@ function signAPK(builder, shortName, destDir, next) {
 		"-sigalg", "MD5withRSA", "-digestalg", "SHA1",
 		"-keystore", keystore, "-storepass", storepass, "-keypass", keypass,
 		"-signedjar", shortName + "-unaligned.apk",
-		shortName + "-release-unsigned.apk",
-		key
+		shortName + "-release-unsigned.apk", key
 	], {
 		cwd: path.join(destDir, "bin")
 	}, function (err) {
