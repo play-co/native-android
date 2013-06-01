@@ -44,7 +44,7 @@ exports.load = function(common) {
 	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname);
 }
 
-exports.testapp = function(opts, next) {
+exports.testapp = function(common, next) {
 	var cwd = process.cwd();
 
 	var f = ff(this, function() {

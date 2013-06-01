@@ -48,10 +48,12 @@ all:
 # install plugins for the test app (uninstalling them from Tealeaf)
 # then build and install the test app
 install:
+	adb uninstall com.tealeaf.test_app
 	cp GCTestApp/AndroidManifest.xml GCTestApp/.AndroidManifest.xml
 	ant -f GCTestApp/build.xml debug
 	ant -f GCTestApp/build.xml installd
 	cp GCTestApp/.AndroidManifest.xml GCTestApp/AndroidManifest.xml
+	adb shell am start -n com.tealeaf.test_app/com.tealeaf.test_app.TestAppActivity
 
 
 # cleans the  TeaLeaf native code as well as supporting project
