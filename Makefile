@@ -41,7 +41,6 @@ release: all
 all:
 	android update project -p TeaLeaf --target android-15 --subprojects
 	android update project -p GCTestApp --target android-15 --subprojects
-	node plugins/installPlugins.js
 	ndk-build -C TeaLeaf -Bj8 RELEASE=$(RELEASE_FLAG) JSPROF=$(PROFILE_FLAG) GPROF=${GPROF_FLAG} V8SYMBOLS=${V8_SYMBOLS}
 	ant -f TeaLeaf/build.xml $(MODE)
 
@@ -49,12 +48,12 @@ all:
 # install plugins for the test app (uninstalling them from Tealeaf)
 # then build and install the test app
 install:
+	adb uninstall com.tealeaf.test_app
 	cp GCTestApp/AndroidManifest.xml GCTestApp/.AndroidManifest.xml
-	node plugins/installTestAppPlugins.js
 	ant -f GCTestApp/build.xml debug
 	ant -f GCTestApp/build.xml installd
 	cp GCTestApp/.AndroidManifest.xml GCTestApp/AndroidManifest.xml
-	node plugins/uninstallPlugins.js
+	adb shell am start -n com.tealeaf.test_app/com.tealeaf.test_app.TestAppActivity
 
 
 # cleans the  TeaLeaf native code as well as supporting project
@@ -63,7 +62,6 @@ clean:
 	ndk-build -C TeaLeaf clean
 	ant -f TeaLeaf/build.xml clean
 	ant -f GCTestApp/build.xml clean
-	node plugins/cleanPlugins.js
 
 analyze:
 	./scripts/analyze.sh
@@ -75,5 +73,4 @@ test:
 setup:
 	android update project -p TeaLeaf --target android-15 --subprojects
 	android update project -p GCTestApp --target android-15 --subprojects
-	node plugins/updatePlugins.js
 	node checkSymlinks
