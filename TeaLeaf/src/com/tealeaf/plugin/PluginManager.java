@@ -31,17 +31,16 @@ import com.tealeaf.logger;
 import dalvik.system.DexFile;
 
 public class PluginManager {
-
 	private static String PACKAGE_NAME = "com.tealeaf";
 	private static String PLUGINS_PACKAGE_NAME = "com.tealeaf.plugin.plugins";
 	private static HashMap<String, Object> classMap = new HashMap<String, Object>();
 
 	public static void init(Context context) {
-
 		ArrayList<String> classNames = new ArrayList<String>();
-		try {
 
+		try {
 			String apkName = null;
+
 			try {
 				apkName = context.getPackageManager().getApplicationInfo(
 						context.getApplicationContext().getPackageName(), 0).sourceDir;
@@ -54,10 +53,13 @@ public class PluginManager {
 			Enumeration<String> enumeration = dexFile.entries();
 
 			int pluginsPackageStrLen = PLUGINS_PACKAGE_NAME.length();
+
 			while (enumeration.hasMoreElements()) {
 				String className = enumeration.nextElement();
+
 				if (className.length() < pluginsPackageStrLen)
 					continue;
+
 				if (className.subSequence(0, pluginsPackageStrLen).equals(
 						PLUGINS_PACKAGE_NAME)) {
 					classNames.add(className);
@@ -68,33 +70,39 @@ public class PluginManager {
 			logger.log(e);
 		}
 
-		// TODO: Load plugin names from some json file (manifest.json?)
 		if (classNames.size() > 0) {
 			String[] classNamesArr = new String[classNames.size()];
 			classNames.toArray(classNamesArr);
+
 			for (String name : classNamesArr) {
 				try {
 					if (name.contains("$")) continue;
-					classMap.put(name, Class.forName(name).newInstance());
+
+					Object instance = Class.forName(name).newInstance();
+
+					if (instance != null) {
+						logger.log("{plugins} Instantiated:", name);
+						classMap.put(name, instance);
+					} else {
+						logger.log("{plugins} WARNING: Class not found:", name);
+					}
 				} catch (ClassNotFoundException e) {
-					logger.log(e);
+					logger.log("{plugins} WARNING: Class not found:", name);
+					e.printStackTrace();
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 			}
 		}
-
 	}
 
 	private static Object invokeMethod(Object targetObject, Object[] parameters,
 			String methodName) {
-
 		Object obj = null;
+
 		if (targetObject == null) {
 			return obj;
 		}
@@ -103,8 +111,10 @@ public class PluginManager {
 			if (!method.getName().equals(methodName)) {
 				continue;
 			}
+
 			Class<?>[] parameterTypes = method.getParameterTypes();
 			boolean match = true;
+
 			for (int i = 0; i < parameterTypes.length; i++) {
 				if (parameters[i] == null) {
 					continue;
@@ -114,6 +124,7 @@ public class PluginManager {
 					break;
 				}
 			}
+
 			if (match) {
 				try {
 					if (method.getReturnType().equals(Void.TYPE)) {
@@ -130,17 +141,19 @@ public class PluginManager {
 				}
 			}
 		}
+
 		return obj;
 	}
 
 	public static Object[] callAll(String methodName, Object... params) {
-
 		Object[] objs = new Object[classMap.size()];
 		int i = 0;
+
 		for (Entry<String, Object> classEntry : classMap.entrySet()) {
 			Object o = invokeMethod(classEntry.getValue(), params, methodName);
 			objs[i++] = o;
 		}
+
 		return objs;
 	}
 
@@ -148,5 +161,5 @@ public class PluginManager {
 			Object... params) {
 		return invokeMethod(classMap.get("com.tealeaf.plugin.plugins." + className), params, methodName);
 	}
-
 }
+
