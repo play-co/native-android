@@ -210,7 +210,7 @@ public class RemoteLogger implements ILogger {
 
 	@Override
 	public void log(Exception e) {
-		if(!logging) {
+		/*if(!logging) {
 			// only try to call log once--if the first one fails, screw it, otherwise we could
 			// end up with infinite recursion
 			logging = true;
@@ -221,7 +221,7 @@ public class RemoteLogger implements ILogger {
 			}
 			sendErrorEvent(context, payload.toString());
 			logging = false;
-		}
+		}*/
 	}
 
 	@Override
@@ -250,9 +250,9 @@ public class RemoteLogger implements ILogger {
 	}
 
 	private void send(LogEvent event) {
-		if (event != null) {
+		/*if (event != null) {
 			pool.execute(new RemoteLogSender(event));
-		}
+		}*/
 	}
 
 	private void enqueue(String event) {
@@ -281,6 +281,6 @@ public class RemoteLogger implements ILogger {
 	}
 
 	private void send(String event) throws Exception {
-		http.post(url, event);
+		//http.post(url, event);
 	}
 }
