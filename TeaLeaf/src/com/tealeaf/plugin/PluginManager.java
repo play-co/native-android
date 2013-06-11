@@ -100,12 +100,15 @@ public class PluginManager {
 	}
 
 	private static Object invokeMethod(Object targetObject, Object[] parameters,
-			String methodName) {
+			String methodName, String className) {
 		Object obj = null;
 
 		if (targetObject == null) {
+			logger.log("{plugins} WARNING: Event could not be delivered for missing plugin:", className);
 			return obj;
 		}
+
+		boolean found = false;
 
 		for (Method method : targetObject.getClass().getMethods()) {
 			if (!method.getName().equals(methodName)) {
@@ -132,6 +135,8 @@ public class PluginManager {
 					} else {
 						obj = method.invoke(targetObject, parameters);
 					}
+
+					found = true;
 				} catch (IllegalArgumentException e) {
 					logger.log(e);
 				} catch (IllegalAccessException e) {
@@ -142,6 +147,10 @@ public class PluginManager {
 			}
 		}
 
+		if (found) {
+			logger.log("{plugins} WARNING: Unknown event could not be delivered for plugin:", className);
+		}
+
 		return obj;
 	}
 
@@ -150,7 +159,7 @@ public class PluginManager {
 		int i = 0;
 
 		for (Entry<String, Object> classEntry : classMap.entrySet()) {
-			Object o = invokeMethod(classEntry.getValue(), params, methodName);
+			Object o = invokeMethod(classEntry.getValue(), params, methodName, "any");
 			objs[i++] = o;
 		}
 
@@ -159,7 +168,7 @@ public class PluginManager {
 
 	public static Object call(String className, String methodName,
 			Object... params) {
-		return invokeMethod(classMap.get("com.tealeaf.plugin.plugins." + className), params, methodName);
+		return invokeMethod(classMap.get("com.tealeaf.plugin.plugins." + className), params, methodName, className);
 	}
 }
 
