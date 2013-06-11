@@ -752,16 +752,40 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 			var xmlPath = path.join(destDir, "AndroidManifest.xml");
 
+			var xslPaths = [];
+
 			for (var key in addonConfig) {
 				var addon = addonConfig[key];
 
 				if (addon.injectionXSL) {
 					var xslPath = builder.common.paths.addons(key, "android", addon.injectionXSL);
 
-					transformXSL(builder, xmlPath, xmlPath, xslPath, params, f());
+					xslPaths.push(xslPath);
 				}
 			}
+
+			// Run the plugin XSLT in series instead of parallel
+			if (xslPaths.length > 0) {
+				var allDone = f.waitPlain();
+
+				var runPluginXSLT = function(index) {
+					if (index >= xslPaths.length) {
+						allDone();
+					} else {
+						var xslPath = xslPaths[index];
+
+						logger.log("Transforming XML with plugin XSL for", xslPath);
+
+						transformXSL(builder, xmlPath, xmlPath, xslPath, params, function() {
+							runPluginXSLT(index + 1);
+						});
+					}
+				}
+
+				runPluginXSLT(0);
+			}
 		}, function(params) {
+			logger.log("Applying final XSL transformation");
 			f(params);
 
 			var xmlPath = path.join(destDir, "AndroidManifest.xml");
