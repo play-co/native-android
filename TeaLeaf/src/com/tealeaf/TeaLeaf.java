@@ -586,17 +586,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	}
 
-	private void registerServiceReceiver() {
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("com.tealeaf.SMS_SENT");
-		filter.addAction("com.tealeaf.PURCHASED_ITEM");
-		filter.addAction("com.tealeaf.PURCHASE_RESPONSE");
-		if(serviceReceiver == null) {
-			serviceReceiver = new TeaLeafReceiver(this);
-		}
-		registerReceiver(serviceReceiver, filter);
-	}
-
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);

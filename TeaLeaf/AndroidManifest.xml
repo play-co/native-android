@@ -62,13 +62,6 @@
 
 		<service android:name="com.tealeaf.TeaLeafService" android:enabled="true" exported="false" />
 
-		<receiver android:name="com.tealeaf.MarketBroadcastReceiver" android:enabled="true"> <intent-filter>
-				<action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
-				<action android:name="com.android.vending.billing.RESPONSE_CODE" />
-				<action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
-			</intent-filter>
-		</receiver>
-
 		<receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
 		<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />
 
