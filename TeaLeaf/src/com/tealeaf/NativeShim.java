@@ -160,27 +160,6 @@ public class NativeShim {
 		});
 	}
 
-	//Purchase
-	public void buy(String id) {
-		service.buy(id);
-	}
-	public void restore() {
-		try {
-			service.get().restoreResults();
-		} catch (RemoteException e) {
-			logger.log(e);
-		}
-	}
-	public void confirmPurchase(String notifyId) {
-		Intent i = new Intent("com.tealeaf.CONFIRM_PURCHASE");
-		i.setClass(context, TeaLeafService.class);
-		i.putExtra("NotifyId", notifyId);
-		context.startService(i);
-	}
-	public boolean marketAvailable() {
-		return service.get().getMarketSupported();
-	}
-
 	//Overlay
 	public void loadOverlay(final String url) {
 		context.runOnUiThread(new Runnable() { public void run() { context.getOverlay().load(url); } });
