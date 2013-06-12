@@ -101,7 +101,6 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
 							if (msg.optBoolean("crossPromo", false)) {
 								// a cross-promo
 								Intent intent = new Intent("com.tealeaf.CROSS_PROMO");
-								intent.setClass(context, TeaLeafService.class);
 								intent.putExtra("appid", msg.getString("appID"));
 								intent.putExtra("url", msg.getString("url"));
 								intent.putExtra("version", msg.getString("version"));

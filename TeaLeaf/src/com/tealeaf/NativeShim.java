@@ -50,7 +50,6 @@ public class NativeShim {
 	private ContactList contactList;
 	private Haptics haptics;
 	private LocationManager locationManager;
-	private ServiceWrapper service;
 	private TeaLeaf context;
 	private ResourceManager resourceManager;
 	private ArrayList<TeaLeafSocket> sockets = new ArrayList<TeaLeafSocket>();
@@ -62,7 +61,7 @@ public class NativeShim {
 	private Gson gson = new Gson();
 	public NativeShim(TextManager textManager, TextureLoader textureLoader, SoundQueue soundQueue,
 			LocalStorage localStorage, ContactList contactList,
-			LocationManager locationManager, ServiceWrapper service, ResourceManager resourceManager,
+			LocationManager locationManager, ResourceManager resourceManager,
 			TeaLeaf context) {
 		this.textManager = textManager;
 		this.textureLoader = textureLoader;
@@ -72,7 +71,6 @@ public class NativeShim {
 		this.contactList = contactList;
 		this.haptics = new Haptics(context);
 		this.locationManager = locationManager;
-		this.service = service;
 		this.resourceManager = resourceManager;
 		this.context = context;
 		this.remoteLogger = context.getRemoteLogger();
@@ -87,10 +85,8 @@ public class NativeShim {
 	}
 
 	public void onPause() {
-		service.unbind();
 	}
 	public void onResume() {
-		service.rebind();
 	}
 
 	public String getVersionCode() {
