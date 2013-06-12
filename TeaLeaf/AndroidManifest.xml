@@ -60,8 +60,6 @@
 		<activity android:name="com.tealeaf.CrashRecover" android:configChanges="keyboard|keyboardHidden|orientation" android:excludeFromRecents="true" android:exported="false" android:stateNotNeeded="true" android:process=":CrashRecover" />
 
 
-		<service android:name="com.tealeaf.TeaLeafService" android:enabled="true" exported="false" />
-
 		<receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
 		<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />
 

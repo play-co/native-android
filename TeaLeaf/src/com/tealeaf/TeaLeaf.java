@@ -84,7 +84,6 @@ public class TeaLeaf extends FragmentActivity {
 	private Settings settings;
 	private IMenuButtonHandler menuButtonHandler;
 
-	private TeaLeafReceiver serviceReceiver;
 	private BroadcastReceiver screenOffReciever;
 
 	private ILogger remoteLogger;
@@ -240,8 +239,6 @@ public class TeaLeaf extends FragmentActivity {
 		compareVersions();
 		setLaunchUri();
 
-		startService(new Intent(this, TeaLeafService.class));
-
 		// defer building all of these things until we have the absolutely correct options
 		logger.buildLogger(this, remoteLogger);
 		resourceManager = new ResourceManager(this, options);
@@ -393,8 +390,6 @@ public class TeaLeaf extends FragmentActivity {
 		pauseGL();
 		paused = true;
 		pause();
-
-		unregisterReceiver(serviceReceiver);
 	}
 
 	private void pause() {
@@ -451,8 +446,6 @@ public class TeaLeaf extends FragmentActivity {
 			}
 		}
 
-
-		registerServiceReceiver();
 		getLaunchType(getIntent());
 	}
 

@@ -276,20 +276,14 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		private String crossPromoTarget = "";
 
 		private ResourceManager resourceManager;
-		private ServiceWrapper service = null;
 
 		public Renderer(TeaLeafGLSurfaceView view) {
 			logger.log("{gl} Created renderer");
 			this.view = view;
 			resourceManager = this.view.context.getResourceManager();
-			// FIXME is this really where we should create the service wrapper?
-			// no, but we need to create it arbitrarily early to give it time to
-			// spin up before the game starts
-			service = new ServiceWrapper(this.view.context);
 		}
 
 		public void destroy() {
-			service.unbind();
 			if (nativeShim != null) {
 				NativeShim.destroy();
 				nativeShim = null;
@@ -670,7 +664,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				nativeShim = new NativeShim(textManager, textureLoader,
 						this.view.context.getSoundQueue(),
 						this.view.context.getLocalStorage(), contactList,
-						new LocationManager(view.context), service,
+						new LocationManager(view.context),
 						resourceManager, view.context);
 			}
 
