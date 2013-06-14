@@ -84,7 +84,6 @@ public class TeaLeaf extends FragmentActivity {
 	private Settings settings;
 	private IMenuButtonHandler menuButtonHandler;
 
-	private TeaLeafReceiver serviceReceiver;
 	private BroadcastReceiver screenOffReciever;
 
 	private ILogger remoteLogger;
@@ -240,8 +239,6 @@ public class TeaLeaf extends FragmentActivity {
 		compareVersions();
 		setLaunchUri();
 
-		startService(new Intent(this, TeaLeafService.class));
-
 		// defer building all of these things until we have the absolutely correct options
 		logger.buildLogger(this, remoteLogger);
 		resourceManager = new ResourceManager(this, options);
@@ -393,8 +390,6 @@ public class TeaLeaf extends FragmentActivity {
 		pauseGL();
 		paused = true;
 		pause();
-
-		unregisterReceiver(serviceReceiver);
 	}
 
 	private void pause() {
@@ -451,8 +446,6 @@ public class TeaLeaf extends FragmentActivity {
 			}
 		}
 
-
-		registerServiceReceiver();
 		getLaunchType(getIntent());
 	}
 
@@ -584,17 +577,6 @@ public class TeaLeaf extends FragmentActivity {
 		filter.addAction("android.intent.action.SCREEN_OFF");
 		registerReceiver(screenOffReciever, filter);
 
-	}
-
-	private void registerServiceReceiver() {
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("com.tealeaf.SMS_SENT");
-		filter.addAction("com.tealeaf.PURCHASED_ITEM");
-		filter.addAction("com.tealeaf.PURCHASE_RESPONSE");
-		if(serviceReceiver == null) {
-			serviceReceiver = new TeaLeafReceiver(this);
-		}
-		registerReceiver(serviceReceiver, filter);
 	}
 
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?

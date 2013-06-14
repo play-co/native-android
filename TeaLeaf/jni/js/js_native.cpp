@@ -25,7 +25,6 @@ extern "C" {
 #include "js/js_native.h"
 #include "js/js_console.h"
 #include "js/js_haptics.h"
-#include "js/js_purchase.h"
 #include "js/js_sound.h"
 #include "js/js_overlay.h"
 #include "js/js_device.h"
@@ -185,7 +184,6 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	NATIVE->Set(STRING_CACHE_localStorage, js_local_storage_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_sound, js_sound_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_overlay, js_overlay_get_template()->NewInstance());
-	NATIVE->Set(STRING_CACHE_purchase, js_purchase_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_device, js_device_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_textbox, js_textbox_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_dialogs, js_dialog_get_template()->NewInstance());
