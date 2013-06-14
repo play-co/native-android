@@ -72,31 +72,6 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 	var addons = project && project.manifest && project.manifest.addons;
 
 	var f = ff(this, function() {
-		// For each addon,
-		if (addons) {
-			for (var ii = 0; ii < addons.length; ++ii) {
-				var addon = addons[ii];
-
-				// Prefer paths in this order:
-				var addon_js_android = paths.addons(addon, 'js', 'android');
-				var addon_js_native = paths.addons(addon, 'js', 'native');
-				var addon_js = paths.addons(addon, 'js');
-
-				if (fs.existsSync(addon_js_android)) {
-					logger.log("Installing addon:", addon, "-- Adding ./js/android to jsio path");
-					require(paths.root('src', 'AddonManager')).registerPath(addon_js_android);
-				} else if (fs.existsSync(addon_js_native)) {
-					logger.log("Installing addon:", addon, "-- Adding ./js/native to jsio path");
-					require(paths.root('src', 'AddonManager')).registerPath(addon_js_native);
-				} else if (fs.existsSync(addon_js)) {
-					logger.log("Installing addon:", addon, "-- Adding ./js to jsio path");
-					require(paths.root('src', 'AddonManager')).registerPath(addon_js);
-				} else {
-					logger.warn("Installing addon:", addon, "-- No js directory so no JavaScript will be installed");
-				}
-			}
-		}
-	}, function() {
 		var group = f.group();
 
 		// For each addon,
@@ -324,7 +299,7 @@ var installAddonCode = function(builder, opts, next) {
 					var jarPath = jarPaths[ii];
 					var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
 
-					logger.log("Installing JAR file:", jarDestPAth);
+					logger.log("Installing JAR file:", jarDestPath);
 
 					fs.writeFile(jarDestPath, data, "binary", f.wait());
 				}
@@ -777,16 +752,40 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 
 			var xmlPath = path.join(destDir, "AndroidManifest.xml");
 
+			var xslPaths = [];
+
 			for (var key in addonConfig) {
 				var addon = addonConfig[key];
 
 				if (addon.injectionXSL) {
 					var xslPath = builder.common.paths.addons(key, "android", addon.injectionXSL);
 
-					transformXSL(builder, xmlPath, xmlPath, xslPath, params, f());
+					xslPaths.push(xslPath);
 				}
 			}
+
+			// Run the plugin XSLT in series instead of parallel
+			if (xslPaths.length > 0) {
+				var allDone = f.waitPlain();
+
+				var runPluginXSLT = function(index) {
+					if (index >= xslPaths.length) {
+						allDone();
+					} else {
+						var xslPath = xslPaths[index];
+
+						logger.log("Transforming XML with plugin XSL for", xslPath);
+
+						transformXSL(builder, xmlPath, xmlPath, xslPath, params, function() {
+							runPluginXSLT(index + 1);
+						});
+					}
+				}
+
+				runPluginXSLT(0);
+			}
 		}, function(params) {
+			logger.log("Applying final XSL transformation");
 			f(params);
 
 			var xmlPath = path.join(destDir, "AndroidManifest.xml");
