@@ -137,9 +137,14 @@ function injectPluginXML(builder, opts, next) {
 		var group = f.group();
 
 		for (var key in addonConfig) {
-			var addonAndroidDir = builder.common.paths.addons(key, "android");
+			var injectionXML = addonConfig[key].injectionXML;
 
-			fs.readFile(path.join(addonAndroidDir, addonConfig[key].injectionXML), "utf-8", group());
+			if (injectionXML) {
+				var filepath = builder.common.paths.addons(key, "android", injectionXML);
+				logger.log("Reading plugin XML:", filepath);
+
+				fs.readFile(filepath, "utf-8", group());
+			}
 		}
 
 		fs.readFile(manifestXml, "utf-8", f());
