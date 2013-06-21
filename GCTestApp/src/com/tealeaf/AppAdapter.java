@@ -87,8 +87,9 @@ public class AppAdapter extends ArrayAdapter<AppInfo>{
 					try {
 						FileInputStream fs = new FileInputStream(bmpFile);
 						possibleBMP = BitmapFactory.decodeStream(fs);
-					} catch (IOException e) {
-					
+					} catch (Exception e) {
+						logger.log("exception while loading bitmap:", e);
+						e.printStackTrace();
 					}
 					bmp = possibleBMP;
 				}
