@@ -52,7 +52,6 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_overlay.cpp                                 \
 			js/js_photo.cpp                                   \
 			js/js_profiler.cpp		                          \
-			js/js_purchase.cpp                                \
 			js/js_plugins.cpp                                  \
 			js/js_socket.cpp                                  \
 			js/js_sound.cpp                                   \
@@ -91,7 +90,6 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			platform/overlay.cpp                              \
 			platform/photo.cpp                                \
 			platform/profiler.cpp		                      \
-			platform/purchase.cpp                             \
 			platform/resource_loader.cpp                      \
 			platform/plugins.cpp                              \
 			platform/socket.cpp                               \
