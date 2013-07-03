@@ -97,7 +97,7 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 			}
 		}
 	}).error(function(err) {
-		logger.error("Failure to install addons:", err);
+		logger.error("Failure to install addons:", err, err.stack);
 	}).cb(next);
 }
 
@@ -172,7 +172,7 @@ function injectPluginXML(builder, opts, next) {
 			logger.log("No plugin XML to inject");
 		}
 	}).success(next).error(function(err) {
-		logger.error("Inject plugin XML failure:", err);
+		logger.error("Inject plugin XML failure:", err, err.stack);
 		process.exit(1);
 	});
 }
@@ -313,7 +313,7 @@ var installAddonCode = function(builder, opts, next) {
 			logger.log("No JAR file data to install");
 		}
 	}).success(next).error(function(err) {
-		logger.error("Error while installing addon code:", err);
+		logger.error("Error while installing addon code:", err, err.stack);
 		process.exit(1);
 	});
 }
@@ -359,7 +359,7 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 
 		fs.writeFile(outFile, dat, 'utf-8', f.wait());
 	}).success(next).error(function(err) {
-		logger.error("Transform XSL failure:", err);
+		logger.error("Transform XSL failure:", err, err.stack);
 		process.exit(1);
 	});
 }
@@ -391,7 +391,7 @@ function validateSubmodules(next) {
 			f.fail("One of the submodules was not found.  Make sure you have run submodule update --init on your clone of the Android repo");
 		}
 	}).success(next).error(function(err) {
-		logger.error("Validate submodule failure:", err);
+		logger.error("Validate submodule failure:", err, err.stack);
 		process.exit(1);
 	});
 }
@@ -409,7 +409,7 @@ function buildSupportProjects(builder, project, destDir, debug, clean, next) {
 	}, function() {
 		builder.common.child('ant', [(debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
-		logger.error("Could not build support projects:", e);
+		logger.error("Could not build support projects:", e, e.stack);
 		process.exit(2);
 	}).success(next);
 }
@@ -442,8 +442,8 @@ function makeAndroidProject(builder, project, namespace, activity, title, appID,
 	}, function() {
 		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
-	}).error(function(code) {
-		logger.error("Build failed creating android project:", code);
+	}).error(function(err) {
+		logger.error("Build failed creating android project:", err, err.stack);
 		process.exit(2);
 	}).success(next);
 }
@@ -800,7 +800,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 					params,
                     f());
         }).error(function(err) {
-			logger.error("Error transforming XSL for AndroidManifest.xml:", err);
+			logger.error("Error transforming XSL for AndroidManifest.xml:", err, err.stack);
 			process.exit(2);
 		}).success(function() {
 			next();
@@ -844,7 +844,7 @@ function versionCode(proj, debug, next) {
 		next(version);
 	}).error(function(err) {
 		if (!debug) {
-			logger.error("Could not get version code:", err);
+			logger.error("Could not get version code:", err, err.stack);
 			process.exit();
 		} else {
 			logger.warn("Could not get version code. In a release build this would be an error");
@@ -883,7 +883,7 @@ exports.build = function(builder, project, opts, next) {
 	var f = ff(this, function() {
 		validateSubmodules(f());
 	}).error(function(err) {
-		logger.error("Failure to validate submodules:", err);
+		logger.error("Failure to validate submodules:", err, err.stack);
 		process.exit(2);
 	});
 
@@ -1008,7 +1008,7 @@ exports.build = function(builder, project, opts, next) {
 	}, function () {
 		next(0);
 	}).error(function (err) {
-		logger.error("Build failure:", err);
+		logger.error("Build failure:", err, err.stack);
 	});
 };
 
