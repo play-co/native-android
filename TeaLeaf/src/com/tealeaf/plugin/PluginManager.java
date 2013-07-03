@@ -146,7 +146,8 @@ public class PluginManager {
 		}
 
 		if (!found) {
-			logger.log("{plugins} WARNING: Unknown event could not be delivered for plugin:", className);
+			logger.log("{plugins} WARNING: Unknown event could not be delivered for plugin:",
+				className, ", method:", methodName);
 		}
 
 		return obj;
