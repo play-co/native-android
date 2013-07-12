@@ -32,6 +32,7 @@
 #include "libzip/zipint.h"
 
 extern "C" {
+#include "core/image-cache/include/image_cache.h"
 #include "core/image_loader.h"
 #include "core/core.h"
 }
@@ -49,8 +50,10 @@ CEXPORT void resource_loader_initialize(const char *path) {
 		return;
 	}
 	storage_dir = get_storage_directory();
+    image_cache_init(storage_dir);
 }
 CEXPORT void resource_loader_deinitialize() {
+    image_cache_destroy();
 	zip_close(APKArchive);
 }
 
@@ -122,9 +125,9 @@ CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
 
 	bool skip = false;
 	// check if it is a special url (text, contacts, etc.), if it is then load in java
-	if(texture->url[0] == '@') {
+	if (texture->url[0] == '@') {
 		skip = true;
-	}
+	} 
 
 	if(!skip) {
 		unsigned long sz;

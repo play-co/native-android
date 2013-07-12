@@ -181,7 +181,7 @@ public class ResourceManager {
 	public String getStorageDirectory() {
 		File storageDir = getBaseStorageDirectory();
 
-		String dataDirPath = storageDir.getAbsolutePath() + File.separator + getClass().getPackage().getName() +File.separator + options.getAppID();
+		String dataDirPath = storageDir.getAbsolutePath();
 		return dataDirPath;
 	}
 
