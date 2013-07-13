@@ -195,7 +195,7 @@ var installAddonGameFiles = function(builder, opts, next) {
 
 					logger.log("Installing game-specific plugin file:", filePath);
 
-					fs.readFile(filePath, "utf-8", group.slot());
+					fs.readFile(filePath, "binary", group.slot());
 
 					// Record target path
 					filePaths.push(builder.common.paths.addons(addon, 'android', config.copyGameFiles[ii]));
@@ -211,7 +211,7 @@ var installAddonGameFiles = function(builder, opts, next) {
 				if (data) {
 					logger.log(" - Writing to:", filePath);
 
-					fs.writeFile(filePath, data, 'utf-8', f.wait());
+					fs.writeFile(filePath, data, 'binary', f.wait());
 				} else {
 					logger.error("Unable to read file expected in game directory:", filePath, "(requested by addons)");
 				}
@@ -228,8 +228,10 @@ var installAddonGameFiles = function(builder, opts, next) {
 var installAddonCode = function(builder, opts, next) {
 	var addonConfig = opts.addonConfig;
 	var destDir = opts.destDir;
+	var project = opts.project;
 
 	var filePaths = [];
+	var replacers = [];
 	var libraries = [];
 	var jars = [];
 	var jarPaths = [];
@@ -247,6 +249,7 @@ var installAddonCode = function(builder, opts, next) {
 					logger.log("Installing addon Java code:", filePath);
 
 					filePaths.push(filePath);
+					replacers.push(config.injectionSource);
 
 					fs.readFile(filePath, "utf-8", group.slot());
 				}
@@ -298,6 +301,23 @@ var installAddonCode = function(builder, opts, next) {
 					logger.log("Installing Java package", pkgName, "to", outFile);
 
 					wrench.mkdirSyncRecursive(path.dirname(outFile));
+
+					// Run injectionSource section of associated addon
+					var replacer = replacers[ii];
+					if (replacer && replacer.length > 0) {
+						for (var jj = 0; jj < replacer.length; ++jj) {
+							var findString = replacer[jj].regex;
+							var keyForReplace = replacer[jj].keyForReplace;
+							var replaceString = project.manifest.android[keyForReplace];
+							if (replaceString) {
+								logger.log(" - Running find-replace for", findString, "->", replaceString, "(android:", keyForReplace + ")");
+								var rexp = new RegExp(findString, "g");
+								data = data.replace(rexp, replaceString);
+							} else {
+								logger.error(" - Unable to find android key for", keyForReplace);
+							}
+						}
+					}
 
 					fs.writeFile(outFile, data, 'utf-8', f.wait());
 				} else {
@@ -1006,7 +1026,8 @@ exports.build = function(builder, project, opts, next) {
 
 		installAddonCode(builder, {
 			addonConfig: addonConfig,
-			destDir: destDir
+			destDir: destDir,
+			project: project
 		}, f());
 	}, function() {
 		var onDoneBuilding = f();
