@@ -248,10 +248,16 @@ var installAddonCode = function(builder, opts, next) {
 
 					logger.log("Installing addon Java code:", filePath);
 
-					filePaths.push(filePath);
 					replacers.push(config.injectionSource);
 
-					fs.readFile(filePath, "utf-8", group.slot());
+					if (path.extname(filePath) === ".java" ||
+						path.extname(filePath) === ".aidl") {
+						filePaths.push(filePath);
+						fs.readFile(filePath, "utf-8", group.slot());
+					} else {
+						filePaths.push(config.copyFiles[ii]);
+						fs.readFile(filePath, "binary", group.slot());
+					}
 				}
 			}
 
@@ -294,32 +300,39 @@ var installAddonCode = function(builder, opts, next) {
 				var filePath = filePaths[ii];
 
 				if (data) {
-					var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
-					var pkgDir = pkgName.replace(/\./g, "/");
-					var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
+					if (path.extname(filePath) === ".java" ||
+						path.extname(filePath) === ".aidl") {
+						var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
+						var pkgDir = pkgName.replace(/\./g, "/");
+						var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
 
-					logger.log("Installing Java package", pkgName, "to", outFile);
+						logger.log("Installing Java package", pkgName, "to", outFile);
 
-					wrench.mkdirSyncRecursive(path.dirname(outFile));
+						wrench.mkdirSyncRecursive(path.dirname(outFile));
 
-					// Run injectionSource section of associated addon
-					var replacer = replacers[ii];
-					if (replacer && replacer.length > 0) {
-						for (var jj = 0; jj < replacer.length; ++jj) {
-							var findString = replacer[jj].regex;
-							var keyForReplace = replacer[jj].keyForReplace;
-							var replaceString = project.manifest.android[keyForReplace];
-							if (replaceString) {
-								logger.log(" - Running find-replace for", findString, "->", replaceString, "(android:", keyForReplace + ")");
-								var rexp = new RegExp(findString, "g");
-								data = data.replace(rexp, replaceString);
-							} else {
-								logger.error(" - Unable to find android key for", keyForReplace);
+						// Run injectionSource section of associated addon
+						var replacer = replacers[ii];
+						if (replacer && replacer.length > 0) {
+							for (var jj = 0; jj < replacer.length; ++jj) {
+								var findString = replacer[jj].regex;
+								var keyForReplace = replacer[jj].keyForReplace;
+								var replaceString = project.manifest.android[keyForReplace];
+								if (replaceString) {
+									logger.log(" - Running find-replace for", findString, "->", replaceString, "(android:", keyForReplace + ")");
+									var rexp = new RegExp(findString, "g");
+									data = data.replace(rexp, replaceString);
+								} else {
+									logger.error(" - Unable to find android key for", keyForReplace);
+								}
 							}
 						}
-					}
 
-					fs.writeFile(outFile, data, 'utf-8', f.wait());
+						fs.writeFile(outFile, data, 'utf-8', f.wait());
+					} else {
+						var outFile = path.join(destDir, filePath);
+
+						fs.writeFile(outFile, data, 'binary', f.wait());
+					}
 				} else {
 					logger.warn("Unable to read Java package", filePath);
 				}
