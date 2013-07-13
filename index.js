@@ -177,6 +177,54 @@ function injectPluginXML(builder, opts, next) {
 	});
 }
 
+var installAddonGameFiles = function(builder, opts, next) {
+	var addonConfig = opts.addonConfig;
+	var project = opts.project;
+
+	var filePaths = [];
+
+	var f = ff(function() {
+		var group = f.group();
+
+		for (var addon in addonConfig) {
+			var config = addonConfig[addon];
+
+			if (config.copyGameFiles) {
+				for (var ii = 0; ii < config.copyGameFiles.length; ++ii) {
+					var filePath = path.join(project.paths.root, config.copyGameFiles[ii]);
+
+					logger.log("Installing game-specific plugin file:", filePath);
+
+					fs.readFile(filePath, "utf-8", group.slot());
+
+					// Record target path
+					filePaths.push(builder.common.paths.addons(addon, 'android', config.copyGameFiles[ii]));
+				}
+			}
+		}
+	}, function(results) {
+		if (results && results.length > 0) {
+			for (var ii = 0; ii < results.length; ++ii) {
+				var data = results[ii];
+				var filePath = filePaths[ii];
+
+				if (data) {
+					logger.log(" - Writing to:", filePath);
+
+					fs.writeFile(filePath, data, 'utf-8', f.wait());
+				} else {
+					logger.error("Unable to read file expected in game directory:", filePath, "(requested by addons)");
+				}
+			}
+		} else {
+			logger.log("No game files to add");
+		}
+	}).success(next).error(function(err) {
+		logger.error("Error while installing addon game files code:", err, err.stack);
+		process.exit(1);
+	});
+}
+
 var installAddonCode = function(builder, opts, next) {
 	var addonConfig = opts.addonConfig;
 	var destDir = opts.destDir;
@@ -944,6 +992,11 @@ exports.build = function(builder, project, opts, next) {
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
 		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, project, destDir, debug, cleanProj, f.waitPlain());
+	}, function() {
+		installAddonGameFiles(builder, {
+			addonConfig: addonConfig,
+			project: project
+		}, f());
 	}, function() {
 		copyFonts(builder, project, destDir);
 		copyIcons(builder, project, destDir);
