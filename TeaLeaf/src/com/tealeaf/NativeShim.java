@@ -275,12 +275,27 @@ public class NativeShim {
 		int textSize = textManager.measureText(font, size, text);
 		return textSize;
 	}
+
 	public void loadTexture(String url) {
 		textureLoader.loadTexture(url);
 	}
+
+    public int cameraGetPhoto() {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadCameraPicture("" + id);
+        return id;
+    }
+
+    public int galleryGetPhoto() {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadGalleryPicture("" + id);
+        return id;
+    }
+
 	public int getNextCameraId() {
 		return textureLoader.getNextCameraId();
 	}
+
 	public int getNextGalleryId() {
 		return textureLoader.getNextGalleryId();
 	}

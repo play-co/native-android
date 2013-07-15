@@ -134,6 +134,7 @@ Persistent<String> STRING_CACHE_camera;
 Persistent<String> STRING_CACHE_localStorage;
 Persistent<String> STRING_CACHE_onRead;
 Persistent<String> STRING_CACHE_getNextId;
+Persistent<String> STRING_CACHE_getPhoto;
 Persistent<String> STRING_CACHE_onAnimationFinish;
 Persistent<String> STRING_CACHE_type;
 Persistent<String> STRING_CACHE_milliseconds;
@@ -344,6 +345,7 @@ void js_string_cache_init() {
 	STRING_CACHE_localStorage = Persistent<String>::New(String::New("localStorage"));
 	STRING_CACHE_onRead = Persistent<String>::New(String::New("onRead"));
 	STRING_CACHE_getNextId = Persistent<String>::New(String::New("getNextId"));
+	STRING_CACHE_getPhoto = Persistent<String>::New(String::New("getPhoto"));
 	STRING_CACHE_onAnimationFinish = Persistent<String>::New(String::New("onAnimationFinish"));
 	STRING_CACHE_type = Persistent<String>::New(String::New("type"));
 	STRING_CACHE_milliseconds = Persistent<String>::New(String::New("milliseconds"));

@@ -582,15 +582,14 @@ public class TeaLeaf extends FragmentActivity {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
 
-		int id = (request & 0xFFFFFF);
-		request = request >> 24;
+		
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
 				if(result == RESULT_OK) {
-					glView.getTextureLoader().saveCameraPhoto(id, (Bitmap)data.getExtras().get("data"));
-					glView.getTextureLoader().finishCameraPicture(id);
+					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
+					glView.getTextureLoader().finishCameraPicture();
 				} else {
-					glView.getTextureLoader().failedCameraPicture(id);
+					glView.getTextureLoader().failedCameraPicture();
 				}
 				break;
 			case PhotoPicker.PICK_IMAGE:
@@ -602,10 +601,10 @@ public class TeaLeaf extends FragmentActivity {
 					int columnindex = cursor.getColumnIndex(filepathcolumn[0]);
 					String filepath = cursor.getString(columnindex);
 					cursor.close();
-					glView.getTextureLoader().saveGalleryPicture(id, BitmapFactory.decodeFile(filepath));
-					glView.getTextureLoader().finishGalleryPicture(id);
+					glView.getTextureLoader().saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), BitmapFactory.decodeFile(filepath));
+					glView.getTextureLoader().finishGalleryPicture();
 				} else {
-					glView.getTextureLoader().failedGalleryPicture(id);
+					glView.getTextureLoader().failedGalleryPicture();
 				}
 				break;
 		}
