@@ -85,7 +85,6 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 
 			var processAddonQueue = function() {
 				var addon = null;
-				logger.log(addonQueue.length);
 				if (addonQueue.length > 0) {
 					addon = addonQueue.shift();
 				} else {
