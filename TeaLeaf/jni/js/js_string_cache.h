@@ -214,5 +214,7 @@ extern Persistent<String> STRING_CACHE_doneLoading;
 extern Persistent<String> STRING_CACHE_failed;
 extern Persistent<String> STRING_CACHE_devicePixelRatio;
 extern Persistent<String> STRING_CACHE_seekTo;
+extern Persistent<String> STRING_CACHE_show_soft_keyboard;
+extern Persistent<String> STRING_CACHE_hide_soft_keyboard;
 
 #endif

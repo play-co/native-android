@@ -34,9 +34,32 @@ Handle<Value> js_input_prompt_show(const Arguments &args) {
 	return Number::New(id);
 }
 
+Handle<Value> js_input_prompt_show_soft_keyboard(const Arguments &args) {
+	String::Utf8Value curr_val_str(args[0]);
+	String::Utf8Value hint_str(args[1]);
+	bool has_backward = args[2]->BooleanValue();
+	bool has_forward = args[3]->BooleanValue();
+	String::Utf8Value input_type_str(args[4]);
+	int max_length = args[5]->Int32Value();
+
+	const char *curr_val = ToCString(curr_val_str);
+	const char *hint = ToCString(hint_str);
+	const char *input_type = ToCString(input_type_str);
+
+    input_prompt_show_soft_keyboard(curr_val, hint, has_backward, has_forward, input_type, max_length);
+    return Undefined();
+}
+
+Handle<Value> js_input_prompt_hide_soft_keyboard(const Arguments &args) {
+    input_prompt_hide_soft_keyboard();
+    return Undefined();
+}
+
 Handle<ObjectTemplate> js_input_prompt_get_template() {
 	Handle<ObjectTemplate> input = ObjectTemplate::New();
 	input->Set(STRING_CACHE_show, FunctionTemplate::New(js_input_prompt_show));
+    input->Set(STRING_CACHE_show_soft_keyboard, FunctionTemplate::New(js_input_prompt_show_soft_keyboard));
+    input->Set(STRING_CACHE_hide_soft_keyboard, FunctionTemplate::New(js_input_prompt_hide_soft_keyboard));
 	return input;
 }
 
