@@ -90,9 +90,7 @@ Handle<Value> defDestroyImage(const Arguments& args) {
     String::Utf8Value str(args[0]);
     const char *url = ToCString(str);
     texture_2d *tex = texture_manager_get_texture(texture_manager_get(), url);
-    LOG("JARED DELETE");
     if (tex && tex->loaded) {
-    LOG("JARED DELETE 2");
         texture_manager_free_texture(texture_manager_get(), tex);
     }
 	LOGFN("endDestroyImage");
