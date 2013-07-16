@@ -5,6 +5,21 @@ LOCAL_LDFLAGS := -Wl,-Map,tealeaf.map
 -include ${LOCAL_PATH}/profiler/android-ndk-profiler.mk
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := curl-prebuilt
+LOCAL_SRC_FILES := lib/libcurl.a 
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := crypto-prebuilt
+LOCAL_SRC_FILES := lib/libcrypto.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := ssl-prebuilt
+LOCAL_SRC_FILES := lib/libssl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libv8a
 LOCAL_SRC_FILES := lib/libv8.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -52,7 +67,6 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_overlay.cpp                                 \
 			js/js_photo.cpp                                   \
 			js/js_profiler.cpp		                          \
-			js/js_purchase.cpp                                \
 			js/js_plugins.cpp                                  \
 			js/js_socket.cpp                                  \
 			js/js_sound.cpp                                   \
@@ -67,6 +81,8 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/draw_textures.c                              \
 			core/events.c                                     \
 			core/geometry.c                                   \
+			core/image-cache/src/image_cache.c                \
+			core/image-cache/src/crypto/sha1.c                \
 			core/image_loader.c                               \
 			core/object_pool.c                                \
 			core/rgba.c                                       \
@@ -91,7 +107,6 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			platform/overlay.cpp                              \
 			platform/photo.cpp                                \
 			platform/profiler.cpp		                      \
-			platform/purchase.cpp                             \
 			platform/resource_loader.cpp                      \
 			platform/plugins.cpp                              \
 			platform/socket.cpp                               \
@@ -114,7 +129,7 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 			lib/v8-profiler/node_buffer.cpp		              \
 			lib/v8-profiler/profiler.cpp
 
-LOCAL_STATIC_LIBRARIES := libzip cpufeatures libjpeg libpng libjansson
+LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libjpeg libpng libjansson
 LOCAL_LDLIBS :=-llog -lGLESv2 -lz #-fuse-ld=gold REQUIRES: android-ndk-r8b
 LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
 
@@ -127,6 +142,9 @@ LOCAL_STATIC_LIBRARIES += libv8a
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include
+LOCAL_SHARED_LIBRARIES += ssl-prebuilt
+LOCAL_SHARED_LIBRARIES += crypto-prebuilt
 
 #RELEASE will stub out the LOG function
 ifeq (${RELEASE}, 1)

@@ -2,17 +2,15 @@
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.
 
  * The Game Closure SDK is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Mozilla Public License v. 2.0 for more details.
 
- * You should have received a copy of the GNU General Public License
- * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Mozilla Public License v. 2.0
+ * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
 package com.tealeaf;
 
@@ -50,7 +48,6 @@ public class NativeShim {
 	private ContactList contactList;
 	private Haptics haptics;
 	private LocationManager locationManager;
-	private ServiceWrapper service;
 	private TeaLeaf context;
 	private ResourceManager resourceManager;
 	private ArrayList<TeaLeafSocket> sockets = new ArrayList<TeaLeafSocket>();
@@ -62,7 +59,7 @@ public class NativeShim {
 	private Gson gson = new Gson();
 	public NativeShim(TextManager textManager, TextureLoader textureLoader, SoundQueue soundQueue,
 			LocalStorage localStorage, ContactList contactList,
-			LocationManager locationManager, ServiceWrapper service, ResourceManager resourceManager,
+			LocationManager locationManager, ResourceManager resourceManager,
 			TeaLeaf context) {
 		this.textManager = textManager;
 		this.textureLoader = textureLoader;
@@ -72,7 +69,6 @@ public class NativeShim {
 		this.contactList = contactList;
 		this.haptics = new Haptics(context);
 		this.locationManager = locationManager;
-		this.service = service;
 		this.resourceManager = resourceManager;
 		this.context = context;
 		this.remoteLogger = context.getRemoteLogger();
@@ -87,10 +83,8 @@ public class NativeShim {
 	}
 
 	public void onPause() {
-		service.unbind();
 	}
 	public void onResume() {
-		service.rebind();
 	}
 
 	public String getVersionCode() {
@@ -158,27 +152,6 @@ public class NativeShim {
 				JSDialog.showDialog(context, image, title, text, buttons, cbs);
 			}
 		});
-	}
-
-	//Purchase
-	public void buy(String id) {
-		service.buy(id);
-	}
-	public void restore() {
-		try {
-			service.get().restoreResults();
-		} catch (RemoteException e) {
-			logger.log(e);
-		}
-	}
-	public void confirmPurchase(String notifyId) {
-		Intent i = new Intent("com.tealeaf.CONFIRM_PURCHASE");
-		i.setClass(context, TeaLeafService.class);
-		i.putExtra("NotifyId", notifyId);
-		context.startService(i);
-	}
-	public boolean marketAvailable() {
-		return service.get().getMarketSupported();
 	}
 
 	//Overlay
@@ -302,12 +275,27 @@ public class NativeShim {
 		int textSize = textManager.measureText(font, size, text);
 		return textSize;
 	}
+
 	public void loadTexture(String url) {
 		textureLoader.loadTexture(url);
 	}
+
+    public int cameraGetPhoto() {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadCameraPicture("" + id);
+        return id;
+    }
+
+    public int galleryGetPhoto() {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadGalleryPicture("" + id);
+        return id;
+    }
+
 	public int getNextCameraId() {
 		return textureLoader.getNextCameraId();
 	}
+
 	public int getNextGalleryId() {
 		return textureLoader.getNextGalleryId();
 	}

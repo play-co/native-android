@@ -2,17 +2,15 @@
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.
 
  * The Game Closure SDK is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Mozilla Public License v. 2.0 for more details.
 
- * You should have received a copy of the GNU General Public License
- * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Mozilla Public License v. 2.0
+ * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
 package com.tealeaf;
 
@@ -84,7 +82,6 @@ public class TeaLeaf extends FragmentActivity {
 	private Settings settings;
 	private IMenuButtonHandler menuButtonHandler;
 
-	private TeaLeafReceiver serviceReceiver;
 	private BroadcastReceiver screenOffReciever;
 
 	private ILogger remoteLogger;
@@ -240,8 +237,6 @@ public class TeaLeaf extends FragmentActivity {
 		compareVersions();
 		setLaunchUri();
 
-		startService(new Intent(this, TeaLeafService.class));
-
 		// defer building all of these things until we have the absolutely correct options
 		logger.buildLogger(this, remoteLogger);
 		resourceManager = new ResourceManager(this, options);
@@ -393,8 +388,6 @@ public class TeaLeaf extends FragmentActivity {
 		pauseGL();
 		paused = true;
 		pause();
-
-		unregisterReceiver(serviceReceiver);
 	}
 
 	private void pause() {
@@ -451,8 +444,6 @@ public class TeaLeaf extends FragmentActivity {
 			}
 		}
 
-
-		registerServiceReceiver();
 		getLaunchType(getIntent());
 	}
 
@@ -469,7 +460,7 @@ public class TeaLeaf extends FragmentActivity {
 
 		boolean consume = true;
 		for (Object o : objs) {
-			if (((Boolean) o).booleanValue()) {
+			if (o != null && ((Boolean) o).booleanValue()) {
 				consume = true;
 				break;
 			}
@@ -586,31 +577,19 @@ public class TeaLeaf extends FragmentActivity {
 
 	}
 
-	private void registerServiceReceiver() {
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("com.tealeaf.SMS_SENT");
-		filter.addAction("com.tealeaf.PURCHASED_ITEM");
-		filter.addAction("com.tealeaf.PURCHASE_RESPONSE");
-		if(serviceReceiver == null) {
-			serviceReceiver = new TeaLeafReceiver(this);
-		}
-		registerReceiver(serviceReceiver, filter);
-	}
-
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
 
-		int id = (request & 0xFFFFFF);
-		request = request >> 24;
+		
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
 				if(result == RESULT_OK) {
-					glView.getTextureLoader().saveCameraPhoto(id, (Bitmap)data.getExtras().get("data"));
-					glView.getTextureLoader().finishCameraPicture(id);
+					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
+					glView.getTextureLoader().finishCameraPicture();
 				} else {
-					glView.getTextureLoader().failedCameraPicture(id);
+					glView.getTextureLoader().failedCameraPicture();
 				}
 				break;
 			case PhotoPicker.PICK_IMAGE:
@@ -622,10 +601,10 @@ public class TeaLeaf extends FragmentActivity {
 					int columnindex = cursor.getColumnIndex(filepathcolumn[0]);
 					String filepath = cursor.getString(columnindex);
 					cursor.close();
-					glView.getTextureLoader().saveGalleryPicture(id, BitmapFactory.decodeFile(filepath));
-					glView.getTextureLoader().finishGalleryPicture(id);
+					glView.getTextureLoader().saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), BitmapFactory.decodeFile(filepath));
+					glView.getTextureLoader().finishGalleryPicture();
 				} else {
-					glView.getTextureLoader().failedGalleryPicture(id);
+					glView.getTextureLoader().failedGalleryPicture();
 				}
 				break;
 		}

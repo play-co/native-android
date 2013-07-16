@@ -10,7 +10,6 @@
 	<uses-feature android:name="android.hardware.telephony" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi" android:required="false" />
 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
-	<uses-permission android:name="com.android.vending.BILLING" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -62,15 +61,6 @@
 
 		<activity android:name="com.tealeaf.CrashRecover" android:configChanges="keyboard|keyboardHidden|orientation" android:excludeFromRecents="true" android:exported="false" android:stateNotNeeded="true" android:process=":CrashRecover" />
 
-
-		<service android:name="com.tealeaf.TeaLeafService" android:enabled="true" exported="false" />
-
-		<receiver android:name="com.tealeaf.MarketBroadcastReceiver" android:enabled="true"> <intent-filter>
-				<action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
-				<action android:name="com.android.vending.billing.RESPONSE_CODE" />
-				<action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
-			</intent-filter>
-		</receiver>
 
 		<receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
 		<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />

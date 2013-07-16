@@ -2,17 +2,15 @@
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.
 
  * The Game Closure SDK is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Mozilla Public License v. 2.0 for more details.
 
- * You should have received a copy of the GNU General Public License
- * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Mozilla Public License v. 2.0
+ * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
 package com.tealeaf;
 
@@ -36,8 +34,8 @@ public class PhotoPicker {
 		resourceManager = manager;
 	}
 
-	public static final byte CAPTURE_IMAGE = (byte) 45;
-	public static final byte PICK_IMAGE = (byte) 46;
+	public static final int CAPTURE_IMAGE = 1000;
+	public static final int PICK_IMAGE = 1001;
 
 	public int getNextCameraId() {
 		return settings.getInt("@__camera_id__", 1);
@@ -54,13 +52,13 @@ public class PhotoPicker {
 
 	public void take(int id) {
 		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		int requestCode = (CAPTURE_IMAGE << 24) | (id & 0xFFFFFF);
+		int requestCode = CAPTURE_IMAGE;
 		moveNextCameraId();
 		activity.startActivityForResult(camera, requestCode);
 	}
 	public void choose(int id) {
 		Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-		int requestCode = (PICK_IMAGE << 24) | (id & 0xFFFFFF);
+		int requestCode = PICK_IMAGE;
 		moveNextGalleryId();
 		activity.startActivityForResult(gallery, requestCode);
 	}
@@ -82,13 +80,21 @@ public class PhotoPicker {
 		}
 	}
 
+    //also deletes the file!!!
 	public Bitmap getResult(String type, int id) {
 		Bitmap bitmap = null;
+        String filename = resourceManager.resolveFile(type + id + ".jpg");
 		try {
-			bitmap = BitmapFactory.decodeFile(resourceManager.resolveFile(type + id + ".jpg"));
+			bitmap = BitmapFactory.decodeFile(filename);
 		} catch(Exception e) {
 			logger.log("{photos} ERROR: Unable to load picture", e);
 		}
+        if (bitmap != null) {
+            File file = new File(filename);
+            if (file != null && file.exists()) {
+                file.delete();
+            }
+        }
 		return bitmap;
 	}
 }

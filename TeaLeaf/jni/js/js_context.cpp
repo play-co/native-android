@@ -23,6 +23,7 @@ extern "C" {
 #include "core/tealeaf_context.h"
 #include "core/rgba.h"
 #include "core/draw_textures.h"
+#include "core/log.h"
 }
 #include "platform/text_manager.h"
 #include <string.h>
@@ -84,9 +85,16 @@ Handle<Value> defDrawPointSprites(const Arguments& args) {
 }
 
 Handle<Value> defDestroyImage(const Arguments& args) {
-	// TODO: Can we remove this?
-
-	return Undefined();
+	LOGFN("destroyImage");
+    HandleScope handleScope;
+    String::Utf8Value str(args[0]);
+    const char *url = ToCString(str);
+    texture_2d *tex = texture_manager_get_texture(texture_manager_get(), url);
+    if (tex && tex->loaded) {
+        texture_manager_free_texture(texture_manager_get(), tex);
+    }
+	LOGFN("endDestroyImage");
+    return Undefined();
 }
 
 Handle<Value> defRotate(const Arguments& args) {
