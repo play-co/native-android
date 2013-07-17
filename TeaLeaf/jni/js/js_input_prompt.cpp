@@ -55,11 +55,23 @@ Handle<Value> js_input_prompt_hide_soft_keyboard(const Arguments &args) {
     return Undefined();
 }
 
+Handle<Value> js_input_prompt_show_status_bar(const Arguments &args) {
+    input_prompt_show_status_bar();
+    return Undefined();
+}
+
+Handle<Value> js_input_prompt_hide_status_bar(const Arguments &args) {
+    input_prompt_hide_status_bar();
+    return Undefined();
+}
+
 Handle<ObjectTemplate> js_input_prompt_get_template() {
 	Handle<ObjectTemplate> input = ObjectTemplate::New();
 	input->Set(STRING_CACHE_show, FunctionTemplate::New(js_input_prompt_show));
     input->Set(STRING_CACHE_show_soft_keyboard, FunctionTemplate::New(js_input_prompt_show_soft_keyboard));
     input->Set(STRING_CACHE_hide_soft_keyboard, FunctionTemplate::New(js_input_prompt_hide_soft_keyboard));
+	input->Set(STRING_CACHE_show_status_bar, FunctionTemplate::New(js_input_prompt_show_status_bar));
+	input->Set(STRING_CACHE_hide_status_bar, FunctionTemplate::New(js_input_prompt_hide_status_bar));
 	return input;
 }
 

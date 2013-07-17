@@ -213,7 +213,8 @@ Persistent<String> STRING_CACHE_devicePixelRatio;
 Persistent<String> STRING_CACHE_seekTo;
 Persistent<String> STRING_CACHE_show_soft_keyboard;
 Persistent<String> STRING_CACHE_hide_soft_keyboard;
-
+Persistent<String> STRING_CACHE_show_status_bar;
+Persistent<String> STRING_CACHE_hide_status_bar;
 
 void js_string_cache_init() {
 	STRING_CACHE_restore = Persistent<String>::New(String::New("restore"));
@@ -425,4 +426,6 @@ void js_string_cache_init() {
 	STRING_CACHE_seekTo = Persistent<String>::New(String::New("seekTo"));
 	STRING_CACHE_show_soft_keyboard = Persistent<String>::New(String::New("showSoftKeyboard"));
 	STRING_CACHE_hide_soft_keyboard = Persistent<String>::New(String::New("hideSoftKeyboard"));
+	STRING_CACHE_show_status_bar = Persistent<String>::New(String::New("showStatusBar"));
+	STRING_CACHE_hide_status_bar = Persistent<String>::New(String::New("hideStatusBar"));
 }

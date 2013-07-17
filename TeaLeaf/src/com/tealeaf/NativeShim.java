@@ -194,6 +194,22 @@ public class NativeShim {
 		});
 	}
 
+	public void showStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}	
+		});
+	}
+
+	public void hideStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}	
+		});
+	}
+
 	//TextInputView
 	public int createTextBox() {
 		return context.getTextInputView().createNew();
