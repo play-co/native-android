@@ -53,11 +53,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import android.support.v4.app.FragmentActivity;
+
 /*
  * FIXME general things
- * there's /a lot/ of stuff in this class.  Much of it needs to be moved into
+ * there's /a lot/ of stuff in this class.	Much of it needs to be moved into
  * other places so that each unit only has one concern.
  *
  * Longer term, this activity should become the activity that always starts and
@@ -72,6 +72,7 @@ public class TeaLeaf extends FragmentActivity {
 	protected FrameLayout group;
 	protected Overlay overlay;
 	protected TextInputView textboxview;
+	private TextEditViewHandler textEditView;
 
 	private Uri launchURI;
 
@@ -141,8 +142,9 @@ public class TeaLeaf extends FragmentActivity {
 	}
 	public synchronized TextInputView getTextInputView() {
 		if(textboxview == null) {
-			textboxview = new TextInputView(this);
+			textboxview = new TextInputView(TeaLeaf.this);
 			group.addView(textboxview, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
 			if(overlay != null) {
 				overlay.bringToFront();
 			}
@@ -205,7 +207,6 @@ public class TeaLeaf extends FragmentActivity {
 
 		PluginManager.callAll("onCreate", this, savedInstanceState);
 
-
 		//check intent for test app info
 		Bundle bundle = getIntent().getExtras();
 		boolean isTestApp = false;
@@ -227,8 +228,13 @@ public class TeaLeaf extends FragmentActivity {
 		   }
 		}
 
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
 		group = new FrameLayout(this);
 		setContentView(group);
+
+		// TextEditViewHandler setup
+		textEditView = new TextEditViewHandler(this);
 
 		settings = new Settings(this);
 		remoteLogger = (ILogger)getLoggerInstance(this);
@@ -262,6 +268,7 @@ public class TeaLeaf extends FragmentActivity {
 		android.widget.AbsoluteLayout absLayout = new android.widget.AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
+
 		group.addView(absLayout);
 
 		if (isTestApp) {
@@ -292,7 +299,6 @@ public class TeaLeaf extends FragmentActivity {
 		}
 	}
 
-
 	private void checkUpdate() {
 		if(settings.isUpdateReady(options.getBuildIdentifier())) {
 			if(settings.isMarketUpdate(options.getBuildIdentifier())) {
@@ -308,7 +314,6 @@ public class TeaLeaf extends FragmentActivity {
 		group.addView(overlay, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		overlay.bringToFront();
 	}
-
 
 
 	public void setServer(String host, int port) {
@@ -354,7 +359,7 @@ public class TeaLeaf extends FragmentActivity {
 		super.onWindowFocusChanged(hasFocus);
 		if(hasFocus) {
 			logger.log("{focus} Gained focus");
-            ActivityState.onWindowFocusAcquired();
+			ActivityState.onWindowFocusAcquired();
 			if (ActivityState.hasResumed(true)) {
 				if (glView != null) {
 					glView.queueResumeEvent();
@@ -368,7 +373,7 @@ public class TeaLeaf extends FragmentActivity {
 			EventQueue.pushEvent(new WindowFocusAcquiredEvent());
 		} else {
 			logger.log("{focus} Lost focus");
-            ActivityState.onWindowFocusLost();
+			ActivityState.onWindowFocusLost();
 			pause();
 			unregisterReceiver(screenOffReciever);
 			//always send lost focus event
@@ -384,7 +389,7 @@ public class TeaLeaf extends FragmentActivity {
 	protected void onPause() {
 		super.onPause();
 
-        ActivityState.onPause();
+		ActivityState.onPause();
 		pauseGL();
 		paused = true;
 		pause();
@@ -410,17 +415,17 @@ public class TeaLeaf extends FragmentActivity {
 		}
 	}
 
-    public void onConfigurationChanged(Configuration config) {
+	public void onConfigurationChanged(Configuration config) {
 
-        super.onConfigurationChanged(config);
-    }
+		super.onConfigurationChanged(config);
+	}
 
 	@Override
 	protected void onResume() {
 		logger.log("{tealeaf} Resume");
 
 		super.onResume();
-        ActivityState.onResume();
+		ActivityState.onResume();
 		paused = false;
 		if(settings.isUpdateReady(options.getBuildIdentifier())) {
 			if(settings.isMarketUpdate(options.getBuildIdentifier())) {
@@ -457,7 +462,6 @@ public class TeaLeaf extends FragmentActivity {
 	public void onBackPressed() {
 		Object [] objs = PluginManager.callAll("consumeOnBackPressed");
 
-
 		boolean consume = true;
 		for (Object o : objs) {
 			if (o != null && ((Boolean) o).booleanValue()) {
@@ -478,7 +482,7 @@ public class TeaLeaf extends FragmentActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		PluginManager.callAll("onDestroy");
-        logger.log("{tealeaf} Destroy");
+		logger.log("{tealeaf} Destroy");
 		glView.destroy();
 		NativeShim.reset();
 	}
@@ -611,6 +615,9 @@ public class TeaLeaf extends FragmentActivity {
 
 	}
 
+	public TextEditViewHandler getTextEditViewHandler() {
+		return textEditView;
+	}
 
 	public void reload() {
 

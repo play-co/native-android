@@ -35,7 +35,10 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
-
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.view.inputmethod.EditorInfo;
+import android.text.InputType;
 
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -172,12 +175,53 @@ public class NativeShim {
 	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
 		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
 	}
+	
+	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength) {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				TextEditViewHandler textEditView = context.getTextEditViewHandler();
+				textEditView.activate(text, hint, hasBackward, hasForward, inputType, maxLength);
+			}
+		});
+	}
+
+	public void hideSoftKeyboard() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				TextEditViewHandler textEditView = context.getTextEditViewHandler();
+				textEditView.closeKeyboard();
+			}
+		});
+	}
+
+	public void showStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}	
+		});
+	}
+
+	public void hideStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}	
+		});
+	}
+
 	//TextInputView
 	public int createTextBox() {
 		return context.getTextInputView().createNew();
 	}
-	public int createTextBox(int x, int y, int w, int h, String initialValue) {
-		return context.getTextInputView().createNew(x, y, w, h, initialValue);
+	public int createTextBox(final int x, final int y, final int w, final int h, final String initialValue) {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getTextInputView().createNew(x, y, w, h, initialValue);
+			}
+		});
+
+		return 0;
 	}
 	public void destroyTextBox(int id) {
 		context.getTextInputView().destroy(id);
