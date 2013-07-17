@@ -318,9 +318,7 @@ Handle<Object> def_get_viewport(Handle<Object> js_opts) {
 }
 
 void def_restore_viewport(Handle<Object> js_opts, Handle<Object> js_viewport) {
-	if (!js_viewport.IsEmpty()) {
-		js_opts->Set(STRING_CACHE_viewport, js_viewport);
-	}
+	js_opts->Set(STRING_CACHE_viewport, js_viewport);
 }
 
 void def_timestep_view_needs_reflow(Handle<Object> js_view, bool force) {

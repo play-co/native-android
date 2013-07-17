@@ -72,30 +72,75 @@ var installAddons = function(builder, project, opts, addonConfig, next) {
 	var addons = project && project.manifest && project.manifest.addons;
 
 	var f = ff(this, function() {
-		var group = f.group();
 
-		// For each addon,
+		var addonConfigMap = {};
+		var next = f.slotPlain();
+		var addonQueue = [];
+		var checkedAddonMap = {};
 		if (addons) {
+			var missingAddons = [];
 			for (var ii = 0; ii < addons.length; ++ii) {
-				var addon = addons[ii];
+				addonQueue.push(addons[ii]);
+			}
+
+			var processAddonQueue = function() {
+				var addon = null;
+				if (addonQueue.length > 0) {
+					addon = addonQueue.shift();
+				} else {
+					if (missingAddons.length > 0) {
+						logger.error("=========================================================================");
+						logger.error("Missing addons =>", JSON.stringify(missingAddons));
+						logger.error("=========================================================================");
+						process.exit(1);
+					}
+
+					next(addonConfigMap);
+					return;
+				}
 				var addonConfig = paths.addons(addon, 'android', 'config.json');
 
 				if (fs.existsSync(addonConfig)) {
-					fs.readFile(addonConfig, 'utf8', group.slot());
+					fs.readFile(addonConfig, 'utf8', function(err, data) {
+						if (!err && data) {
+							var config = JSON.parse(data);
+							addonConfigMap[addon] = data;
+							if (config.addonDependencies && config.addonDependencies.length > 0) {
+								for (var a in config.addonDependencies) {
+									var dep = config.addonDependencies[a];
+									if (!checkedAddonMap[dep]) {
+										checkedAddonMap[dep] = true;
+										addonQueue.push(dep);
+									}
+								}
+							}
+						}
+						processAddonQueue();
+					});
 				} else {
-					logger.warn("Unable to find Android addon config file", addonConfig);
+					if (!checkedAddonMap[addon]) {
+						checkedAddonMap[addon] = true;
+					}
+					if (missingAddons.indexOf(addon) == -1) {
+						missingAddons.push(addon);
+						logger.warn("Unable to find Android addon config file", addonConfig);
+					}
+					processAddonQueue();
 				}
-			}
-		}
-	}, function(results) {
-		if (results) {
-			for (var ii = 0; ii < results.length; ++ii) {
-				var addon = addons[ii];
-				addonConfig[addon] = JSON.parse(results[ii]);
+			};
 
-				logger.log("Configured addon:", addon);
-			}
+			processAddonQueue();
+
+		} else {
+			next({});
 		}
+	}, function(addonConfigMap) {
+		if (addonConfigMap) {
+            for (var addon in addonConfigMap) {
+                addonConfig[addon] = JSON.parse(addonConfigMap[addon]);
+				logger.log("Configured addon:", addon);
+            }
+        }
 	}).error(function(err) {
 		logger.error("Failure to install addons:", err, err.stack);
 	}).cb(next);
@@ -177,11 +222,61 @@ function injectPluginXML(builder, opts, next) {
 	});
 }
 
+var installAddonGameFiles = function(builder, opts, next) {
+	var addonConfig = opts.addonConfig;
+	var project = opts.project;
+
+	var filePaths = [];
+
+	var f = ff(function() {
+		var group = f.group();
+
+		for (var addon in addonConfig) {
+			var config = addonConfig[addon];
+
+			if (config.copyGameFiles) {
+				for (var ii = 0; ii < config.copyGameFiles.length; ++ii) {
+					var filePath = path.join(project.paths.root, config.copyGameFiles[ii]);
+
+					logger.log("Installing game-specific plugin file:", filePath);
+
+					fs.readFile(filePath, "binary", group.slot());
+
+					// Record target path
+					filePaths.push(builder.common.paths.addons(addon, 'android', config.copyGameFiles[ii]));
+				}
+			}
+		}
+	}, function(results) {
+		if (results && results.length > 0) {
+			for (var ii = 0; ii < results.length; ++ii) {
+				var data = results[ii];
+				var filePath = filePaths[ii];
+
+				if (data) {
+					logger.log(" - Writing to:", filePath);
+
+					fs.writeFile(filePath, data, 'binary', f.wait());
+				} else {
+					logger.error("Unable to read file expected in game directory:", filePath, "(requested by addons)");
+				}
+			}
+		} else {
+			logger.log("No game files to add");
+		}
+	}).success(next).error(function(err) {
+		logger.error("Error while installing addon game files code:", err, err.stack);
+		process.exit(1);
+	});
+}
+
 var installAddonCode = function(builder, opts, next) {
 	var addonConfig = opts.addonConfig;
 	var destDir = opts.destDir;
+	var project = opts.project;
 
 	var filePaths = [];
+	var replacers = [];
 	var libraries = [];
 	var jars = [];
 	var jarPaths = [];
@@ -198,9 +293,16 @@ var installAddonCode = function(builder, opts, next) {
 
 					logger.log("Installing addon Java code:", filePath);
 
-					filePaths.push(filePath);
+					replacers.push(config.injectionSource);
 
-					fs.readFile(filePath, "utf-8", group.slot());
+					if (path.extname(filePath) === ".java" ||
+						path.extname(filePath) === ".aidl") {
+						filePaths.push(filePath);
+						fs.readFile(filePath, "utf-8", group.slot());
+					} else {
+						filePaths.push(config.copyFiles[ii]);
+						fs.readFile(filePath, "binary", group.slot());
+					}
 				}
 			}
 
@@ -243,15 +345,39 @@ var installAddonCode = function(builder, opts, next) {
 				var filePath = filePaths[ii];
 
 				if (data) {
-					var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
-					var pkgDir = pkgName.replace(/\./g, "/");
-					var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
+					if (path.extname(filePath) === ".java" ||
+						path.extname(filePath) === ".aidl") {
+						var pkgName = data.match(/(package[\s]+)([a-z.A-Z0-9]+)/g)[0].split(' ')[1];
+						var pkgDir = pkgName.replace(/\./g, "/");
+						var outFile = path.join(destDir, "src", pkgDir, path.basename(filePath));
 
-					logger.log("Installing Java package", pkgName, "to", outFile);
+						logger.log("Installing Java package", pkgName, "to", outFile);
 
-					wrench.mkdirSyncRecursive(path.dirname(outFile));
+						wrench.mkdirSyncRecursive(path.dirname(outFile));
 
-					fs.writeFile(outFile, data, 'utf-8', f.wait());
+						// Run injectionSource section of associated addon
+						var replacer = replacers[ii];
+						if (replacer && replacer.length > 0) {
+							for (var jj = 0; jj < replacer.length; ++jj) {
+								var findString = replacer[jj].regex;
+								var keyForReplace = replacer[jj].keyForReplace;
+								var replaceString = project.manifest.android[keyForReplace];
+								if (replaceString) {
+									logger.log(" - Running find-replace for", findString, "->", replaceString, "(android:", keyForReplace + ")");
+									var rexp = new RegExp(findString, "g");
+									data = data.replace(rexp, replaceString);
+								} else {
+									logger.error(" - Unable to find android key for", keyForReplace);
+								}
+							}
+						}
+
+						fs.writeFile(outFile, data, 'utf-8', f.wait());
+					} else {
+						var outFile = path.join(destDir, filePath);
+
+						fs.writeFile(outFile, data, 'binary', f.wait());
+					}
 				} else {
 					logger.warn("Unable to read Java package", filePath);
 				}
@@ -945,6 +1071,11 @@ exports.build = function(builder, project, opts, next) {
 		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, project, destDir, debug, cleanProj, f.waitPlain());
 	}, function() {
+		installAddonGameFiles(builder, {
+			addonConfig: addonConfig,
+			project: project
+		}, f());
+	}, function() {
 		copyFonts(builder, project, destDir);
 		copyIcons(builder, project, destDir);
 		copyMusic(builder, project, destDir);
@@ -953,7 +1084,8 @@ exports.build = function(builder, project, opts, next) {
 
 		installAddonCode(builder, {
 			addonConfig: addonConfig,
-			destDir: destDir
+			destDir: destDir,
+			project: project
 		}, f());
 	}, function() {
 		var onDoneBuilding = f();

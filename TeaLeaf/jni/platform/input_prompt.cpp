@@ -52,3 +52,19 @@ void input_prompt_hide_soft_keyboard() {
 	jmethodID method = env->GetMethodID(shim->type, "hideSoftKeyboard", "()V");
     env->CallVoidMethod(shim->instance, method);
 }
+
+void input_prompt_show_status_bar() {
+	native_shim* shim = get_native_shim();
+	JNIEnv *env = shim->env;
+    
+	jmethodID method = env->GetMethodID(shim->type, "showStatusBar", "()V");
+    env->CallVoidMethod(shim->instance, method);
+}
+
+void input_prompt_hide_status_bar() {
+	native_shim* shim = get_native_shim();
+	JNIEnv *env = shim->env;
+    
+	jmethodID method = env->GetMethodID(shim->type, "hideStatusBar", "()V");
+    env->CallVoidMethod(shim->instance, method);
+}

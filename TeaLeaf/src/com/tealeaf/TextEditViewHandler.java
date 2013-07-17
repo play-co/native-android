@@ -57,7 +57,7 @@ public class TextEditViewHandler {
 
 		LayoutInflater inflater = activity.getLayoutInflater();
 		editTextHandler = inflater.inflate(R.layout.edit_text_handler, null);
-		editTextHandler.setOnTouchListener(this.getScreenCaptureListener());
+		editTextHandler.setOnClickListener(this.getScreenCaptureListener());
 
 		// setup EditText
 		editText = (TextEditView) editTextHandler.findViewById(R.id.handler_text);
@@ -220,15 +220,13 @@ public class TextEditViewHandler {
 		this.deactivate();	
 	}
 
-	public OnTouchListener getScreenCaptureListener() {
-		return new OnTouchListener() {
+	public OnClickListener getScreenCaptureListener() {
+		return new OnClickListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
+			public void onClick(View v) {
 				if (isActive) {
 					closeKeyboard();
 				}
-
-				return false;
 			}
 		};	
 	}
