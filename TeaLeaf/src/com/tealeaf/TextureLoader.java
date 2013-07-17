@@ -304,6 +304,7 @@ public class TextureLoader implements Runnable {
         if (bmpSquare != bmpScaled) {
         	bmpScaled.recycle();
         }
+        logger.log(bmpSquare.isRecycled());
 		return bmpSquare;
 	}
 
@@ -333,12 +334,12 @@ public class TextureLoader implements Runnable {
 						Bitmap bmp = photoPicker.getResult(tag.toLowerCase(), id);
 						if (bmp != null) {
                             Bitmap bScaled = scaleTo(size, bmp);
-                            if (bScaled != bmp) {
+                            if (!bScaled.isRecycled()) {
                                 bmp.recycle();
                             }
-                            loadTexture("@" + tag.toUpperCase() + id + "-" + size, bScaled);
+                            loadTexture("@" + tag.toUpperCase() + id + "-" + size, bScaled, false);
                             sendPhotoLoadedEvent(bScaled);
-						} else {
+                        } else {
 							loadingError("@" + tag.toUpperCase() + id + "-" + size);
 						}
 					}
@@ -557,8 +558,8 @@ public class TextureLoader implements Runnable {
 		logger.log("{texture} Loading took", System.currentTimeMillis() - then, "ms");
 	}
 
-	public void loadTexture(String url, Bitmap bmp) {
-		TextureData td = getTextureData(url, bmp);
+    public void loadTexture(String url, Bitmap bmp, boolean recycleOrig) {
+		TextureData td = getTextureData(url, bmp, recycleOrig);
 		if (td == null) {
 			return;
 		}
@@ -571,9 +572,14 @@ public class TextureLoader implements Runnable {
 				logger.log("{texture} WARNING: Aborting pushing loaded image during clearing");
 			}
 		}
+
+    }
+
+	public void loadTexture(String url, Bitmap bmp) {
+        loadTexture(url, bmp, true);
 	}
 
-	public TextureData getTextureData(String url, Bitmap bmp) {
+    public TextureData getTextureData(String url, Bitmap bmp, boolean recycleOrig) {
 		int originalWidth = bmp.getWidth(), originalHeight = bmp.getHeight(), width = getNextHighestPO2(originalWidth), height = getNextHighestPO2(originalHeight);
 		if (width > 1024 || height > 1024) {
 			EventQueue.pushEvent(new LogEvent("The image " + url + " has dimensions larger than 1024x1024, which won't work"));
@@ -605,8 +611,10 @@ public class TextureLoader implements Runnable {
 					Canvas c = new Canvas(bitmap);
 					c.scale(1.f / ratio, 1.f / ratio);
 					c.drawBitmap(bmp, 0, 0, null);
-					bmp.recycle();
-					bmp = null;
+                    if (recycleOrig) {
+                        bmp.recycle();
+                        bmp = null;
+                    }
 				} else {
 					// put the texture back on the queue--something went wrong
 					loadTexture(url);
@@ -617,11 +625,16 @@ public class TextureLoader implements Runnable {
 				loadTexture(url);
 			}
 		}
-		if (bmp != null) {
+		if (bmp != null && recycleOrig) {
 			bitmap = bmp;
 		}
 		return new TextureData(url, -1, width, height, originalWidth, originalHeight, bitmap, true);
-	}
+
+    }
+
+	public TextureData getTextureData(String url, Bitmap bmp) {
+        return getTextureData(url, bmp, true);
+    }
 
 	public void finishLoadingTexture(TextureData td) {
 		if (td == null || td.url == null || td.bitmap == null) {
