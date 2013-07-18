@@ -147,6 +147,7 @@ Persistent<String> STRING_CACHE_getType;
 Persistent<String> STRING_CACHE_applyUpdate;
 Persistent<String> STRING_CACHE___gl_name;
 Persistent<String> STRING_CACHE_inputPrompt;
+Persistent<String> STRING_CACHE_statusBar;
 Persistent<String> STRING_CACHE_language;
 Persistent<String> STRING_CACHE_androidHash;
 Persistent<String> STRING_CACHE_playSound;
@@ -360,6 +361,7 @@ void js_string_cache_init() {
 	STRING_CACHE_getType = Persistent<String>::New(String::New("getType"));
 	STRING_CACHE_applyUpdate = Persistent<String>::New(String::New("applyUpdate"));
 	STRING_CACHE___gl_name = Persistent<String>::New(String::New("__gl_name"));
+	STRING_CACHE_statusBar = Persistent<String>::New(String::New("statusBar"));
 	STRING_CACHE_inputPrompt = Persistent<String>::New(String::New("inputPrompt"));
 	STRING_CACHE_language = Persistent<String>::New(String::New("language"));
 	STRING_CACHE_androidHash = Persistent<String>::New(String::New("androidHash"));
