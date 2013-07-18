@@ -97,13 +97,13 @@ public class PluginManager {
 		}
 	}
 
-	private static Object invokeMethod(Object targetObject, Object[] parameters,
+	private static String invokeMethod(Object targetObject, Object[] parameters,
             String methodName, String className) {
-		Object obj = null;
+		String retStr = "{}";
 
 		if (targetObject == null) {
 			logger.log("{plugins} WARNING: Event could not be delivered for missing plugin:", className);
-			return obj;
+			return retStr;
 		}
 
 		boolean found = false;
@@ -130,9 +130,12 @@ public class PluginManager {
 				try {
 					if (method.getReturnType().equals(Void.TYPE)) {
 						method.invoke(targetObject, parameters);
+					} else if (method.getReturnType().equals(String.class)) {
+						retStr = (String)method.invoke(targetObject, parameters);
 					} else {
-						obj = method.invoke(targetObject, parameters);
+						retStr = "" + method.invoke(targetObject, parameters);
 					}
+
 
 					found = true;
 				} catch (IllegalArgumentException e) {
@@ -150,22 +153,26 @@ public class PluginManager {
 				className, ", method:", methodName);
 		}
 
-		return obj;
+        if (retStr == null) {
+            retStr = "{}";
+        }
+
+		return retStr;
 	}
 
-	public static Object[] callAll(String methodName, Object... params) {
-		Object[] objs = new Object[classMap.size()];
+	public static String[] callAll(String methodName, Object... params) {
+		String[] strs = new String[classMap.size()];
 		int i = 0;
 
 		for (Entry<String, Object> classEntry : classMap.entrySet()) {
-			Object o = invokeMethod(classEntry.getValue(), params, methodName, "any");
-			objs[i++] = o;
+			String s = (String)invokeMethod(classEntry.getValue(), params, methodName, "any");
+			strs[i++] = s;
 		}
 
-		return objs;
+		return strs;
 	}
 
-	public static Object call(String className, String methodName,
+	public static String call(String className, String methodName,
 			Object... params) {
 		return invokeMethod(classMap.get("com.tealeaf.plugin.plugins." + className), params, methodName, className);
 	}

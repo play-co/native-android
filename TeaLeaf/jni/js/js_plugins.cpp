@@ -22,6 +22,7 @@ using namespace v8;
 
 Handle<Value> js_plugins_send_event(const Arguments& args) {
 	LOGFN("plugins send event");
+    char *ret_str = NULL;
 	if (args[0]->IsString() && args[1]->IsString() && args[2]->IsString()) {
 		String::Utf8Value str_plugin_class(args[0]->ToString());
 		String::Utf8Value str_plugin_method(args[1]->ToString());
@@ -29,14 +30,21 @@ Handle<Value> js_plugins_send_event(const Arguments& args) {
 
 		const char* plugin_class = ToCString(str_plugin_class);
 		const char* plugin_method = ToCString(str_plugin_method);
-		const char* data = ToCString(str_data);
-		plugins_send_event(plugin_class, plugin_method, data);
+        const char* data = ToCString(str_data);
+        ret_str = plugins_send_event(plugin_class, plugin_method, data);
 	} else {
 		LOG("{plugins} WARNING: send event should be called with 3 string arguments");
 	}
 
 	LOGFN("end plugins send event");
-	return Undefined();
+    Handle<Value> retVal;
+    if (ret_str != NULL) {
+        retVal = String::New(ret_str);
+        free(ret_str);
+    } else {
+        retVal = String::New("{}");
+    }
+	return retVal;
 }
 
 
