@@ -150,6 +150,7 @@ extern Persistent<String> STRING_CACHE_getType;
 extern Persistent<String> STRING_CACHE_applyUpdate;
 extern Persistent<String> STRING_CACHE___gl_name;
 extern Persistent<String> STRING_CACHE_inputPrompt;
+extern Persistent<String> STRING_CACHE_statusBar;
 extern Persistent<String> STRING_CACHE_language;
 extern Persistent<String> STRING_CACHE_androidHash;
 extern Persistent<String> STRING_CACHE_playSound;
