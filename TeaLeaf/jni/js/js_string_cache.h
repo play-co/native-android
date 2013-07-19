@@ -150,6 +150,7 @@ extern Persistent<String> STRING_CACHE_getType;
 extern Persistent<String> STRING_CACHE_applyUpdate;
 extern Persistent<String> STRING_CACHE___gl_name;
 extern Persistent<String> STRING_CACHE_inputPrompt;
+extern Persistent<String> STRING_CACHE_statusBar;
 extern Persistent<String> STRING_CACHE_language;
 extern Persistent<String> STRING_CACHE_androidHash;
 extern Persistent<String> STRING_CACHE_playSound;
@@ -215,5 +216,9 @@ extern Persistent<String> STRING_CACHE_doneLoading;
 extern Persistent<String> STRING_CACHE_failed;
 extern Persistent<String> STRING_CACHE_devicePixelRatio;
 extern Persistent<String> STRING_CACHE_seekTo;
+extern Persistent<String> STRING_CACHE_show_soft_keyboard;
+extern Persistent<String> STRING_CACHE_hide_soft_keyboard;
+extern Persistent<String> STRING_CACHE_show_status_bar;
+extern Persistent<String> STRING_CACHE_hide_status_bar;
 
 #endif

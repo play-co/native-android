@@ -14,6 +14,7 @@
  */
 package com.tealeaf;
 
+import java.io.InputStream;
 import android.content.pm.ActivityInfo;
 import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
@@ -27,6 +28,9 @@ import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
+import android.os.AsyncTask;
+import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.content.BroadcastReceiver;
 import android.content.res.Configuration;
 import android.content.Context;
@@ -36,6 +40,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -53,11 +58,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import android.support.v4.app.FragmentActivity;
+
 /*
  * FIXME general things
- * there's /a lot/ of stuff in this class.  Much of it needs to be moved into
+ * there's /a lot/ of stuff in this class.	Much of it needs to be moved into
  * other places so that each unit only has one concern.
  *
  * Longer term, this activity should become the activity that always starts and
@@ -72,6 +77,7 @@ public class TeaLeaf extends FragmentActivity {
 	protected FrameLayout group;
 	protected Overlay overlay;
 	protected TextInputView textboxview;
+	private TextEditViewHandler textEditView;
 
 	private Uri launchURI;
 
@@ -141,8 +147,9 @@ public class TeaLeaf extends FragmentActivity {
 	}
 	public synchronized TextInputView getTextInputView() {
 		if(textboxview == null) {
-			textboxview = new TextInputView(this);
+			textboxview = new TextInputView(TeaLeaf.this);
 			group.addView(textboxview, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
 			if(overlay != null) {
 				overlay.bringToFront();
 			}
@@ -205,7 +212,6 @@ public class TeaLeaf extends FragmentActivity {
 
 		PluginManager.callAll("onCreate", this, savedInstanceState);
 
-
 		//check intent for test app info
 		Bundle bundle = getIntent().getExtras();
 		boolean isTestApp = false;
@@ -227,8 +233,13 @@ public class TeaLeaf extends FragmentActivity {
 		   }
 		}
 
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
 		group = new FrameLayout(this);
 		setContentView(group);
+
+		// TextEditViewHandler setup
+		textEditView = new TextEditViewHandler(this);
 
 		settings = new Settings(this);
 		remoteLogger = (ILogger)getLoggerInstance(this);
@@ -262,6 +273,7 @@ public class TeaLeaf extends FragmentActivity {
 		android.widget.AbsoluteLayout absLayout = new android.widget.AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
+
 		group.addView(absLayout);
 
 		if (isTestApp) {
@@ -292,7 +304,6 @@ public class TeaLeaf extends FragmentActivity {
 		}
 	}
 
-
 	private void checkUpdate() {
 		if(settings.isUpdateReady(options.getBuildIdentifier())) {
 			if(settings.isMarketUpdate(options.getBuildIdentifier())) {
@@ -308,7 +319,6 @@ public class TeaLeaf extends FragmentActivity {
 		group.addView(overlay, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		overlay.bringToFront();
 	}
-
 
 
 	public void setServer(String host, int port) {
@@ -354,7 +364,7 @@ public class TeaLeaf extends FragmentActivity {
 		super.onWindowFocusChanged(hasFocus);
 		if(hasFocus) {
 			logger.log("{focus} Gained focus");
-            ActivityState.onWindowFocusAcquired();
+			ActivityState.onWindowFocusAcquired();
 			if (ActivityState.hasResumed(true)) {
 				if (glView != null) {
 					glView.queueResumeEvent();
@@ -368,7 +378,7 @@ public class TeaLeaf extends FragmentActivity {
 			EventQueue.pushEvent(new WindowFocusAcquiredEvent());
 		} else {
 			logger.log("{focus} Lost focus");
-            ActivityState.onWindowFocusLost();
+			ActivityState.onWindowFocusLost();
 			pause();
 			unregisterReceiver(screenOffReciever);
 			//always send lost focus event
@@ -384,7 +394,7 @@ public class TeaLeaf extends FragmentActivity {
 	protected void onPause() {
 		super.onPause();
 
-        ActivityState.onPause();
+		ActivityState.onPause();
 		pauseGL();
 		paused = true;
 		pause();
@@ -410,17 +420,17 @@ public class TeaLeaf extends FragmentActivity {
 		}
 	}
 
-    public void onConfigurationChanged(Configuration config) {
+	public void onConfigurationChanged(Configuration config) {
 
-        super.onConfigurationChanged(config);
-    }
+		super.onConfigurationChanged(config);
+	}
 
 	@Override
 	protected void onResume() {
 		logger.log("{tealeaf} Resume");
 
 		super.onResume();
-        ActivityState.onResume();
+		ActivityState.onResume();
 		paused = false;
 		if(settings.isUpdateReady(options.getBuildIdentifier())) {
 			if(settings.isMarketUpdate(options.getBuildIdentifier())) {
@@ -457,7 +467,6 @@ public class TeaLeaf extends FragmentActivity {
 	public void onBackPressed() {
 		String [] objs = PluginManager.callAll("consumeOnBackPressed");
 
-
 		boolean consume = true;
 		for (String o : objs) {
 			if (o != null && Boolean.getBoolean(o)) {
@@ -478,7 +487,7 @@ public class TeaLeaf extends FragmentActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		PluginManager.callAll("onDestroy");
-        logger.log("{tealeaf} Destroy");
+		logger.log("{tealeaf} Destroy");
 		glView.destroy();
 		NativeShim.reset();
 	}
@@ -581,7 +590,6 @@ public class TeaLeaf extends FragmentActivity {
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
-
 		
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
@@ -594,23 +602,87 @@ public class TeaLeaf extends FragmentActivity {
 				break;
 			case PhotoPicker.PICK_IMAGE:
 				if(result == RESULT_OK) {
-					Uri selectedimage = data.getData();
-					String[] filepathcolumn = {android.provider.MediaStore.Images.Media.DATA};
-					android.database.Cursor cursor = getContentResolver().query(selectedimage, filepathcolumn, null, null, null);
-					cursor.moveToFirst();
-					int columnindex = cursor.getColumnIndex(filepathcolumn[0]);
-					String filepath = cursor.getString(columnindex);
-					cursor.close();
-					glView.getTextureLoader().saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), BitmapFactory.decodeFile(filepath));
-					glView.getTextureLoader().finishGalleryPicture();
+					final Uri selectedImage = data.getData();
+					
+					String[] filePathColumn = { MediaColumns.DATA,
+												MediaStore.Images.ImageColumns.ORIENTATION };
+
+					String filePath = null;
+
+					try {
+						Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+						cursor.moveToFirst();
+
+						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+						String filepath = cursor.getString(columnIndex);
+						columnIndex = cursor.getColumnIndex(filePathColumn[1]);
+						int orientation = cursor.getInt(columnIndex);
+						cursor.close();
+					} catch (Exception e) {
+					
+					}
+
+					if (filePath == null) {
+						new AsyncTask<Void, Void, Bitmap>() {
+							protected Bitmap doInBackground(Void... voids) {
+								BitmapFactory.Options options = new BitmapFactory.Options();
+								InputStream inputStream;
+								Bitmap bmp = null;
+
+								try {
+									inputStream = getContentResolver().openInputStream(selectedImage);
+									bmp = BitmapFactory.decodeStream(inputStream, null, options);
+									inputStream.close();
+								} catch (Exception e) {
+								
+								}
+
+								return bmp;
+							}	
+
+							protected void onProgressUpdate(Void... progress) {
+							
+							}
+
+							protected void onPostExecute(Bitmap bmp) {
+								if (bmp != null) {
+									glView.getTextureLoader()
+										  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+									glView.getTextureLoader()
+										  .finishGalleryPicture();
+								}	
+							}
+						}.execute();
+					} else {
+						Bitmap bmp = null;
+
+						try {
+							bmp = BitmapFactory.decodeFile(filePath);	
+						} catch (OutOfMemoryError e) {
+							System.gc();
+
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							options.inSampleSize = 4;
+							bmp = BitmapFactory.decodeFile(filePath, options);
+						}
+
+						if (bmp != null) {
+							glView.getTextureLoader()
+								  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+							glView.getTextureLoader()
+								  .finishGalleryPicture();
+						}
+					}
 				} else {
 					glView.getTextureLoader().failedGalleryPicture();
 				}
 				break;
 		}
-
 	}
 
+	public TextEditViewHandler getTextEditViewHandler() {
+		return textEditView;
+	}
 
 	public void reload() {
 

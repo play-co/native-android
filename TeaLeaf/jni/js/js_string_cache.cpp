@@ -147,6 +147,7 @@ Persistent<String> STRING_CACHE_getType;
 Persistent<String> STRING_CACHE_applyUpdate;
 Persistent<String> STRING_CACHE___gl_name;
 Persistent<String> STRING_CACHE_inputPrompt;
+Persistent<String> STRING_CACHE_statusBar;
 Persistent<String> STRING_CACHE_language;
 Persistent<String> STRING_CACHE_androidHash;
 Persistent<String> STRING_CACHE_playSound;
@@ -212,7 +213,10 @@ Persistent<String> STRING_CACHE_doneLoading;
 Persistent<String> STRING_CACHE_failed;
 Persistent<String> STRING_CACHE_devicePixelRatio;
 Persistent<String> STRING_CACHE_seekTo;
-
+Persistent<String> STRING_CACHE_show_soft_keyboard;
+Persistent<String> STRING_CACHE_hide_soft_keyboard;
+Persistent<String> STRING_CACHE_show_status_bar;
+Persistent<String> STRING_CACHE_hide_status_bar;
 
 void js_string_cache_init() {
 	STRING_CACHE_restore = Persistent<String>::New(String::New("restore"));
@@ -357,6 +361,7 @@ void js_string_cache_init() {
 	STRING_CACHE_getType = Persistent<String>::New(String::New("getType"));
 	STRING_CACHE_applyUpdate = Persistent<String>::New(String::New("applyUpdate"));
 	STRING_CACHE___gl_name = Persistent<String>::New(String::New("__gl_name"));
+	STRING_CACHE_statusBar = Persistent<String>::New(String::New("statusBar"));
 	STRING_CACHE_inputPrompt = Persistent<String>::New(String::New("inputPrompt"));
 	STRING_CACHE_language = Persistent<String>::New(String::New("language"));
 	STRING_CACHE_androidHash = Persistent<String>::New(String::New("androidHash"));
@@ -423,4 +428,8 @@ void js_string_cache_init() {
 	STRING_CACHE_failed = Persistent<String>::New(String::New("failed"));
 	STRING_CACHE_devicePixelRatio = Persistent<String>::New(String::New("devicePixelRatio"));
 	STRING_CACHE_seekTo = Persistent<String>::New(String::New("seekTo"));
+	STRING_CACHE_show_soft_keyboard = Persistent<String>::New(String::New("showSoftKeyboard"));
+	STRING_CACHE_hide_soft_keyboard = Persistent<String>::New(String::New("hideSoftKeyboard"));
+	STRING_CACHE_show_status_bar = Persistent<String>::New(String::New("showStatusBar"));
+	STRING_CACHE_hide_status_bar = Persistent<String>::New(String::New("hideStatusBar"));
 }
