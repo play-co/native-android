@@ -14,6 +14,7 @@
  */
 package com.tealeaf;
 
+import java.io.InputStream;
 import android.content.pm.ActivityInfo;
 import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
@@ -27,6 +28,9 @@ import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
+import android.os.AsyncTask;
+import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.content.BroadcastReceiver;
 import android.content.res.Configuration;
 import android.content.Context;
@@ -36,6 +40,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -585,7 +590,6 @@ public class TeaLeaf extends FragmentActivity {
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
-
 		
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
@@ -598,21 +602,82 @@ public class TeaLeaf extends FragmentActivity {
 				break;
 			case PhotoPicker.PICK_IMAGE:
 				if(result == RESULT_OK) {
-					Uri selectedimage = data.getData();
-					String[] filepathcolumn = {android.provider.MediaStore.Images.Media.DATA};
-					android.database.Cursor cursor = getContentResolver().query(selectedimage, filepathcolumn, null, null, null);
-					cursor.moveToFirst();
-					int columnindex = cursor.getColumnIndex(filepathcolumn[0]);
-					String filepath = cursor.getString(columnindex);
-					cursor.close();
-					glView.getTextureLoader().saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), BitmapFactory.decodeFile(filepath));
-					glView.getTextureLoader().finishGalleryPicture();
+					final Uri selectedImage = data.getData();
+					
+					String[] filePathColumn = { MediaColumns.DATA,
+												MediaStore.Images.ImageColumns.ORIENTATION };
+
+					String filePath = null;
+
+					try {
+						Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+						cursor.moveToFirst();
+
+						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+						String filepath = cursor.getString(columnIndex);
+						columnIndex = cursor.getColumnIndex(filePathColumn[1]);
+						int orientation = cursor.getInt(columnIndex);
+						cursor.close();
+					} catch (Exception e) {
+					
+					}
+
+					if (filePath == null) {
+						new AsyncTask<Void, Void, Bitmap>() {
+							protected Bitmap doInBackground(Void... voids) {
+								BitmapFactory.Options options = new BitmapFactory.Options();
+								InputStream inputStream;
+								Bitmap bmp = null;
+
+								try {
+									inputStream = getContentResolver().openInputStream(selectedImage);
+									bmp = BitmapFactory.decodeStream(inputStream, null, options);
+									inputStream.close();
+								} catch (Exception e) {
+								
+								}
+
+								return bmp;
+							}	
+
+							protected void onProgressUpdate(Void... progress) {
+							
+							}
+
+							protected void onPostExecute(Bitmap bmp) {
+								if (bmp != null) {
+									glView.getTextureLoader()
+										  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+									glView.getTextureLoader()
+										  .finishGalleryPicture();
+								}	
+							}
+						}.execute();
+					} else {
+						Bitmap bmp = null;
+
+						try {
+							bmp = BitmapFactory.decodeFile(filePath);	
+						} catch (OutOfMemoryError e) {
+							System.gc();
+
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							options.inSampleSize = 4;
+							bmp = BitmapFactory.decodeFile(filePath, options);
+						}
+
+						if (bmp != null) {
+							glView.getTextureLoader()
+								  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+							glView.getTextureLoader()
+								  .finishGalleryPicture();
+						}
+					}
 				} else {
 					glView.getTextureLoader().failedGalleryPicture();
 				}
 				break;
 		}
-
 	}
 
 	public TextEditViewHandler getTextEditViewHandler() {
