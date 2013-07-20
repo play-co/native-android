@@ -477,12 +477,11 @@ public class NativeShim {
 	}
 
 	// plugins
-	public void pluginsCall(final String className,final String methodName, final Object[] params) {
-		context.runOnUiThread(new Runnable() {
-			public void run() {
-				PluginManager.call(className, methodName, params);
-			}
-		});
+	public String pluginsCall(final String className,final String methodName, final Object[] params) {
+//		there may be issues not running this on the ui thread however
+//		it is required for now and there doesn't seem to be any immediate
+//		concerns with it running on any thread
+        return PluginManager.call(className, methodName, params);
 	}
 
 	// native
