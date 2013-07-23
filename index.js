@@ -376,6 +376,8 @@ var installAddonCode = function(builder, opts, next) {
 					} else {
 						var outFile = path.join(destDir, filePath);
 
+						wrench.mkdirSyncRecursive(path.dirname(outFile));
+
 						fs.writeFile(outFile, data, 'binary', f.wait());
 					}
 				} else {
