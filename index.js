@@ -69,7 +69,7 @@ exports.testapp = function(common, opts, next) {
 
 var installAddons = function(builder, project, opts, addonConfig, next) {
 	var paths = builder.common.paths;
-	var addons = project && project.manifest && project.manifest.addons;
+	var addons = Object.keys(project.getAddonConfig());
 
 	var f = ff(this, function() {
 
@@ -459,7 +459,7 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 		for (var key in params) {
 			if (typeof params[key] != 'string') {
 				if (params[key] == undefined || typeof params[key] == 'object') {
-					logger.error("settings for AndroidManifest: value for", clc.yellow.bright(key), "is not a string");
+					logger.error("settings for AndroidManifest: value for", clc.yellowBright(key), "is not a string");
 				}
 
 				params[key] = JSON.stringify(params[key]);
@@ -1108,8 +1108,8 @@ exports.build = function(builder, project, opts, next) {
 				if (fs.existsSync(destApkPath)) {
 					wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
 					builder.common.copyFileSync(destApkPath, apkPath);
-					logger.log("built", clc.yellow.bright(packageName));
-					logger.log("saved to " + clc.blue.bright(apkPath));
+					logger.log("built", clc.yellowBright(packageName));
+					logger.log("saved to " + clc.blueBright(apkPath));
 					onDoneBuilding();
 				} else {
 					logger.error("No file at " + destApkPath);
