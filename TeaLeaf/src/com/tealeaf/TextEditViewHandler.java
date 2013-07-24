@@ -100,7 +100,14 @@ public class TextEditViewHandler {
 		// setup forward and back keys
 		View backButton = editTextHandler.findViewById(R.id.back_button);
 		View forwardButton = editTextHandler.findViewById(R.id.forward_button);
+		View doneButton = editTextHandler.findViewById(R.id.done_button);
 
+		doneButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				closeKeyboard();
+			}
+		});
 		backButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -195,9 +202,19 @@ public class TextEditViewHandler {
 		// Button options
 		View backButton = editTextHandler.findViewById(R.id.back_button);
 		View forwardButton = editTextHandler.findViewById(R.id.forward_button);
+		View doneButton = editTextHandler.findViewById(R.id.done_button);
 
-		backButton.setEnabled(hasBackward);
-		forwardButton.setEnabled(hasForward);
+		if (!hasForward && !hasBackward) {
+			backButton.setVisibility(View.GONE);
+			forwardButton.setVisibility(View.GONE);
+			doneButton.setVisibility(View.VISIBLE);
+		} else {
+			backButton.setVisibility(View.VISIBLE);
+			forwardButton.setVisibility(View.VISIBLE);
+			doneButton.setVisibility(View.GONE);
+			backButton.setEnabled(hasBackward);
+			forwardButton.setEnabled(hasForward);
+		}
 
 		this.hasForward = hasForward;
 	}
