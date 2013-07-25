@@ -33,6 +33,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpEntity;
@@ -122,7 +123,8 @@ public class HTTP {
 		GET,
 		POST,
 		PUT,
-		DELETE
+		DELETE,
+		HEAD
 	};
 
 	public Response makeRequest(Methods method, URI uri, HashMap<String, String> requestHeaders) {
@@ -148,6 +150,8 @@ public class HTTP {
 				}
 			} else if (method == Methods.DELETE){
 				request = new HttpDelete();
+			} else if (method == Methods.HEAD){
+				request = new HttpHead();
 			}
 		} catch (UnsupportedEncodingException e) {
 			logger.log(e);
