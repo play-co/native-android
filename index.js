@@ -313,6 +313,13 @@ var installAddonCode = function(builder, opts, next) {
 					logger.log("Installing addon library:", library);
 
 					libraries.push(library);
+
+					// Set up library build files
+					var target = "android-15";
+					builder.common.child('android', [
+							"update", "project", "--target", target,
+							"--path", library
+							], {}, f.wait());
 				}
 			}
 
