@@ -80,15 +80,20 @@ public class XMLHttpRequest implements Runnable {
 			response = http.makeRequest(HTTP.Methods.PUT, uri, requestHeaders, data);
 		} else if (method.toUpperCase().equals("DELETE")) {
 			response = http.makeRequest(HTTP.Methods.DELETE, uri, requestHeaders);
+		} else if (method.toUpperCase().equals("HEAD")) {
+			response = http.makeRequest(HTTP.Methods.HEAD, uri, requestHeaders);
 		} else {
 			logger.log("{xhr} WARNING: Unable to handle method", method);
 		}
-		
-		int count = response.headers.size();
-		keys = new String[count];
-		values = new String[count];
-		response.headers.keySet().toArray(keys);
-		response.headers.values().toArray(values);
+
+		if (response.headers != null) {
+			int count = response.headers.size();
+			keys = new String[count];
+			values = new String[count];
+			response.headers.keySet().toArray(keys);
+			response.headers.values().toArray(values);
+		}
+
 		cb.run();
 	}
 }
