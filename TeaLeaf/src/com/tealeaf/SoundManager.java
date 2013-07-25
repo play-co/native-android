@@ -79,17 +79,19 @@ public class SoundManager implements Runnable {
 				synchronized (this) {
 					spec = id2spec.get(sampleId);
 				}
-				synchronized (spec) {
-					if (status == 0) { // success
-						spec.loaded = true;
-						spec.failed = false;
-						SoundManager.this.sendLoadedEvent(spec.url);
-					} else { // failure
-						spec.failed = true;
-						spec.loaded = false;
-						SoundManager.this.sendErrorEvent(spec.url);
+				if (spec != null) {
+					synchronized (spec) {
+						if (status == 0) { // success
+							spec.loaded = true;
+							spec.failed = false;
+							SoundManager.this.sendLoadedEvent(spec.url);
+						} else { // failure
+							spec.failed = true;
+							spec.loaded = false;
+							SoundManager.this.sendErrorEvent(spec.url);
+						}
+						spec.notifyAll();
 					}
-					spec.notifyAll();
 				}
 			}
 		});
