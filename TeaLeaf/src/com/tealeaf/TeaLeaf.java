@@ -15,6 +15,7 @@
 package com.tealeaf;
 
 import java.io.InputStream;
+import java.io.File;
 import android.content.pm.ActivityInfo;
 import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
@@ -31,6 +32,7 @@ import com.tealeaf.util.ILogger;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
+import android.media.ExifInterface;
 import android.content.BroadcastReceiver;
 import android.content.res.Configuration;
 import android.content.Context;
@@ -43,6 +45,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -586,10 +589,39 @@ public class TeaLeaf extends FragmentActivity {
 
 	}
 
+    static int ROTATE_0 = 0;
+    static int ROTATE_90 = 90;
+    static int ROTATE_180 = 180;
+    static int ROTATE_270 = 270;
+    private Bitmap rotateBitmap(Bitmap bitmap, int rotate) {
+        // rotate as needed
+        Bitmap bmp;
+
+        int newWidth = bitmap.getWidth();
+        int newHeight = bitmap.getHeight();
+        int degrees = 0;
+        if (rotate == ROTATE_90 || rotate == ROTATE_270) {
+            newWidth = bitmap.getHeight();
+            newHeight = bitmap.getWidth();
+        }
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotate);
+
+        bmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                bitmap.getHeight(), matrix, true);
+        if (bitmap != bmp) {
+            bitmap.recycle();
+        }
+
+        return bmp;
+    }
+
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
+		logger.log("GOT ACTIVITY RESULT WITH", request, result);
 		
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
@@ -607,14 +639,14 @@ public class TeaLeaf extends FragmentActivity {
 					String[] filePathColumn = { MediaColumns.DATA,
 												MediaStore.Images.ImageColumns.ORIENTATION };
 
-					String filePath = null;
+					String _filepath = null;
 
 					try {
 						Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
 						cursor.moveToFirst();
 
 						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-						String filepath = cursor.getString(columnIndex);
+						_filepath = cursor.getString(columnIndex);
 						columnIndex = cursor.getColumnIndex(filePathColumn[1]);
 						int orientation = cursor.getInt(columnIndex);
 						cursor.close();
@@ -622,9 +654,11 @@ public class TeaLeaf extends FragmentActivity {
 					
 					}
 
-					if (filePath == null) {
-						new AsyncTask<Void, Void, Bitmap>() {
-							protected Bitmap doInBackground(Void... voids) {
+					final String filePath = _filepath;
+
+					new Thread(new Runnable() {
+						public void run(){
+							if (filePath == null) {
 								BitmapFactory.Options options = new BitmapFactory.Options();
 								InputStream inputStream;
 								Bitmap bmp = null;
@@ -634,45 +668,68 @@ public class TeaLeaf extends FragmentActivity {
 									bmp = BitmapFactory.decodeStream(inputStream, null, options);
 									inputStream.close();
 								} catch (Exception e) {
-								
+									logger.log(e);
+
 								}
 
-								return bmp;
-							}	
-
-							protected void onProgressUpdate(Void... progress) {
-							
-							}
-
-							protected void onPostExecute(Bitmap bmp) {
 								if (bmp != null) {
 									glView.getTextureLoader()
-										  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+									.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
 									glView.getTextureLoader()
-										  .finishGalleryPicture();
-								}	
+									.finishGalleryPicture();
+								}
+
+							} else {
+								Bitmap bmp = null;
+
+								try {
+									bmp = BitmapFactory.decodeFile(filePath);	
+								} catch (OutOfMemoryError e) {
+									System.gc();
+
+									BitmapFactory.Options options = new BitmapFactory.Options();
+									options.inSampleSize = 4;
+									bmp = BitmapFactory.decodeFile(filePath, options);
+								}
+
+								if (bmp != null) {
+									try {
+										File f = new File(filePath);
+										ExifInterface exif = new ExifInterface(
+												f.getAbsolutePath());
+										int orientation = exif.getAttributeInt(
+												ExifInterface.TAG_ORIENTATION,
+												ExifInterface.ORIENTATION_NORMAL);
+										if (orientation != ExifInterface.ORIENTATION_NORMAL) {
+											int rotateBy = 0;
+											switch(orientation) {
+												case ExifInterface.ORIENTATION_ROTATE_90:
+													rotateBy = ROTATE_90;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_180:
+													rotateBy = ROTATE_180;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_270:
+													rotateBy = ROTATE_270;
+													break;
+											}
+											Bitmap rotatedBmp = rotateBitmap(bmp, rotateBy);
+											bmp.recycle();
+											bmp = rotatedBmp;
+										}
+									} catch(Exception e) {
+										logger.log(e);
+									}
+
+									glView.getTextureLoader()
+									.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+									glView.getTextureLoader()
+									.finishGalleryPicture();
+								}
 							}
-						}.execute();
-					} else {
-						Bitmap bmp = null;
-
-						try {
-							bmp = BitmapFactory.decodeFile(filePath);	
-						} catch (OutOfMemoryError e) {
-							System.gc();
-
-							BitmapFactory.Options options = new BitmapFactory.Options();
-							options.inSampleSize = 4;
-							bmp = BitmapFactory.decodeFile(filePath, options);
 						}
+					}).start();
 
-						if (bmp != null) {
-							glView.getTextureLoader()
-								  .saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
-							glView.getTextureLoader()
-								  .finishGalleryPicture();
-						}
-					}
 				} else {
 					glView.getTextureLoader().failedGalleryPicture();
 				}
