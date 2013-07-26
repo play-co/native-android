@@ -46,7 +46,7 @@ exports.load = function(common) {
 	
 	common.config.write();
 
-	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname);
+	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname, "build");
 }
 
 exports.testapp = function(common, opts, next) {
