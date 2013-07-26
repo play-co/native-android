@@ -623,6 +623,7 @@ public class TeaLeaf extends FragmentActivity {
 		PluginManager.callAll("onActivityResult", request, result, data);
 		logger.log("GOT ACTIVITY RESULT WITH", request, result);
 		
+
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
 				if(result == RESULT_OK) {
@@ -677,6 +678,8 @@ public class TeaLeaf extends FragmentActivity {
 									.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
 									glView.getTextureLoader()
 									.finishGalleryPicture();
+								} else {
+									glView.getTextureLoader().failedCameraPicture();
 								}
 
 							} else {
@@ -686,7 +689,6 @@ public class TeaLeaf extends FragmentActivity {
 									bmp = BitmapFactory.decodeFile(filePath);	
 								} catch (OutOfMemoryError e) {
 									System.gc();
-
 									BitmapFactory.Options options = new BitmapFactory.Options();
 									options.inSampleSize = 4;
 									bmp = BitmapFactory.decodeFile(filePath, options);
@@ -714,17 +716,23 @@ public class TeaLeaf extends FragmentActivity {
 													break;
 											}
 											Bitmap rotatedBmp = rotateBitmap(bmp, rotateBy);
-											bmp.recycle();
+											if (rotatedBmp != bmp) {
+												bmp.recycle();
+											}
 											bmp = rotatedBmp;
 										}
 									} catch(Exception e) {
 										logger.log(e);
 									}
 
-									glView.getTextureLoader()
-									.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
-									glView.getTextureLoader()
-									.finishGalleryPicture();
+									if (bmp != null) {
+										glView.getTextureLoader()
+										.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+										glView.getTextureLoader()
+										.finishGalleryPicture();
+									} else {
+										glView.getTextureLoader().failedCameraPicture();
+									}
 								}
 							}
 						}
