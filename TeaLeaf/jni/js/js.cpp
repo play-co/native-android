@@ -170,7 +170,7 @@ static inline void log_error(const char *message) {
 		}
 	}
 	if (!logged) {
-		LOG(message);
+		LOG("%s", message);
 	}
 }
 
