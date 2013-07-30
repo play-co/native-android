@@ -186,7 +186,7 @@ void timestep_view_set_width (Local<String> property, Local<Value> value, const 
 
 	if (width != view->width) {
 		if (!view->js_view.IsEmpty()) {
-			def_timestep_view_needs_reflow(view->js_view, true);
+			def_timestep_view_needs_reflow(view->js_view, false);
 		}
 	}
 }
@@ -216,7 +216,7 @@ void timestep_view_set_height (Local<String> property, Local<Value> value, const
 
 	if (height != view->height) {
 		if (!view->js_view.IsEmpty()) {
-			def_timestep_view_needs_reflow(view->js_view, true);
+			def_timestep_view_needs_reflow(view->js_view, false);
 		}
 	}
 }
@@ -241,7 +241,7 @@ void timestep_view_set_widthPercent(Local<String> property, Local<Value> value, 
 
 	if (width_percent != view->width_percent) {
 		if (!view->js_view.IsEmpty()) {
-			def_timestep_view_needs_reflow(view->js_view, true);
+			def_timestep_view_needs_reflow(view->js_view, false);
 		}
 	}
 }
@@ -267,7 +267,7 @@ void timestep_view_set_heightPercent (Local<String> property, Local<Value> value
 
 	if (height_percent != view->height_percent) {
 		if (!view->js_view.IsEmpty()) {
-			def_timestep_view_needs_reflow(view->js_view, true);
+			def_timestep_view_needs_reflow(view->js_view, false);
 		}
 	}
 }
