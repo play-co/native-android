@@ -298,7 +298,6 @@ public class TeaLeaf extends FragmentActivity {
 				//get visible area of the view
 				Rect r = new Rect();
 				group.getWindowVisibleDisplayFrame(r);
-				logger.log("jared ", r.left, r.right, r.top, r.bottom);
 				//get display height
 				android.view.Display display = getWindow().getWindowManager().getDefaultDisplay();
 				int height = display.getHeight();
