@@ -21,6 +21,7 @@ import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
 import com.tealeaf.event.OnUpdatedEvent;
 import com.tealeaf.event.PauseEvent;
+import com.tealeaf.event.KeyboardScreenResizeEvent;
 import com.tealeaf.event.WindowFocusAcquiredEvent;
 import com.tealeaf.event.WindowFocusLostEvent;
 import com.tealeaf.event.JSUpdateNotificationEvent;
@@ -29,6 +30,8 @@ import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
+import android.graphics.Rect;
+import android.view.ViewTreeObserver;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
@@ -290,6 +293,22 @@ public class TeaLeaf extends FragmentActivity {
 		paused = false;
 		menuButtonHandler = MenuButtonHandlerFactory.getButtonHandler(this);
 
+		group.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(){
+			public void onGlobalLayout(){
+				//get visible area of the view
+				Rect r = new Rect();
+				group.getWindowVisibleDisplayFrame(r);
+				logger.log("jared ", r.left, r.right, r.top, r.bottom);
+				//get display height
+				android.view.Display display = getWindow().getWindowManager().getDefaultDisplay();
+				int height = display.getHeight();
+				//if our visible height is less than 75% normal, assume keyboard on screen
+				int visibleHeight = r.bottom - r.top;
+				//TODO
+				//maybe this should be renamed
+				EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
+			}
+		});
 
 	}
 
