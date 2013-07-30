@@ -43,6 +43,7 @@ public class TextEditViewHandler {
 	private boolean registerTextChange = true;
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
+	private int uid = -1;
 
 	public enum InputName {
 		DEFAULT,
@@ -68,7 +69,7 @@ public class TextEditViewHandler {
 				// propagate text changes to JS to update views
 				if (registerTextChange) {
 					logger.log("KeyUp textChange in TextEditView");
-					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString()));
+					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString(), editText.getSelectionStart()));
 				} else {
 					registerTextChange = true;
 				}
@@ -138,7 +139,7 @@ public class TextEditViewHandler {
 	/**
 	 * Perform actions necessary when TextEditView pops up.
 	 */
-	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, int maxLength) {
+	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, int maxLength, int cursorPos) {
 
 		editText.setImeOptions(hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE);
 
@@ -197,7 +198,7 @@ public class TextEditViewHandler {
 		editText.setFocusableInTouchMode(true);
 		editText.setText(text);
 		editText.setHint(hint);
-		editText.setSelection(editText.getText().length());
+		editText.setSelection(cursorPos < 0 || cursorPos > editText.length() ? editText.getText().length() : cursorPos);
 
 		// Button options
 		View backButton = editTextHandler.findViewById(R.id.back_button);

@@ -34,15 +34,15 @@ int input_prompt_show(const char *title, const char *message, const char *value,
 	return id;
 }
 
-void input_prompt_show_soft_keyboard(const char *curr_val, const char *hint, bool has_backward, bool has_forward, const char *input_type, int max_length) {
+void input_prompt_show_soft_keyboard(const char *curr_val, const char *hint, bool has_backward, bool has_forward, const char *input_type, int max_length, int cursorPos) {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jstring jcurr_val = env->NewStringUTF(curr_val);
 	jstring jhint = env->NewStringUTF(hint);
 	jstring jinput_type = env->NewStringUTF(input_type);
 
-	jmethodID method = env->GetMethodID(shim->type, "showSoftKeyboard", "(Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;I)V");
-    env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, max_length);
+	jmethodID method = env->GetMethodID(shim->type, "showSoftKeyboard", "(Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;II)V");
+    env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, max_length, cursorPos);
 }
 
 void input_prompt_hide_soft_keyboard() {

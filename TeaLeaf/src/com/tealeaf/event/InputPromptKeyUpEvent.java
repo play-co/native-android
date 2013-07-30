@@ -18,9 +18,11 @@ package com.tealeaf.event;
 public class InputPromptKeyUpEvent extends Event {
     @SuppressWarnings("unused")
     private String text;
+    private int cursorPos;
 
-    public InputPromptKeyUpEvent(String text) {
+    public InputPromptKeyUpEvent(String text, int cursorPos) {
         super("inputPromptKeyUp");
         this.text = text; 
+        this.cursorPos = cursorPos;
     }
 }

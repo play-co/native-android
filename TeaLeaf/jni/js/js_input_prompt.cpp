@@ -41,12 +41,13 @@ Handle<Value> js_input_prompt_show_soft_keyboard(const Arguments &args) {
 	bool has_forward = args[3]->BooleanValue();
 	String::Utf8Value input_type_str(args[4]);
 	int max_length = args[5]->Int32Value();
+	int cursorPos = args[6]->Int32Value();
 
 	const char *curr_val = ToCString(curr_val_str);
 	const char *hint = ToCString(hint_str);
 	const char *input_type = ToCString(input_type_str);
 
-	input_prompt_show_soft_keyboard(curr_val, hint, has_backward, has_forward, input_type, max_length);
+	input_prompt_show_soft_keyboard(curr_val, hint, has_backward, has_forward, input_type, max_length, cursorPos);
 	return Undefined();
 }
 
