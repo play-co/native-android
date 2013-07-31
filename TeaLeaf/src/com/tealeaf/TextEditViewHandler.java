@@ -9,6 +9,7 @@ import android.view.View.OnKeyListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import com.tealeaf.event.InputPromptKeyUpEvent;
+import com.tealeaf.event.InputPromptSubmitEvent;
 import com.tealeaf.event.InputPromptMoveEvent;
 import android.view.View;
 import android.text.TextWatcher;
@@ -107,6 +108,7 @@ public class TextEditViewHandler {
 		doneButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				EventQueue.pushEvent(new InputPromptSubmitEvent(0, ""));
 				closeKeyboard();
 			}
 		});
