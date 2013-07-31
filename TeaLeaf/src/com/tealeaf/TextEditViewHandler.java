@@ -43,7 +43,6 @@ public class TextEditViewHandler {
 	private boolean registerTextChange = true;
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
-	private int uid = -1;
 
 	public enum InputName {
 		DEFAULT,
