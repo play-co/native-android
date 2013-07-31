@@ -176,11 +176,11 @@ public class NativeShim {
 		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
 	}
 	
-	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength) {
+	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength, final int cursorPos) {
 		context.runOnUiThread(new Runnable() {
 			public void run() {
 				TextEditViewHandler textEditView = context.getTextEditViewHandler();
-				textEditView.activate(text, hint, hasBackward, hasForward, inputType, maxLength);
+				textEditView.activate(text, hint, hasBackward, hasForward, inputType, maxLength, cursorPos);
 			}
 		});
 	}
