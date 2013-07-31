@@ -464,7 +464,7 @@ public class TeaLeaf extends FragmentActivity {
 
 		boolean consume = true;
 		for (Object o : objs) {
-			if (o != null && Boolean.valueOf(o)) {
+			if (o != null && ((Boolean) o).booleanValue()) {
 				consume = true;
 				break;
 			}
