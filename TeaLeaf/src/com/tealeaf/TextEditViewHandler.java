@@ -64,12 +64,14 @@ public class TextEditViewHandler {
 		editText = (TextEditView) editTextHandler.findViewById(R.id.handler_text);
 		editText.setTextEditViewHandler(this);
 		editText.addTextChangedListener(new TextWatcher() {
+			private String beforeText = "";
+
 			@Override
 			public void afterTextChanged(Editable s) {
 				// propagate text changes to JS to update views
 				if (registerTextChange) {
 					logger.log("KeyUp textChange in TextEditView");
-					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString(), editText.getSelectionStart()));
+					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString(), beforeText, editText.getSelectionStart()));
 				} else {
 					registerTextChange = true;
 				}
@@ -77,7 +79,7 @@ public class TextEditViewHandler {
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			
+				beforeText = s.toString();	
 			}
 
 			@Override
