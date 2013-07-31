@@ -41,6 +41,7 @@ extern "C" {
 
 static zip * APKArchive=NULL;
 static char *storage_dir = NULL;
+static pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 CEXPORT void resource_loader_initialize(const char *path) {
 	APKArchive = zip_open(path, 0, NULL);
@@ -122,9 +123,9 @@ CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
 
 	bool skip = false;
 	// check if it is a special url (text, contacts, etc.), if it is then load in java
-	if(texture->url[0] == '@') {
+	if (texture->url[0] == '@') {
 		skip = true;
-	}
+	} 
 
 	if(!skip) {
 		unsigned long sz;
@@ -197,8 +198,12 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 		char *filename = (char*)malloc(flen);
 		strcpy(filename, APK_PREFIX);
 		strcat(filename, url);
+
+		pthread_mutex_lock(&m_mutex);
+
 		zip_file *file = zip_fopen(APKArchive, filename, 0);
 		if (!file) {
+			pthread_mutex_unlock(&m_mutex);
 			LOG("{resources} WARNING: Unable to open %s from APK", filename);
 			free(filename);
 			return 0;
@@ -215,6 +220,8 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 		zip_fread(file, data, *sz - 1);
 
 		zip_fclose(file);
+		pthread_mutex_unlock(&m_mutex);
+
 		free(filename);
 	}
 
