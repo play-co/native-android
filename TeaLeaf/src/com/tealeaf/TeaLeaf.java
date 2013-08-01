@@ -646,8 +646,8 @@ public class TeaLeaf extends FragmentActivity {
 
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
-                EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 				if(result == RESULT_OK) {
+					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
 					glView.getTextureLoader().finishCameraPicture();
 				} else {
@@ -655,9 +655,9 @@ public class TeaLeaf extends FragmentActivity {
 				}
 				break;
 			case PhotoPicker.PICK_IMAGE:
-                EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 				if(result == RESULT_OK) {
 					final Uri selectedImage = data.getData();
+					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 					
 					String[] filePathColumn = { MediaColumns.DATA,
 												MediaStore.Images.ImageColumns.ORIENTATION };
