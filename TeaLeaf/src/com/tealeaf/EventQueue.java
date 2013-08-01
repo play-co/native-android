@@ -47,7 +47,7 @@ public class EventQueue {
 				NativeShim.dispatchEvents(batch256);
 			}
 
-			if (len & 255) {
+			if ((len & 255) > 0) {
 				int batchLength = len & 255;
 				String[] batch = new String[batchLength];
 
