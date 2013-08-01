@@ -33,10 +33,10 @@ public class EventQueue {
 	public static void dispatchEvents() {
 		String[] e = getEvents();
 
-		if (e.length() > 256) {
+		if (e.length > 256) {
 			String[] batch256 = new String[256];
 
-			int ii, len = e.length();
+			int ii, len = e.length;
 			for (ii = 0; ii < len; ii += 256) {
 				int batchLength = len - ii;
 				if (batchLength < 256) {
