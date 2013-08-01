@@ -360,12 +360,14 @@ public class SoundManager implements Runnable {
 	}
 
 	public void onPause() {
+		soundPool.autoPause();
 		if (backgroundMusic != null) {
 			backgroundMusic.pause();
 		}
 	}
 
 	public void onResume() {
+		soundPool.autoResume();
 		if (backgroundMusic != null && shouldResumeBackgroundMusic) {
 			backgroundMusic.start();
 		}
