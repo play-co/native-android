@@ -20,13 +20,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.content.res.AssetFileDescriptor;
 
-import com.tealeaf.SoundManager.SoundSpec;
 import com.tealeaf.event.SoundDurationEvent;
 import com.tealeaf.event.SoundErrorEvent;
 import com.tealeaf.event.SoundLoadedEvent;
