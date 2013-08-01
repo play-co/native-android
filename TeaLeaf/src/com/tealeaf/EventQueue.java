@@ -47,11 +47,11 @@ public class EventQueue {
 				NativeShim.dispatchEvents(batch256);
 			}
 
-			if (ii < len) {
-				int batchLength = len - ii;
+			if (len & 255) {
+				int batchLength = len & 255;
 				String[] batch = new String[batchLength];
 
-				System.arraycopy(e, ii, batch, 0, batchLength);
+				System.arraycopy(e, len & ~255, batch, 0, batchLength);
 				NativeShim.dispatchEvents(batch);
 			}
 		} else {
