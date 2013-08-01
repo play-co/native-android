@@ -20,11 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.content.res.AssetFileDescriptor;
 
+import com.tealeaf.SoundManager.SoundSpec;
 import com.tealeaf.event.SoundDurationEvent;
 import com.tealeaf.event.SoundErrorEvent;
 import com.tealeaf.event.SoundLoadedEvent;
@@ -40,6 +42,7 @@ public class SoundManager implements Runnable {
 	private final LinkedBlockingQueue<SoundSpec> loadingQueue = new LinkedBlockingQueue<SoundSpec>();
 	private HashMap<String, Integer> durations = new HashMap<String, Integer>();
 	private HashSet<SoundSpec> pausedSounds = new HashSet<SoundSpec>();
+	private HashSet<SoundSpec> loopers = new HashSet<SoundSpec>();
 	private SoundPool soundPool = new SoundPool(15, AudioManager.STREAM_MUSIC, 0);
 	private MediaPlayer backgroundMusic = null, loadingSound = null;
 	private String backgroundMusicUrl = null;
@@ -159,6 +162,9 @@ public class SoundManager implements Runnable {
 			if (sound == null) {
 				logger.log("{sound} ERROR: Internal sound is null");
 			} else {
+				if (loop) {
+					loopers.add(sound);
+				}
 				int stream = soundPool.play(sound.id, volume, volume, 1, loop ? -1 : 0, 1);
 				sound.stream = stream;
 				if (pausedSounds.contains(sound)) {
@@ -304,6 +310,9 @@ public class SoundManager implements Runnable {
 			}
 		} else {
 			SoundSpec sound = getSound(url);
+			if (loopers.contains(sound)) {
+				loopers.remove(sound);
+			}
 			if (sound != null) {
 				soundPool.stop(sound.stream);
 			}
@@ -322,6 +331,9 @@ public class SoundManager implements Runnable {
 			}
 		} else {
 			SoundSpec sound = getSound(url);
+			if (loopers.contains(sound)) {
+				loopers.remove(sound);
+			}
 			if (sound != null) {
 				soundPool.pause(sound.stream);
 				pausedSounds.add(sound);
@@ -360,12 +372,22 @@ public class SoundManager implements Runnable {
 	}
 
 	public void onPause() {
+		Iterator<SoundSpec> looperIterator = loopers.iterator();
+		while (looperIterator.hasNext()) {
+			SoundSpec sound = (SoundSpec) looperIterator.next();
+			soundPool.pause(sound.stream);
+		}
 		if (backgroundMusic != null) {
 			backgroundMusic.pause();
 		}
 	}
 
 	public void onResume() {
+		Iterator<SoundSpec> looperIterator = loopers.iterator();
+		while (looperIterator.hasNext()) {
+			SoundSpec sound = (SoundSpec) looperIterator.next();
+			soundPool.resume(sound.stream);
+		}
 		if (backgroundMusic != null && shouldResumeBackgroundMusic) {
 			backgroundMusic.start();
 		}
