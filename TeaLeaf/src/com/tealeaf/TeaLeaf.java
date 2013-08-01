@@ -21,6 +21,7 @@ import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
 import com.tealeaf.event.OnUpdatedEvent;
 import com.tealeaf.event.PauseEvent;
+import com.tealeaf.event.PhotoBeginLoadedEvent;
 import com.tealeaf.event.KeyboardScreenResizeEvent;
 import com.tealeaf.event.WindowFocusAcquiredEvent;
 import com.tealeaf.event.WindowFocusLostEvent;
@@ -644,6 +645,7 @@ public class TeaLeaf extends FragmentActivity {
 
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
+                EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 				if(result == RESULT_OK) {
 					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
 					glView.getTextureLoader().finishCameraPicture();
@@ -652,6 +654,7 @@ public class TeaLeaf extends FragmentActivity {
 				}
 				break;
 			case PhotoPicker.PICK_IMAGE:
+                EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 				if(result == RESULT_OK) {
 					final Uri selectedImage = data.getData();
 					
