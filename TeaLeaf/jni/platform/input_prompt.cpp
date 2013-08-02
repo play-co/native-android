@@ -17,20 +17,24 @@
 #include "platform/input_prompt.h"
 #include "platform/platform.h"
 
-int input_prompt_show(const char *title, const char *message, const char *value, bool auto_show_keyboard, bool is_password) {
+int input_prompt_show(const char *title, const char *message, const char *ok_text, const char *cancel_text, const char *value, bool auto_show_keyboard, bool is_password) {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jstring jtitle = env->NewStringUTF(title);
 	jstring jmessage = env->NewStringUTF(message);
 	jstring jvalue = env->NewStringUTF(value);
+	jstring jok = env->NewStringUTF(ok_text);
+	jstring jcancel = env->NewStringUTF(cancel_text);
 
-	jmethodID method = env->GetMethodID(shim->type, "showInputPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)I");
-	jint id = env->CallIntMethod(shim->instance, method, jtitle, jmessage, jvalue, auto_show_keyboard, is_password);
+	jmethodID method = env->GetMethodID(shim->type, "showInputPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)I");
+	jint id = env->CallIntMethod(shim->instance, method, jtitle, jmessage, jok, jcancel, jvalue, auto_show_keyboard, is_password);
 
 	env->DeleteLocalRef(jtitle);
 	env->DeleteLocalRef(jmessage);
 	env->DeleteLocalRef(jvalue);
-	
+	env->DeleteLocalRef(jok);
+	env->DeleteLocalRef(jcancel);
+
 	return id;
 }
 
@@ -42,14 +46,14 @@ void input_prompt_show_soft_keyboard(const char *curr_val, const char *hint, boo
 	jstring jinput_type = env->NewStringUTF(input_type);
 
 	jmethodID method = env->GetMethodID(shim->type, "showSoftKeyboard", "(Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;II)V");
-    env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, max_length, cursorPos);
+	env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, max_length, cursorPos);
 }
 
 void input_prompt_hide_soft_keyboard() {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
-    
+
 	jmethodID method = env->GetMethodID(shim->type, "hideSoftKeyboard", "()V");
-    env->CallVoidMethod(shim->instance, method);
+	env->CallVoidMethod(shim->instance, method);
 }
 

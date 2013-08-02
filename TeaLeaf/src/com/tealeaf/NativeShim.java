@@ -172,8 +172,8 @@ public class NativeShim {
 	}
 
 	private int textInputId = 0;
-	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
-		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
+	public int showInputPrompt(final String title, final String message, final String okText, final String cancelText, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
+		return InputPrompt.getInstance().showInputPrompt(context, title, message, okText, cancelText, value, autoShowKeyboard, isPassword);
 	}
 	
 	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength, final int cursorPos) {
