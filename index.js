@@ -546,7 +546,29 @@ function buildAndroidProject(builder, destDir, debug, next) {
 	}, next);
 }
 
-function makeAndroidProject(builder, project, namespace, activity, title, appID,
+
+function saveLocalizedStringsXmls(destDir, titles) {
+	var stringsXmlPath = path.join(destDir, "res/values/strings.xml");
+	var stringsXml = fs.readFileSync(stringsXmlPath, "utf-8");
+	for (var t in titles) {
+		logger.log("JARED WRITE LOCALIZED FILES");
+		var title = titles[t];
+		var i = stringsXml.indexOf('</resources>');
+		var first = stringsXml.substring(0, i);
+		var second = stringsXml.substring(i);
+		var inner = '<string name="title">' + title + '</string>';
+		var finalXml = first + inner + second;
+		//default en
+		if (t === 'en') {
+			fs.writeFileSync(path.join(destDir, "res/values/strings.xml"), finalXml, 'utf-8');
+		} else {
+			fs.mkdirSync(path.join(destDir, "res/values-" + t));
+			fs.writeFileSync(path.join(destDir, "res/values-" + t + "/strings.xml"), finalXml, 'utf-8');
+		}
+	}
+}
+
+function makeAndroidProject(builder, project, namespace, activity, title, titles, appID,
 		shortName, version, debug,
 		destDir, servicesURL, metadata, studioName, addonConfig, next)
 {
@@ -566,7 +588,8 @@ function makeAndroidProject(builder, project, namespace, activity, title, appID,
 	}, function() {
 		fs.appendFile(path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
 	}, function() {
-		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
+		saveLocalizedStringsXmls(destDir, titles);
+		updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
 	}).error(function(err) {
 		logger.error("Build failed creating android project:", err, err.stack);
@@ -778,7 +801,7 @@ function getAndroidHash(builder, next) {
 	});
 }
 
-function updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, next) {
+function updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, next) {
 	var defaults = {
 		// Empty defaults
 		installShortcut: "false",
@@ -847,7 +870,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 			copy(params, project.manifest.android);
 			copy(params, {
 					"package": namespace,
-					title: title,
+					title: "@string/title",
 					activity: "." + activity,
 					version: "" + version,
 					appid: appID,
@@ -1030,7 +1053,8 @@ exports.build = function(builder, project, opts, next) {
 
 	// Project title.
 	var title = project.manifest.title;
-	if (title === null) {
+	var titles = project.manifest.titles;
+	if (title === null && titles === null) {
 		title = shortName;
 	}
 	// Create Android Activity name.
@@ -1063,7 +1087,7 @@ exports.build = function(builder, project, opts, next) {
 	}, function() {
 		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
 
-		makeAndroidProject(builder, project, packageName, activity, title, appID,
+		makeAndroidProject(builder, project, packageName, activity, title, titles, appID,
 			shortName, opts.version, debug, destDir, servicesURL, metadata,
 			studioName, addonConfig, f.waitPlain());
 
