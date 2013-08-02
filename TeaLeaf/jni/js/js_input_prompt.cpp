@@ -22,9 +22,9 @@ using namespace v8;
 Handle<Value> js_input_prompt_show(const Arguments &args) {
 	String::Utf8Value title_str(args[0]);
 	String::Utf8Value message_str(args[1]);
-	String::Utf8Value value_str(args[2]);
-	String::Utf8Value ok_str(args[3]);
-	String::Utf8Value cancel_str(args[4]);
+	String::Utf8Value ok_str(args[2]);
+	String::Utf8Value cancel_str(args[3]);
+	String::Utf8Value value_str(args[4]);
 
 	bool auto_show_keyboard = args[5]->BooleanValue();
 	bool is_password = args[6]->BooleanValue();
