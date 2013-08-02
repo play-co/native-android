@@ -431,8 +431,9 @@ var installAddonCode = function(builder, opts, next) {
 					var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
 
 					logger.log("Installing JAR file:", jarDestPath);
-
-					fs.writeFile(jarDestPath, data, "binary", f.wait());
+					//TODO: remove jar reading since sym links work
+					fs.symlinkSync(jarPath, jarDestPath, 'junction');
+					//fs.writeFile(jarDestPath, data, "binary", f.wait());
 				}
 			}
 		} else {
