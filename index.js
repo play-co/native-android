@@ -587,7 +587,12 @@ function makeAndroidProject(builder, project, namespace, activity, title, titles
 	}, function() {
 		fs.appendFile(path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
 	}, function() {
-		saveLocalizedStringsXmls(destDir, titles);
+		if (titles) {
+			if (titles.length == 0) {
+				titles['en'] = title;
+			}
+			saveLocalizedStringsXmls(destDir, titles);
+		}
 		updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
 	}).error(function(err) {
