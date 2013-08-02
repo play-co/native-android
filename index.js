@@ -329,16 +329,7 @@ var installAddonCode = function(builder, opts, next) {
 
 		fs.readFile(path.join(destDir, "project.properties"), "utf-8", f());
 
-		var jarGroup = f.group();
-
-		for (var ii = 0; ii < jars.length; ++ii) {
-			var jar = jars[ii];
-
-			fs.readFile(jar, "binary", jarGroup.slot());
-
-			jarPaths.push(jar);
-		}
-	}, function(results, properties, jarResults) {
+	}, function(results, properties) {
 		if (results && results.length > 0) {
 			for (var ii = 0; ii < results.length; ++ii) {
 				var data = results[ii];
@@ -422,19 +413,12 @@ var installAddonCode = function(builder, opts, next) {
 			logger.log("No library properties to add");
 		}
 
-		if (jarResults && jarResults.length > 0) {
-			for (var ii = 0; ii < jarResults.length; ++ii) {
-				var data = jarResults[ii];
-
-				if (data) {
-					var jarPath = jarPaths[ii];
-					var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
-
-					logger.log("Installing JAR file:", jarDestPath);
-					//TODO: remove jar reading since sym links work
-					fs.symlinkSync(jarPath, jarDestPath, 'junction');
-					//fs.writeFile(jarDestPath, data, "binary", f.wait());
-				}
+		if (jars && jars.length > 0) {
+			for (var ii = 0; ii < jars.length; ++ii) {
+				var jarPath = jars[ii];
+				var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
+				logger.log("Installing JAR file:", jarDestPath);
+				fs.symlinkSync(jarPath, jarDestPath, 'junction');
 			}
 		} else {
 			logger.log("No JAR file data to install");
@@ -592,8 +576,12 @@ function makeAndroidProject(builder, project, namespace, activity, title, titles
 			if (titles.length == 0) {
 				titles['en'] = title;
 			}
-			saveLocalizedStringsXmls(destDir, titles);
+		}  else {
+			titles = {};
+			titles['en'] = title;
 		}
+		saveLocalizedStringsXmls(destDir, titles);
+
 		updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
 	}).error(function(err) {
