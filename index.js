@@ -551,7 +551,6 @@ function saveLocalizedStringsXmls(destDir, titles) {
 	var stringsXmlPath = path.join(destDir, "res/values/strings.xml");
 	var stringsXml = fs.readFileSync(stringsXmlPath, "utf-8");
 	for (var t in titles) {
-		logger.log("JARED WRITE LOCALIZED FILES");
 		var title = titles[t];
 		var i = stringsXml.indexOf('</resources>');
 		var first = stringsXml.substring(0, i);
