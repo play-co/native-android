@@ -73,6 +73,7 @@ public class TextEditViewHandler {
 		final FrameLayout group = this.activity.getGroup();
 		editTextFrame = editTextHandler.findViewById(R.id.handler_wrapper);
 
+		// TODO: we could use the observer in TeaLeaf.java to avoid duplicate code here...
 		group.getViewTreeObserver()
 			 .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			 public void onGlobalLayout() {
