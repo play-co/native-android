@@ -33,6 +33,7 @@ import com.tealeaf.util.ILogger;
 
 import android.graphics.Rect;
 import android.view.ViewTreeObserver;
+
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
@@ -64,6 +65,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 import android.support.v4.app.FragmentActivity;
 
@@ -240,7 +242,7 @@ public class TeaLeaf extends FragmentActivity {
 		   }
 		}
 
-		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 		group = new FrameLayout(this);
 		setContentView(group);
@@ -268,7 +270,7 @@ public class TeaLeaf extends FragmentActivity {
 		glView = new TeaLeafGLSurfaceView(this);
 
 		int orientation = getRequestedOrientation();
-		android.view.Display display = getWindow().getWindowManager().getDefaultDisplay();
+		Display display = getWindow().getWindowManager().getDefaultDisplay();
 		int width = display.getWidth();
 		int height = display.getHeight();
 		if ((orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE &&  height > width) || (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && width > height)) {
@@ -277,7 +279,7 @@ public class TeaLeaf extends FragmentActivity {
 			height = tempWidth;
 		}
 
-		android.widget.AbsoluteLayout absLayout = new android.widget.AbsoluteLayout(this);
+		AbsoluteLayout absLayout = new AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
 
@@ -296,20 +298,22 @@ public class TeaLeaf extends FragmentActivity {
 
 		group.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(){
 			public void onGlobalLayout(){
-				//get visible area of the view
+				// get visible area of the view
 				Rect r = new Rect();
 				group.getWindowVisibleDisplayFrame(r);
-				//get display height
-				android.view.Display display = getWindow().getWindowManager().getDefaultDisplay();
+				
+				// get display height
+				Display display = getWindow().getWindowManager().getDefaultDisplay();
 				int height = display.getHeight();
-				//if our visible height is less than 75% normal, assume keyboard on screen
+				
+				// if our visible height is less than 75% normal, assume keyboard on screen
 				int visibleHeight = r.bottom - r.top;
-				//TODO
-				//maybe this should be renamed
+
+				// TODO
+				// maybe this should be renamed
 				EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
 			}
 		});
-
 	}
 
 	public void pauseGL() {
@@ -769,6 +773,10 @@ public class TeaLeaf extends FragmentActivity {
 
 	public TextEditViewHandler getTextEditViewHandler() {
 		return textEditView;
+	}
+
+	public FrameLayout getGroup() {
+		return group;	
 	}
 
 	public void reload() {
