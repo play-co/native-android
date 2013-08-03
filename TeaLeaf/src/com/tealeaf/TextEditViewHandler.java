@@ -5,6 +5,8 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.graphics.Rect;
+import android.view.ViewTreeObserver;
 import android.view.View.OnKeyListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
@@ -28,6 +30,10 @@ import com.tealeaf.util.ILogger;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.view.Display;
+import android.widget.Toast;
 
 /**
  * Allows JS to open up a keyboard that has an EditText attached
@@ -37,13 +43,16 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class TextEditViewHandler {
 
-	private Activity activity;
+	private TeaLeaf activity;
 	private View editTextHandler;
+	private View editTextFrame;
 	private TextEditView editText;
 	private boolean isActive = false;
 	private boolean registerTextChange = true;
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
+	private int lastKnownHeight = -1;
+	private boolean triggerFrameVisibility = false;
 
 	public enum InputName {
 		DEFAULT,
@@ -53,12 +62,52 @@ public class TextEditViewHandler {
 		CAPITAL
 	}
 
-	public TextEditViewHandler(Activity activity) {
-		this.activity = activity;
+	public TextEditViewHandler(TeaLeaf tealeaf) {
+		this.activity = tealeaf;
 
 		LayoutInflater inflater = activity.getLayoutInflater();
 		editTextHandler = inflater.inflate(R.layout.edit_text_handler, null);
 		editTextHandler.setOnClickListener(this.getScreenCaptureListener());
+
+		// setup screen listener
+		final FrameLayout group = this.activity.getGroup();
+		editTextFrame = editTextHandler.findViewById(R.id.handler_wrapper);
+
+		group.getViewTreeObserver()
+			 .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			 public void onGlobalLayout() {
+			 	Rect r = new Rect();		
+				group.getWindowVisibleDisplayFrame(r);
+
+				Display display = activity.getWindow()
+				 						  .getWindowManager()
+				 						  .getDefaultDisplay();
+
+				int originalHeight = display.getHeight();
+				int visibleHeight = r.bottom - r.top;
+				int heightDiff = originalHeight - visibleHeight;
+
+				// check triggerFrameVisibility for when no virtual keyboard is available
+				if ((lastKnownHeight != visibleHeight && heightDiff > .25 * originalHeight) || triggerFrameVisibility) {
+					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+					params.setMargins(0, visibleHeight - editTextFrame.getMeasuredHeight(), 0, 0);
+					editTextFrame.setLayoutParams(params);
+					editTextFrame.requestLayout();
+					editTextFrame.invalidate();
+
+					if (triggerFrameVisibility) {
+						triggerFrameVisibility = false;
+						(new Handler()).postDelayed(new Runnable() {
+							public void run() {
+								editTextHandler.setVisibility(View.VISIBLE);
+							}	
+						}, 250);
+					}
+				}
+
+				lastKnownHeight = visibleHeight;
+			 }	
+		});
 
 		// setup EditText
 		editText = (TextEditView) editTextHandler.findViewById(R.id.handler_text);
@@ -149,13 +198,8 @@ public class TextEditViewHandler {
 
 		if (!isActive) {
 			isActive = true;
-			editTextHandler.setVisibility(View.VISIBLE);
-			
-			Animation animFadeIn = AnimationUtils.loadAnimation(activity.getApplicationContext(),
-																android.R.anim.fade_in);
-			animFadeIn.setDuration(250);
-			editTextHandler.setAnimation(animFadeIn);
-
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+			triggerFrameVisibility = true;
 
 			// In order to show keyboard directly after making EditText visible we must show keyboard
 			// independent of EditText and then requestFocus.
@@ -230,7 +274,12 @@ public class TextEditViewHandler {
 	public void deactivate() {
 		if (isActive) {
 			isActive = false;
-			editTextHandler.setVisibility(View.GONE);
+			editTextHandler.setVisibility(View.INVISIBLE);
+
+			// return to top of screen
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+			params.setMargins(0, 0, 0, 0);
+			editTextFrame.setLayoutParams(params);
 		}
 	}
 
