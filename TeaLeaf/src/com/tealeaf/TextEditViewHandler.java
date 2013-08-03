@@ -52,6 +52,8 @@ public class TextEditViewHandler {
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
 	private int lastKnownHeight = -1;
+	private Runnable triggerFrameUpdate = null;
+	private Handler triggerFrameHandler = null;
 	private boolean triggerFrameVisibility = false;
 
 	public enum InputName {
@@ -84,27 +86,36 @@ public class TextEditViewHandler {
 				 						  .getDefaultDisplay();
 
 				int originalHeight = display.getHeight();
-				int visibleHeight = r.bottom - r.top;
+				final int visibleHeight = r.bottom - r.top;
 				int heightDiff = originalHeight - visibleHeight;
 
-				// check triggerFrameVisibility for when no virtual keyboard is available
+				// if keyboard appeared the height will change
+				// triggerFrameVisibility means a keyboard was activated
 				if (lastKnownHeight != visibleHeight && triggerFrameVisibility) {
-					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
-					params.setMargins(0, visibleHeight - editTextFrame.getMeasuredHeight(), 0, 0);
-					editTextFrame.setLayoutParams(params);
-
-					(new Handler()).postDelayed(new Runnable() {
-						public void run() {
-							editTextHandler.setVisibility(View.VISIBLE);
-							editTextHandler.requestLayout();
-						}	
-					}, 100);
-
+					triggerFrameHandler.removeCallbacks(triggerFrameUpdate);
+					triggerFrameUpdate = null;
+					updateEditFramePosition(visibleHeight);
 					triggerFrameVisibility = false;
+				} 
+			
+				// if keyboard was activated there may or not be a screen height change coming.
+				// activate editText positioning on delay to be canceled if a height change
+				// does arrive. If not we trigger after delay
+				if (triggerFrameVisibility && triggerFrameUpdate == null) {
+					triggerFrameUpdate = new Runnable() {
+						public void run() {
+							updateEditFramePosition(visibleHeight);
+							triggerFrameVisibility = false;
+							triggerFrameUpdate = null;
+						}	
+					};
+
+					triggerFrameHandler = new Handler();
+					triggerFrameHandler.postDelayed(triggerFrameUpdate, 250);
 				}
 
 				lastKnownHeight = visibleHeight;
-			 }	
+			}
 		});
 
 		// setup EditText
@@ -177,6 +188,19 @@ public class TextEditViewHandler {
 																		  RelativeLayout.LayoutParams.FILL_PARENT);
 
 		activity.addContentView(editTextHandler, rlp);
+	}
+
+	public void updateEditFramePosition(int visibleHeight) {
+		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+		params.setMargins(0, visibleHeight - editTextFrame.getMeasuredHeight(), 0, 0);
+		editTextFrame.setLayoutParams(params);
+
+		(new Handler()).postDelayed(new Runnable() {
+			public void run() {
+				editTextHandler.setVisibility(View.VISIBLE);
+				editTextHandler.requestLayout();
+			}	
+		}, 100);
 	}
 
 	/**
