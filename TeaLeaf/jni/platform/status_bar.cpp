@@ -17,6 +17,14 @@
 #include "platform/status_bar.h"
 #include "platform/platform.h"
 
+int status_bar_get_height() {
+	native_shim* shim = get_native_shim();
+	JNIEnv *env = shim->env;
+	
+	jmethodID method = env->GetMethodID(shim->type, "getStatusBarHeight", "()I");
+	jint height = env->CallIntMethod(shim->instance, method);
+	return height;
+}
 
 void status_bar_show() {
 	native_shim* shim = get_native_shim();

@@ -75,6 +75,7 @@ public class TextEditViewHandler {
 		final FrameLayout group = this.activity.getGroup();
 		editTextFrame = editTextHandler.findViewById(R.id.handler_wrapper);
 
+		// TODO: we could use the observer in TeaLeaf.java to avoid duplicate code here...
 		group.getViewTreeObserver()
 			 .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			 public void onGlobalLayout() {
@@ -149,7 +150,8 @@ public class TextEditViewHandler {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
-					deactivate();	
+					EventQueue.pushEvent(new InputPromptSubmitEvent(0, editText.getText().toString()));
+					closeKeyboard();
 				} else if (actionId == EditorInfo.IME_ACTION_NEXT) {
 					EventQueue.pushEvent(new InputPromptMoveEvent(true));	
 				}
@@ -166,7 +168,7 @@ public class TextEditViewHandler {
 		doneButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptSubmitEvent(0, ""));
+				EventQueue.pushEvent(new InputPromptSubmitEvent(0, editText.getText().toString()));
 				closeKeyboard();
 			}
 		});

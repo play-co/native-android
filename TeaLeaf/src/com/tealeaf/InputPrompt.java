@@ -38,7 +38,7 @@ public class InputPrompt {
 		}
 	}
 	
-	public int showInputPrompt(final TeaLeaf context, final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
+	public int showInputPrompt(final TeaLeaf context, final String title, final String message, final String okText, final String cancelText, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
 		final int id = textInputId++;
 		context.runOnUiThread(new Runnable() {
 			public void run() {
@@ -88,7 +88,7 @@ public class InputPrompt {
 					});
 				}
 
-				alert.setPositiveButton("Submit",
+				alert.setPositiveButton(okText == null || okText.length() == 0 ? "Submit" : okText,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							String value = input.getText().toString();
@@ -97,7 +97,7 @@ public class InputPrompt {
 					}
 				);
 
-				alert.setNegativeButton("Cancel",
+				alert.setNegativeButton(cancelText,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							EventQueue.pushEvent(new InputPromptCancelEvent(id));

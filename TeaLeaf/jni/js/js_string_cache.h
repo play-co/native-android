@@ -220,5 +220,6 @@ extern Persistent<String> STRING_CACHE_show_soft_keyboard;
 extern Persistent<String> STRING_CACHE_hide_soft_keyboard;
 extern Persistent<String> STRING_CACHE_show_status_bar;
 extern Persistent<String> STRING_CACHE_hide_status_bar;
+extern Persistent<String> STRING_CACHE_status_bar_height;
 
 #endif

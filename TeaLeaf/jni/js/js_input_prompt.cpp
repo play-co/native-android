@@ -22,15 +22,20 @@ using namespace v8;
 Handle<Value> js_input_prompt_show(const Arguments &args) {
 	String::Utf8Value title_str(args[0]);
 	String::Utf8Value message_str(args[1]);
-	String::Utf8Value value_str(args[2]);
-	bool auto_show_keyboard = args[3]->BooleanValue();
-	bool is_password = args[4]->BooleanValue();
+	String::Utf8Value ok_str(args[2]);
+	String::Utf8Value cancel_str(args[3]);
+	String::Utf8Value value_str(args[4]);
+
+	bool auto_show_keyboard = args[5]->BooleanValue();
+	bool is_password = args[6]->BooleanValue();
 	
 	const char *title = ToCString(title_str);
 	const char *message = ToCString(message_str);
 	const char *value = ToCString(value_str);
-	
-	int id = input_prompt_show(title, message, value, auto_show_keyboard, is_password);
+	const char *okText = ToCString(ok_str);
+	const char *cancelText = ToCString(cancel_str);
+
+	int id = input_prompt_show(title, message, okText, cancelText, value, auto_show_keyboard, is_password);
 	return Number::New(id);
 }
 

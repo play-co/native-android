@@ -59,6 +59,7 @@ public class NativeShim {
 	private ConnectivityManager connectivityManager;
 	private NetworkStateReceiver networkStateReceiver;
 	private boolean onlineStatus;
+	private int statusBarHeight;
 	private Gson gson = new Gson();
 	public NativeShim(TextManager textManager, TextureLoader textureLoader, SoundQueue soundQueue,
 			LocalStorage localStorage, ContactList contactList,
@@ -79,6 +80,13 @@ public class NativeShim {
 		this.networkStateReceiver = new NetworkStateReceiver(this);
 		this.onlineStatus = false;
 		this.updateOnlineStatus();
+
+		this.statusBarHeight = 0;
+		int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			this.statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+			logger.log("status bar height:", this.statusBarHeight);
+		}
 
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		context.registerReceiver(this.networkStateReceiver, filter);
@@ -172,8 +180,8 @@ public class NativeShim {
 	}
 
 	private int textInputId = 0;
-	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
-		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
+	public int showInputPrompt(final String title, final String message, final String okText, final String cancelText, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
+		return InputPrompt.getInstance().showInputPrompt(context, title, message, okText, cancelText, value, autoShowKeyboard, isPassword);
 	}
 	
 	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength, final int cursorPos) {
@@ -194,11 +202,15 @@ public class NativeShim {
 		});
 	}
 
+	public int getStatusBarHeight() {
+		return statusBarHeight;
+	}
+
 	public void showStatusBar() {
 		context.runOnUiThread(new Runnable() {
 			public void run() {
 				context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			}	
+			}
 		});
 	}
 
@@ -206,7 +218,7 @@ public class NativeShim {
 		context.runOnUiThread(new Runnable() {
 			public void run() {
 				context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			}	
+			}
 		});
 	}
 
