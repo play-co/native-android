@@ -88,21 +88,19 @@ public class TextEditViewHandler {
 				int heightDiff = originalHeight - visibleHeight;
 
 				// check triggerFrameVisibility for when no virtual keyboard is available
-				if ((lastKnownHeight != visibleHeight && heightDiff > .25 * originalHeight) || triggerFrameVisibility) {
+				if (lastKnownHeight != visibleHeight && triggerFrameVisibility) {
 					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
 					params.setMargins(0, visibleHeight - editTextFrame.getMeasuredHeight(), 0, 0);
 					editTextFrame.setLayoutParams(params);
-					editTextFrame.requestLayout();
-					editTextFrame.invalidate();
 
-					if (triggerFrameVisibility) {
-						triggerFrameVisibility = false;
-						(new Handler()).postDelayed(new Runnable() {
-							public void run() {
-								editTextHandler.setVisibility(View.VISIBLE);
-							}	
-						}, 250);
-					}
+					(new Handler()).postDelayed(new Runnable() {
+						public void run() {
+							editTextHandler.setVisibility(View.VISIBLE);
+							editTextHandler.requestLayout();
+						}	
+					}, 100);
+
+					triggerFrameVisibility = false;
 				}
 
 				lastKnownHeight = visibleHeight;
