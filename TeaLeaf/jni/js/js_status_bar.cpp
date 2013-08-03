@@ -33,6 +33,7 @@ Handle<ObjectTemplate> js_status_bar_get_template() {
 	Handle<ObjectTemplate> status_bar = ObjectTemplate::New();
 	status_bar->Set(STRING_CACHE_show_status_bar, FunctionTemplate::New(js_status_bar_show));
 	status_bar->Set(STRING_CACHE_hide_status_bar, FunctionTemplate::New(js_status_bar_hide));
+	status_bar->Set(STRING_CACHE_status_bar_height, Integer::New(status_bar_get_height()), ReadOnly);
 	return status_bar;
 }
 
