@@ -656,7 +656,7 @@ function copySplash(builder, project, destDir, next) {
 	wrench.mkdirSyncRecursive(destPath);
 	
 	if (project.manifest.splash) {
-		var potentialSplashFiles = ["universal", "portrait1136", "portrait960", "portrait480"];
+		var potentialSplashFiles = ["universal", "portrait2048", "portrait1024", "portrait512"];
 
 		// Try to find a potential splash
 		for (var i in potentialSplashFiles) {
