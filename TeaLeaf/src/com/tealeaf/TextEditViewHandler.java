@@ -23,6 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.view.KeyEvent;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -52,8 +53,6 @@ public class TextEditViewHandler {
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
 	private int lastKnownHeight = -1;
-	private Runnable triggerFrameUpdate = null;
-	private Handler triggerFrameHandler = null;
 	private boolean triggerFrameVisibility = false;
 
 	public enum InputName {
@@ -92,27 +91,9 @@ public class TextEditViewHandler {
 
 				// if keyboard appeared the height will change
 				// triggerFrameVisibility means a keyboard was activated
-				if (lastKnownHeight != visibleHeight && triggerFrameVisibility) {
-					triggerFrameHandler.removeCallbacks(triggerFrameUpdate);
-					triggerFrameUpdate = null;
+				if ((lastKnownHeight != visibleHeight || activity.getResources().getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) && triggerFrameVisibility) {
 					updateEditFramePosition(visibleHeight);
 					triggerFrameVisibility = false;
-				} 
-			
-				// if keyboard was activated there may or not be a screen height change coming.
-				// activate editText positioning on delay to be canceled if a height change
-				// does arrive. If not we trigger after delay
-				if (triggerFrameVisibility && triggerFrameUpdate == null) {
-					triggerFrameUpdate = new Runnable() {
-						public void run() {
-							updateEditFramePosition(visibleHeight);
-							triggerFrameVisibility = false;
-							triggerFrameUpdate = null;
-						}	
-					};
-
-					triggerFrameHandler = new Handler();
-					triggerFrameHandler.postDelayed(triggerFrameUpdate, 250);
 				}
 
 				lastKnownHeight = visibleHeight;
