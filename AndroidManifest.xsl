@@ -5,7 +5,6 @@
 	<xsl:param name="activity" />
 	<xsl:param name="version" />
 	<xsl:param name="versionCode" />
-	<xsl:param name="debuggable" />
 
 	<xsl:param name="gameHash">0.0</xsl:param>
 	<xsl:param name="sdkHash">1.0</xsl:param>
@@ -22,6 +21,7 @@
 	<xsl:param name="pushUrl">http://staging.api.gameclosure.com/push/%s/?device=%s&amp;version=%s</xsl:param>
 	<xsl:param name="servicesUrl">http://api.gameclosure.com</xsl:param>
 	<xsl:param name="disableLogs">true</xsl:param>
+	<xsl:param name="debuggable">false</xsl:param>
 	<xsl:param name="installShortcut">false</xsl:param>
 
 	<xsl:param name="contactsUrl"></xsl:param>
@@ -116,7 +116,7 @@
 		<meta-data android:name="entryPoint" android:value="{$entryPoint}"/>
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='disableLogs']">
-		<meta-data android:name="disableLogs" android:value="{$disableLogs}"/>
+		<meta-data android:name="disableLogs" android:value="false"/>
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='installShortcut']">
 		<meta-data android:name="installShortcut" android:value="{$installShortcut}"/>
