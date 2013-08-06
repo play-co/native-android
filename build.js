@@ -493,18 +493,18 @@ function validateSubmodules(next) {
 	});
 }
 
-function buildSupportProjects(builder, project, destDir, debug, clean, next) {
+function buildSupportProjects(builder, opts, next) {
 	var tealeafDir;
-	
+
 	var f = ff(this, function() {
 		tealeafDir = path.join(__dirname, "TeaLeaf");
-		if (clean) {
+		if (opts.clean) {
 			builder.common.child('make', ['clean'], {cwd: __dirname}, f.slot());
 		}
 	}, function() {
-		builder.common.child('ndk-build', ["-j", "8", (debug ? "DEBUG=1" : "RELEASE=1")], { cwd: tealeafDir }, f.wait()); 
+		builder.common.child('ndk-build', ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")], { cwd: tealeafDir }, f.wait()); 
 	}, function() {
-		builder.common.child('ant', [(debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
+		builder.common.child('ant', [(opts.debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
 		logger.error("Could not build support projects:", e, e.stack);
 		process.exit(2);
@@ -517,28 +517,26 @@ function buildAndroidProject(builder, destDir, debug, next) {
 	}, next);
 }
 
-function makeAndroidProject(builder, project, namespace, activity, title, appID,
-		shortName, version, debug,
-		destDir, servicesURL, metadata, studioName, addonConfig, next)
-{
+
+function makeAndroidProject(builder, opts, next) {
 	var target = "android-15";
 	var f = ff(function() {
 		builder.common.child('android', [
-			"create", "project", "--target", target, "--name", shortName,
-			"--path", destDir, "--activity", activity,
-			"--package", namespace
+			"create", "project", "--target", opts.target, "--name", opts.shortName,
+			"--path", opts.destDir, "--activity", opts.activity,
+			"--package", opts.namespace
 		], {}, f());
 	}, function() {
 		builder.common.child('android', [
-			"update", "project", "--target", target,
-			"--path", destDir,
+			"update", "project", "--target", opts.target,
+			"--path", opts.destDir,
 			"--library", "../../TeaLeaf"
 		], {}, f());
 	}, function() {
-		fs.appendFile(path.join(destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
+		fs.appendFile(path.join(opts.destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
 	}, function() {
-		updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
-		updateActivity(project, namespace, activity, destDir, f.waitPlain());
+		updateManifest(builder, opts, f.waitPlain());
+		updateActivity(opts, f.waitPlain());
 	}).error(function(err) {
 		logger.error("Build failed creating android project:", err, err.stack);
 		process.exit(2);
@@ -838,7 +836,7 @@ function getAndroidHash(builder, next) {
 	});
 }
 
-function updateManifest(builder, project, namespace, activity, title, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, next) {
+function updateManifest(builder, opts, next) {
 	var defaults = {
 		// Empty defaults
 		installShortcut: "false",
@@ -852,22 +850,22 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 		activePollTimeInSeconds: "10",
 		passivePollTimeInSeconds: "20",
 		syncPolling: "false",
-		disableLogs: String(!debug), 
-		develop: String(debug),
-		servicesUrl: servicesURL,
-		pushUrl: servicesURL + "push/%s/?key=%s&version=%s",
-		contactsUrl: servicesURL + "users/me/contacts/?key=%s",
+		disableLogs: String(opts.disableLogs), 
+		develop: String(opts.debug),
+		servicesUrl: opts.servicesURL,
+		pushUrl: opts.servicesURL + "push/%s/?key=%s&version=%s",
+		contactsUrl: opts.servicesURL + "users/me/contacts/?key=%s",
 		userdataUrl: "",
-		studioName: studioName,
+		studioName: opts.studioName,
 	};
 	
 	var f = ff(function() {
-		builder.packager.getGameHash(project, f.slotPlain());
+		builder.packager.getGameHash(opts.project, f.slotPlain());
 		builder.packager.getSDKHash(f.slotPlain());
 		getAndroidHash(builder, f.slotPlain());
-		versionCode(project, debug, f.slotPlain());
+		versionCode(opts.project, opts.debug, f.slotPlain());
 	}, function(gameHash, sdkHash, androidHash, versionCode) {
-		var orientations = project.manifest.supportedOrientations;
+		var orientations = opts.project.manifest.supportedOrientations;
 		var orientation = "portrait";
 
 		if (orientations.indexOf("portrait") != -1 && orientations.indexOf("landscape") != -1) {
@@ -904,24 +902,24 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 		var params = {};
 			f(params);
 			copy(params, defaults);
-			copy(params, project.manifest.android);
+			copy(params, opts.project.manifest.android);
 			copy(params, {
-					"package": namespace,
-					title: title,
-					activity: "." + activity,
-					version: "" + version,
-					appid: appID,
-					shortname: shortName,
-					orientation: orientation,
-					studioName: studioName,
+					"package": opts.namespace,
+					title: opts.title,
+					activity: "." + opts.activity,
+					version: "" + opts.version,
+					appid: opts.appID,
+					shortname: opts.shortName,
+					orientation: opts.orientation,
+					studioName: opts.studioName,
 				gameHash: gameHash,
 				sdkHash: sdkHash,
 				androidHash: androidHash,
 				versionCode: versionCode,
-				debuggable: debug ? 'true' : 'false'
+				debuggable: opts.debug ? 'true' : 'false'
 			});
 
-		wrench.mkdirSyncRecursive(destDir);
+		wrench.mkdirSyncRecursive(opts.destDir);
 
 		}, function(params) {
 			f(params);
@@ -930,23 +928,20 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 		}, function(params, xmlContent) {
 			f(params);
 
-			fs.writeFile(path.join(destDir, "AndroidManifest.xml"), xmlContent, "utf-8", f.wait());
+			fs.writeFile(path.join(opts.destDir, "AndroidManifest.xml"), xmlContent, "utf-8", f.wait());
 		}, function(params) {
 			f(params);
 
-			injectPluginXML(builder, {
-				addonConfig: addonConfig,
-				destDir: destDir
-			}, f());
+			injectPluginXML(builder, opts, f());
 		}, function(params) {
 			f(params);
 
-			var xmlPath = path.join(destDir, "AndroidManifest.xml");
+			var xmlPath = path.join(opts.destDir, "AndroidManifest.xml");
 
 			var xslPaths = [];
 
-			for (var key in addonConfig) {
-				var addon = addonConfig[key];
+			for (var key in opts.addonConfig) {
+				var addon = opts.addonConfig[key];
 
 				if (addon.injectionXSL) {
 					var xslPath = builder.common.paths.addons(key, "android", addon.injectionXSL);
@@ -979,7 +974,7 @@ function updateManifest(builder, project, namespace, activity, title, appID, sho
 			logger.log("Applying final XSL transformation");
 			f(params);
 
-			var xmlPath = path.join(destDir, "AndroidManifest.xml");
+			var xmlPath = path.join(opts.destDir, "AndroidManifest.xml");
 
 			transformXSL(builder, xmlPath, xmlPath,
 					path.join(__dirname, "AndroidManifest.xsl"),
@@ -1039,8 +1034,8 @@ function versionCode(proj, debug, next) {
 	});
 }
 
-function updateActivity(project, namespace, activity, destDir, next) {
-	var activityFile = path.join(destDir, "src/" + namespace.replace(/\./g, "/") + "/" + activity + ".java");
+function updateActivity(opts, next) {
+	var activityFile = path.join(opts.destDir, "src/" + opts.namespace.replace(/\./g, "/") + "/" + opts.activity + ".java");
 
 	if (fs.existsSync(activityFile)) {
 		fs.readFile(activityFile, 'utf-8', function (err, contents) {
@@ -1060,6 +1055,15 @@ exports.build = function(builder, project, opts, next) {
 	// Command line options.
 	var debug = argv.debug;
 	var clean = argv.clean;
+
+	// Disable logs if --logging is not specified and in release mode.
+	var disableLogs = !argv.logging && !debug;
+
+	if (disableLogs) {
+		logger.warn("Disabling JS logs in release mode.  Add --logging to your build command to enable adb logcat JS log output in release mode");
+	} else {
+		logger.log("Enabling JS logs");
+	}
 
 	// Extracted values from options.
 	var packageName = opts.packageName;
@@ -1123,13 +1127,29 @@ exports.build = function(builder, project, opts, next) {
 	}, function() {
 		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
 
-		makeAndroidProject(builder, project, packageName, activity, title, appID,
-			shortName, opts.version, debug, destDir, servicesURL, metadata,
-			studioName, addonConfig, f.waitPlain());
+		makeAndroidProject(builder, {
+			project: project,
+			namespace: packageName,
+			activity: activity,
+			title: title,
+			appID: appID,
+			shortName: shortName,
+			version: opts.version,
+			debug: debug,
+			destDir: destDir,
+			servicesURL: servicesURL,
+			metadata: metadata,
+			studioName: studioName,
+			addonConfig: addonConfig,
+			disableLogs: disableLogs
+		}, f.waitPlain());
 
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
 		builder.common.config.set("lastBuildWasDebug", debug);
-		buildSupportProjects(builder, project, destDir, debug, cleanProj, f.waitPlain());
+		buildSupportProjects(builder, {
+			debug: debug,
+			clean: cleanProj
+		}, f.waitPlain());
 	}, function() {
 		installAddonGameFiles(builder, {
 			addonConfig: addonConfig,
@@ -1180,7 +1200,8 @@ exports.build = function(builder, project, opts, next) {
 		});
 	}, function() {
 		if (argv.install || argv.open) {
-			var cmd = 'adb uninstall "' + packageName + '"';
+			var keepStorage = argv.clearstorage ? "" : " -k";
+			var cmd = 'adb uninstall' + keepStorage + ' "' + packageName + '"';
 			logger.log('Install: Running ' + cmd + '...');
 			builder.common.child('adb', ['uninstall', packageName], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 		}
