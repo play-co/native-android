@@ -907,7 +907,7 @@ function updateManifest(builder, opts, next) {
 					version: "" + opts.version,
 					appid: opts.appID,
 					shortname: opts.shortName,
-					orientation: opts.orientation,
+					orientation: orientation,
 					studioName: opts.studioName,
 				gameHash: gameHash,
 				sdkHash: sdkHash,
