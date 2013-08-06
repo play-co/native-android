@@ -243,6 +243,7 @@ public class TeaLeaf extends FragmentActivity {
 		}
 
 		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		group = new FrameLayout(this);
 		setContentView(group);
