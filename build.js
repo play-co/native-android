@@ -516,7 +516,7 @@ function saveLocalizedStringsXmls(destDir, titles) {
 
 function makeAndroidProject(builder, project, namespace, activity, title, titles, appID,
 		shortName, version, debug,
-		destDir, servicesURL, metadata, studioName, addonConfig, next)
+		destDir, servicesURL, metadata, studioName, addonConfig, disableLogs, next)
 {
 	var target = "android-15";
 	var f = ff(function() {
@@ -544,7 +544,7 @@ function makeAndroidProject(builder, project, namespace, activity, title, titles
 		}
 		saveLocalizedStringsXmls(destDir, titles);
 
-		updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, f.waitPlain());
+		updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, disableLogs, f.waitPlain());
 		updateActivity(project, namespace, activity, destDir, f.waitPlain());
 	}).error(function(err) {
 		logger.error("Build failed creating android project:", err, err.stack);
@@ -845,7 +845,7 @@ function getAndroidHash(builder, next) {
 	});
 }
 
-function updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, next) {
+function updateManifest(builder, project, namespace, activity, title, titles, appID, shortName, version, debug, destDir, servicesURL, metadata, studioName, addonConfig, disableLogs, next) {
 	var defaults = {
 		// Empty defaults
 		installShortcut: "false",
@@ -859,7 +859,7 @@ function updateManifest(builder, project, namespace, activity, title, titles, ap
 		activePollTimeInSeconds: "10",
 		passivePollTimeInSeconds: "20",
 		syncPolling: "false",
-		disableLogs: String(!debug), 
+		disableLogs: String(disableLogs), 
 		develop: String(debug),
 		servicesUrl: servicesURL,
 		pushUrl: servicesURL + "push/%s/?key=%s&version=%s",
@@ -1068,6 +1068,15 @@ exports.build = function(builder, project, opts, next) {
 	var debug = argv.debug;
 	var clean = argv.clean;
 
+	// Disable logs if --logging is not specified and in release mode.
+	var disableLogs = !argv.logging && !debug;
+
+	if (disableLogs) {
+		logger.warn("Disabling JS logs in release mode.  Add --logging to your build command to enable adb logcat JS log output in release mode");
+	} else {
+		logger.log("Enabling JS logs");
+	}
+
 	// Extracted values from options.
 	var packageName = opts.packageName;
 	var studio = opts.studio;
@@ -1133,7 +1142,7 @@ exports.build = function(builder, project, opts, next) {
 
 		makeAndroidProject(builder, project, packageName, activity, title, titles, appID,
 			shortName, opts.version, debug, destDir, servicesURL, metadata,
-			studioName, addonConfig, f.waitPlain());
+			studioName, addonConfig, disableLogs, f.waitPlain());
 
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
 		builder.common.config.set("lastBuildWasDebug", debug);
