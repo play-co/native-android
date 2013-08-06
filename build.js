@@ -275,6 +275,12 @@ var installAddonCode = function(builder, opts, next) {
 					logger.log("Installing addon library:", library);
 
 					libraries.push(library);
+
+					// Set up library build files
+					builder.common.child('android', [
+							"update", "project", "--target", opts.target,
+							"--path", library
+							], {}, f.wait());
 				}
 			}
 
@@ -1113,6 +1119,8 @@ exports.build = function(builder, project, opts, next) {
 	var names = studio.split(/\./g).reverse();
 	studio = names.join('.');
 
+	var androidTarget = "android-15";
+
 	var studioName = project.manifest.studio && project.manifest.studio.name;
 	var servicesURL = opts.servicesURL;
 
@@ -1149,7 +1157,8 @@ exports.build = function(builder, project, opts, next) {
 			studioName: studioName,
 			addonConfig: addonConfig,
 			disableLogs: disableLogs,
-			titles: titles
+			titles: titles,
+			target: androidTarget
 		}, f.waitPlain());
 
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
@@ -1173,7 +1182,8 @@ exports.build = function(builder, project, opts, next) {
 		installAddonCode(builder, {
 			addonConfig: addonConfig,
 			destDir: destDir,
-			project: project
+			project: project,
+			target: androidTarget
 		}, f());
 	}, function() {
 		var onDoneBuilding = f();
