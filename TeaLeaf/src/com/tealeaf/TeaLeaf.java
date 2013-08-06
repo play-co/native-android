@@ -527,7 +527,7 @@ public class TeaLeaf extends FragmentActivity {
 		// FIXME HACK: find a better way to determine the appID
 		try {
 			Bundle metaData = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA).metaData;
-			return metaData.containsKey("appID") ? metaData.getString("appID") : "tealeaf";
+			return metaData.containsKey("appID") ? metaData.get("appID").toString() : "tealeaf";
 		} catch (NameNotFoundException e) {
 			logger.log(e);
 			return "tealeaf";

@@ -32,8 +32,6 @@ public class XMLHttpRequest implements Runnable {
 	private HashMap<String,String> requestHeaders;
 	private Runnable cb;
 	private HTTP.Response response;
-	private String[] keys;
-	private String[] values;
 
 	public XMLHttpRequest(final int id, String method, String url, String data, boolean async, HashMap<String, String> requestHeaders, Runnable cb) {
 		this.method = method;
@@ -44,8 +42,13 @@ public class XMLHttpRequest implements Runnable {
 			public void run() {
 				TeaLeaf instance = TeaLeaf.get();
 				if (id != -1 && instance != null) {
-					//TODO: if there is no glView, what should we do with the cb
-					// that means there's no javascript currently running.
+					String[] keys = null;
+					String[] values = null;
+					if (response.headers != null) {
+						keys = response.headers.keySet().toArray(new String[0]);
+						values = response.headers.values().toArray(new String[0]);
+					}
+
 					EventQueue.pushEvent(new XHREvent(id, 4, response.status, response.body, keys, values));
 				}
 			}
@@ -80,15 +83,12 @@ public class XMLHttpRequest implements Runnable {
 			response = http.makeRequest(HTTP.Methods.PUT, uri, requestHeaders, data);
 		} else if (method.toUpperCase().equals("DELETE")) {
 			response = http.makeRequest(HTTP.Methods.DELETE, uri, requestHeaders);
+		} else if (method.toUpperCase().equals("HEAD")) {
+			response = http.makeRequest(HTTP.Methods.HEAD, uri, requestHeaders);
 		} else {
 			logger.log("{xhr} WARNING: Unable to handle method", method);
 		}
-		
-		int count = response.headers.size();
-		keys = new String[count];
-		values = new String[count];
-		response.headers.keySet().toArray(keys);
-		response.headers.values().toArray(values);
+
 		cb.run();
 	}
 }

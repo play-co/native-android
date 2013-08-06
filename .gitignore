@@ -39,3 +39,6 @@ proguard-project.txt
 TeaLeaf/src/com/tealeaf/plugin/plugins
 plugins/config.json
 
+#manifest
+manifest.json
+
