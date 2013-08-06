@@ -594,7 +594,8 @@ var DEFAULT_ICON_PATH = {
 	"36": "drawable-ldpi/icon.png",
 	"48": "drawable-mdpi/icon.png",
 	"72": "drawable-hdpi/icon.png",
-	"96": "drawable-xhdpi/icon.png"
+	"96": "drawable-xhdpi/icon.png",
+	"144": "drawable-xxhdpi/icon.png"
 };
 
 function copyIcon(builder, project, destDir, tag, size) {
@@ -619,7 +620,8 @@ var DEFAULT_NOTIFY_ICON_PATH = {
 	"low": "drawable-ldpi/notifyicon.png",
 	"med": "drawable-mdpi/notifyicon.png",
 	"high": "drawable-hdpi/notifyicon.png",
-	"xhigh": "drawable-xhdpi/notifyicon.png"
+	"xhigh": "drawable-xhdpi/notifyicon.png",
+	"xxhigh": "drawable-xxhdpi/notifyicon.png"
 };
 
 function copyNotifyIcon(builder, project, destDir, tag, name) {
@@ -645,76 +647,163 @@ function copyIcons(builder, project, destDir) {
 	copyIcon(builder, project, destDir, "m", "48");
 	copyIcon(builder, project, destDir, "h", "72");
 	copyIcon(builder, project, destDir, "xh", "96");
+	copyIcon(builder, project, destDir, "xxh", "144");
 	copyNotifyIcon(builder, project, destDir, "l", "low");
 	copyNotifyIcon(builder, project, destDir, "m", "med");
 	copyNotifyIcon(builder, project, destDir, "h", "high");
 	copyNotifyIcon(builder, project, destDir, "xh", "xhigh");
+	copyNotifyIcon(builder, project, destDir, "xxh", "xxhigh");
 }
 
 function copySplash(builder, project, destDir, next) {
 	var destPath = path.join(destDir, "assets/resources");
 	wrench.mkdirSyncRecursive(destPath);
 	
-	if (project.manifest.splash) {
-		var potentialSplashFiles = ["universal", "portrait1136", "portrait960", "portrait480"];
-
-		// Try to find a potential splash
-		for (var i in potentialSplashFiles) {
-			if(project.manifest.splash[potentialSplashFiles[i]]) {
-				var splashFile = path.resolve(project.manifest.splash[potentialSplashFiles[i]]);
-				break;
-			}
+	var splashes = [
+		{
+			copyFile: "portrait512",
+			inFiles: [
+				"portrait960",
+				"portrait1024",
+				"portrait1136",
+				"portrait480",
+				"universal",
+				"portrait2048"
+			],
+			outFile: "splash-512.png",
+			outSize: "512"
+		},
+		{
+			copyFile: "portrait1024",
+			inFiles: [
+				"portrait1136",
+				"universal",
+				"portrait960",
+				"portrait2048"
+/*				"portrait512",
+				"portrait480"*/
+			],
+			outFile: "splash-1024.png",
+			outSize: "1024"
+		},
+		{
+			copyFile: "portrait2048",
+			inFiles: [
+				"universal"
+/*				"portrait1136",
+				"portrait1024",
+				"portrait960",
+				"portrait512",
+				"portrait480"*/
+			],
+			outFile: "splash-2048.png",
+			outSize: "2048"
 		}
-		
-		if (!splashFile) {
-			logger.warn("Could not find a suitable splash field for generating splash images in the project manifest. Posible options are:" + JSON.stringify(potentialSplashFiles));
-		}
+	];
 
-		var splashes = [
-			{ outFile: "splash-512.png", outSize: "512" },
-			{ outFile: "splash-1024.png", outSize: "1024"},
-			{ outFile: "splash-2048.png", outSize: "2048"}
-		];
+	var splashPaths = project.manifest.splash || {};
 
-		var f = ff(function () {	
-			var sLeft = splashes.length;
-			var nextF = f();
-			
-			var makeSplash = function(i) {
-				if (i < 0) {
-					nextF();
-					return;
+	var f = ff(function () {
+		var group = f.group();
+		var splasherTasks = [];
+
+		// For each splash image to produce,
+		for (var ii = 0; ii < splashes.length; ++ii) {
+			var splash = splashes[ii];
+			var outFile = splash.outFile;
+			var outSize = splash.outSize;
+			var copyFile = splash.copyFile;
+			var inFiles = splash.inFiles;
+
+			// Look up default copy file
+			var srcFile = splashPaths[copyFile];
+			var copying = true;
+
+			// If copy source file DNE,
+			if (!srcFile) {
+				// Will not be copying
+				copying = false;
+
+				// For each candidate replacement,
+				for (var jj = 0; jj < inFiles.length; ++jj) {
+					// Read manifest to see if it is specified
+					var candidate = inFiles[jj];
+					srcFile = splashPaths[candidate];
+
+					// If found one that exists,
+					if (srcFile) {
+						// Stop at the first (best) one
+						break;
+					}
 				}
-
-				var splash = splashes[i];
-				var splashOut = path.join(destPath, splash.outFile);
-
-				logger.log("Creating splash: " + splashOut + " from: " + splashFile);
-
-				builder.jvmtools.exec('splasher', [
-					"-i", splashFile,
-					"-o", splashOut,
-					"-resize", splash.outSize,
-					"-rotate", "auto"
-				], function (splasher) {
-					var formatter = new builder.common.Formatter('splasher');
-
-					splasher.on('out', formatter.out);
-					splasher.on('err', formatter.err);
-					splasher.on('end', function (data) {
-						console.log("at end");
-						makeSplash(i-1);
-					})
-				});
 			}
 
-			makeSplash(sLeft-1);
-		}).cb(next);
-	} else {
-		logger.warn("No splash image provided in the manifest");
+			// If file was specified,
+			if (srcFile) {
+				// Resolve it to a valid path
+				srcFile = path.resolve(srcFile);
 
-		next();
-	}
+				// If file does not exist,
+				if (!srcFile || !fs.existsSync(srcFile)) {
+					logger.warn("Splash file specified by your game manifest does not exist:", srcFile);
+					srcFile = null;
+				}
+			}
+
+			// If no input file exists,
+			if (!srcFile) {
+				logger.warn("No splash screen images provided for size", outSize);
+			} else {
+				outFile = path.join(destPath, outFile);
+
+				// If copying,
+				if (copying) {
+					logger.log("Copying size", outSize, "splash:", outFile, "from", srcFile);
+
+					builder.common.copyFileSync(srcFile, outFile);
+				} else {
+					splasherTasks.push({
+						'outSize': outSize,
+						'outFile': outFile,
+						'srcFile': srcFile
+					});
+				}
+			} // end if input file exists
+		} // next splash screen
+
+		// Run splasher one at a time because the jvm tool is unable to run multiple
+		// instances of the same Java application in parallel.  FIXME
+		function runSplasher() {
+			var task = splasherTasks.pop();
+			if (!task) {
+				return;
+			}
+
+			var slot = group();
+
+			logger.log("Creating size", task.outSize, "splash:", task.outFile, "from", task.srcFile);
+
+			builder.jvmtools.exec('splasher', [
+				"-i", task.srcFile,
+				"-o", task.outFile,
+				"-resize", task.outSize,
+				"-rotate", "auto"
+			], function (splasher) {
+				var formatter = new builder.common.Formatter('splash' + task.outSize);
+
+				splasher.on('out', formatter.out);
+				splasher.on('err', formatter.err);
+				splasher.on('end', function (data) {
+					logger.log("Done splashing size", task.outSize);
+					runSplasher();
+					slot();
+				});
+			});
+		}
+
+		// Run splasher on tasks
+		runSplasher();
+	}).cb(next);
 }
 
 function copyMusic(builder, project, destDir) {
