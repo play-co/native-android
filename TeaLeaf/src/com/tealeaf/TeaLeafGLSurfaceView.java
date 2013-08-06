@@ -587,7 +587,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			}
 
 			boolean success = false;
-			
+
 			if (longerScreenSide > 1024) {
 				success = trySplashImage("splash-2048.png");
 			}
@@ -598,6 +598,16 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			
 			if (!success) {
 				success = trySplashImage("splash-512.png");
+
+				// Use much larger splashes if smaller ones cannot be found:
+
+				if (!success && longerScreenSide <= 512) {
+					success = trySplashImage("splash-1024.png");
+				}
+
+				if (!success && longerScreenSide <= 1024) {
+					success = trySplashImage("splash-2048.png");
+				}
 			}
 
 			if (!success) {
