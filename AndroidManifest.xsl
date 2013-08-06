@@ -31,6 +31,16 @@
 	<xsl:output indent="yes" />
 	<xsl:template match="comment()" />
 
+	<xsl:template match="@*|node()">
+		<xsl:copy>
+			<xsl:apply-templates select="@*|node()" />
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="application/@android:debuggable">
+		<xsl:attribute name="android:debuggable"><xsl:value-of select="$debuggable" /></xsl:attribute>
+	</xsl:template>
+
 	<xsl:template match="manifest/@package">
 		<xsl:attribute name="package"><xsl:value-of select="$package" /></xsl:attribute>
 	</xsl:template>
@@ -110,11 +120,5 @@
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='installShortcut']">
 		<meta-data android:name="installShortcut" android:value="{$installShortcut}"/>
-	</xsl:template>
-
-	<xsl:template match="@*|node()">
-		<xsl:copy>
-			<xsl:apply-templates select="@*|node()" />
-		</xsl:copy>
 	</xsl:template>
 </xsl:stylesheet>

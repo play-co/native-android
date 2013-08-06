@@ -517,7 +517,6 @@ function buildAndroidProject(builder, destDir, debug, next) {
 	}, next);
 }
 
-
 function makeAndroidProject(builder, opts, next) {
 	var target = "android-15";
 	var f = ff(function() {
