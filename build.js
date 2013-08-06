@@ -277,9 +277,8 @@ var installAddonCode = function(builder, opts, next) {
 					libraries.push(library);
 
 					// Set up library build files
-					var target = "android-15";
 					builder.common.child('android', [
-							"update", "project", "--target", target,
+							"update", "project", "--target", opts.target,
 							"--path", library
 							], {}, f.wait());
 				}
@@ -518,7 +517,6 @@ function buildAndroidProject(builder, destDir, debug, next) {
 }
 
 function makeAndroidProject(builder, opts, next) {
-	var target = "android-15";
 	var f = ff(function() {
 		builder.common.child('android', [
 			"create", "project", "--target", opts.target, "--name", opts.shortName,
@@ -1105,6 +1103,8 @@ exports.build = function(builder, project, opts, next) {
 	var names = studio.split(/\./g).reverse();
 	studio = names.join('.');
 
+	var androidTarget = "android-15";
+
 	var studioName = project.manifest.studio && project.manifest.studio.name;
 	var servicesURL = opts.servicesURL;
 
@@ -1140,7 +1140,8 @@ exports.build = function(builder, project, opts, next) {
 			metadata: metadata,
 			studioName: studioName,
 			addonConfig: addonConfig,
-			disableLogs: disableLogs
+			disableLogs: disableLogs,
+			target: androidTarget
 		}, f.waitPlain());
 
 		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
@@ -1164,7 +1165,8 @@ exports.build = function(builder, project, opts, next) {
 		installAddonCode(builder, {
 			addonConfig: addonConfig,
 			destDir: destDir,
-			project: project
+			project: project,
+			target: androidTarget
 		}, f());
 	}, function() {
 		var onDoneBuilding = f();
