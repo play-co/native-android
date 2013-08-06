@@ -116,7 +116,7 @@
 		<meta-data android:name="entryPoint" android:value="{$entryPoint}"/>
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='disableLogs']">
-		<meta-data android:name="disableLogs" android:value="false"/>
+		<meta-data android:name="disableLogs" android:value="{$disableLogs}"/>
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='installShortcut']">
 		<meta-data android:name="installShortcut" android:value="{$installShortcut}"/>
