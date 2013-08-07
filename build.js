@@ -545,7 +545,7 @@ function makeAndroidProject(builder, opts, next) {
 			titles = {};
 			titles['en'] = title;
 		}
-		saveLocalizedStringsXmls(destDir, titles);
+		saveLocalizedStringsXmls(opts.destDir, titles);
 
 		updateManifest(builder, opts, f.waitPlain());
 		updateActivity(opts, f.waitPlain());
