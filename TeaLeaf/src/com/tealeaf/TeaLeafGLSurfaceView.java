@@ -18,6 +18,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 
 import android.opengl.GLES20;
 import android.os.Build;
@@ -33,6 +34,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.tealeaf.event.ImageLoadedEvent;
@@ -163,6 +165,57 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			renderer.onResume();
 			super.onResume();
 		}
+	}
+
+	public interface PluginKeyHook {
+		boolean onKeyDown(final int keyCode, KeyEvent event);
+		boolean onKeyUp(final int keyCode, KeyEvent event);
+		boolean onGenericMotionEvent(final MotionEvent event);
+	};
+
+	private LinkedList<PluginKeyHook> _pluginHooks = new LinkedList<PluginKeyHook>();
+
+	public void addPluginKeyHook(PluginKeyHook hook) {
+		super.setFocusableInTouchMode(true);
+
+		_pluginHooks.add(hook);
+	}
+
+	public void removePluginKeyHook(PluginKeyHook hook) {
+		_pluginHooks.remove(hook);
+	}
+
+	@Override
+	public boolean onKeyDown(final int keyCode, KeyEvent event) {
+		for (PluginKeyHook hook : _pluginHooks) {
+			if (hook.onKeyDown(keyCode, event)) {
+				return true;
+			}
+		}
+
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(final int keyCode, KeyEvent event) {
+		for (PluginKeyHook hook : _pluginHooks) {
+			if (hook.onKeyUp(keyCode, event)) {
+				return true;
+			}
+		}
+
+		return super.onKeyUp(keyCode, event);
+	}
+
+	@Override
+    public boolean onGenericMotionEvent(final MotionEvent event) {
+		for (PluginKeyHook hook : _pluginHooks) {
+			if (hook.onGenericMotionEvent(event)) {
+				return true;
+			}
+		}
+
+		return super.onGenericMotionEvent(event);
 	}
 
 	public void destroy() {
