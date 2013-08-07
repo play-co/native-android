@@ -537,13 +537,14 @@ function makeAndroidProject(builder, opts, next) {
 		fs.appendFile(path.join(opts.destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
 	}, function() {
 		var titles = opts.titles;
+		console.log(titles);
 		if (titles) {
 			if (titles.length == 0) {
-				titles['en'] = title;
+				titles['en'] = opts.title;
 			}
 		}  else {
 			titles = {};
-			titles['en'] = title;
+			titles['en'] = opts.title;
 		}
 		saveLocalizedStringsXmls(opts.destDir, titles);
 
