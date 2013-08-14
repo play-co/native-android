@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "js/js_input_prompt.h"
+
+#include "js/js_status_bar.h"
 #include "platform/status_bar.h"
 
 using namespace v8;

@@ -184,11 +184,18 @@ public class NativeShim {
 		return InputPrompt.getInstance().showInputPrompt(context, title, message, okText, cancelText, value, autoShowKeyboard, isPassword);
 	}
 	
-	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength, final int cursorPos) {
+	public void showSoftKeyboard(final String text,
+								 final String hint,
+								 final boolean hasBackward,
+								 final boolean hasForward,
+								 final String inputType,
+								 final String inputReturnButton,
+								 final int maxLength,
+								 final int cursorPos) {
 		context.runOnUiThread(new Runnable() {
 			public void run() {
 				TextEditViewHandler textEditView = context.getTextEditViewHandler();
-				textEditView.activate(text, hint, hasBackward, hasForward, inputType, maxLength, cursorPos);
+				textEditView.activate(text, hint, hasBackward, hasForward, inputType, inputReturnButton, maxLength, cursorPos);
 			}
 		});
 	}

@@ -58,7 +58,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_events.cpp                                  \
 			js/js_gc.cpp                                      \
 			js/js_haptics.cpp                                 \
-			js/js_input_prompt.cpp	                	      \
+			js/js_input.cpp	                                  \
 			js/js_status_bar.cpp	                	      \
 			js/js_local_storage.cpp                           \
 			js/js_locale.cpp		                          \
@@ -98,7 +98,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			platform/device.cpp                               \
 			platform/dialog.cpp                               \
 			platform/haptics.cpp                              \
-			platform/input_prompt.cpp	                      \
+			platform/input.cpp                                \
 			platform/status_bar.cpp                           \
 			platform/local_storage.cpp                        \
 			platform/get_locale.cpp		                      \

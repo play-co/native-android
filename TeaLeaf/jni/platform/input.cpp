@@ -17,7 +17,7 @@
 #include "platform/input_prompt.h"
 #include "platform/platform.h"
 
-int input_prompt_show(const char *title, const char *message, const char *ok_text, const char *cancel_text, const char *value, bool auto_show_keyboard, bool is_password) {
+int input_open_prompt(const char *title, const char *message, const char *ok_text, const char *cancel_text, const char *value, bool auto_show_keyboard, bool is_password) {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jstring jtitle = env->NewStringUTF(title);
@@ -38,18 +38,19 @@ int input_prompt_show(const char *title, const char *message, const char *ok_tex
 	return id;
 }
 
-void input_prompt_show_soft_keyboard(const char *curr_val, const char *hint, bool has_backward, bool has_forward, const char *input_type, int max_length, int cursorPos) {
+void input_show_keyboard(const char *curr_val, const char *hint, bool has_backward, bool has_forward, const char *input_type, const char *input_return_button, int max_length, int cursorPos) {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jstring jcurr_val = env->NewStringUTF(curr_val);
 	jstring jhint = env->NewStringUTF(hint);
 	jstring jinput_type = env->NewStringUTF(input_type);
+	jstring jinput_return_button = env->NewStringUTF(input_return_button);
 
-	jmethodID method = env->GetMethodID(shim->type, "showSoftKeyboard", "(Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;II)V");
-	env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, max_length, cursorPos);
+	jmethodID method = env->GetMethodID(shim->type, "showSoftKeyboard", "(Ljava/lang/String;Ljava/lang/String;ZZLjava/lang/String;Ljava/lang/String;II)V");
+	env->CallVoidMethod(shim->instance, method, jcurr_val, jhint, has_backward, has_forward, jinput_type, jinput_return_button, max_length, cursorPos);
 }
 
-void input_prompt_hide_soft_keyboard() {
+void input_hide_keyboard() {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;
 

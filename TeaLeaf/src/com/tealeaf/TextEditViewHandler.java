@@ -196,9 +196,26 @@ public class TextEditViewHandler {
 	/**
 	 * Perform actions necessary when TextEditView pops up.
 	 */
-	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, int maxLength, int cursorPos) {
+	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, String inputReturnButton, int maxLength, int cursorPos) {
 
-		editText.setImeOptions(hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE);
+		if (inputReturnButton.equals("done")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		} else if (inputReturnButton.equals("next")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		} else if (inputReturnButton.equals("search")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+		} else if (inputReturnButton.equals("send")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_SEND);
+		} else if (inputReturnButton.equals("go")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_GO);
+		} else {
+			int action = hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE;
+			if (inputReturnButton.equals("default")) {
+				editText.setImeOptions(action);
+			} else {
+				editText.setImeActionLabel(inputReturnButton, action);
+			}
+		}
 
 		if (!isActive) {
 			isActive = true;
@@ -219,13 +236,13 @@ public class TextEditViewHandler {
 
 		switch (inputName) {
 			case NUMBER:
-				type = InputType.TYPE_CLASS_NUMBER;	
+				type = InputType.TYPE_CLASS_NUMBER;
 				break;
 			case PHONE:
 				type = InputType.TYPE_CLASS_PHONE;
 				break;
 			case PASSWORD:
-				type = InputType.TYPE_TEXT_VARIATION_PASSWORD;	
+				type = InputType.TYPE_TEXT_VARIATION_PASSWORD;
 				break;
 			case CAPITAL:
 				type = InputType.TYPE_TEXT_FLAG_CAP_WORDS;
@@ -238,7 +255,7 @@ public class TextEditViewHandler {
 		editText.setInputType(type | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
 		if (maxLength == -1) {
-			editText.setFilters(new InputFilter[] {});	
+			editText.setFilters(new InputFilter[] {});
 		} else {
 			editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxLength) });
 		}
@@ -320,9 +337,9 @@ public class TextEditViewHandler {
 			// you cannot use standard onBackPressed for this key press.
 			if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
 				if (handler != null) {
-					handler.deactivate();	
+					handler.deactivate();
 				}
-			}	
+			}
 
 			return super.onKeyPreIme(keyCode, event);
 		}
