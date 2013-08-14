@@ -111,6 +111,14 @@ Handle<Value> js_native_send_activity_to_back(const Arguments& args) {
 	return Boolean::New(result);
 }
 
+Handle<Value> js_native_stay_awake(const Arguments& args) {
+	LOGFN("stay_awake");
+	int enabled = args[0]->Int32Value();
+	native_stay_awake(enabled != 0);
+	LOGFN("end stay_awake");
+	return Undefined();
+}
+
 Handle<Value> js_native_upload_device_info(const Arguments& args) {
 	LOGFN("upload_device_info");
 	upload_device_info();
@@ -175,6 +183,7 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	NATIVE->Set(STRING_CACHE_applyUpdate, FunctionTemplate::New(native_apply_update));
 	NATIVE->Set(STRING_CACHE_Socket, FunctionTemplate::New(js_socket_ctor));
 	NATIVE->Set(STRING_CACHE_sendActivityToBack, FunctionTemplate::New(js_native_send_activity_to_back));
+	NATIVE->Set(STRING_CACHE_stayAwake, FunctionTemplate::New(js_native_stay_awake));
 	NATIVE->Set(STRING_CACHE_uploadDeviceInfo, FunctionTemplate::New(js_native_upload_device_info));
 	NATIVE->Set(STRING_CACHE_getCurrentTimeMicroseconds, FunctionTemplate::New(js_native_get_microseconds));
 	NATIVE->Set(STRING_CACHE_reload, FunctionTemplate::New(js_native_reload));

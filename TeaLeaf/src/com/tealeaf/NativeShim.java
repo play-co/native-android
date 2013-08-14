@@ -40,6 +40,8 @@ import android.widget.EditText;
 import android.view.inputmethod.EditorInfo;
 import android.text.InputType;
 
+import android.view.Window;
+
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -328,7 +330,20 @@ public class NativeShim {
 	public String getDeviceInfo() {
 		return Device.getDeviceInfo();
 	}
+	public void setStayAwake(final boolean on) {
+		final Window w = context.getWindow();
 
+		context.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (on) {
+					w.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				} else {
+					w.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+				}
+			}
+		});
+	}
 	public void reload() {
 		context.reload();
 	}

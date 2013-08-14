@@ -129,6 +129,7 @@ extern Persistent<String> STRING_CACHE_width;
 extern Persistent<String> STRING_CACHE_create;
 extern Persistent<String> STRING_CACHE_clearTimeout;
 extern Persistent<String> STRING_CACHE_sendActivityToBack;
+extern Persistent<String> STRING_CACHE_stayAwake;
 extern Persistent<String> STRING_CACHE_fillText;
 extern Persistent<String> STRING_CACHE_PROFILER;
 extern Persistent<String> STRING_CACHE_runGC;
