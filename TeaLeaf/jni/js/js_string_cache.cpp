@@ -126,6 +126,7 @@ Persistent<String> STRING_CACHE_width;
 Persistent<String> STRING_CACHE_create;
 Persistent<String> STRING_CACHE_clearTimeout;
 Persistent<String> STRING_CACHE_sendActivityToBack;
+Persistent<String> STRING_CACHE_stayAwake;
 Persistent<String> STRING_CACHE_fillText;
 Persistent<String> STRING_CACHE_PROFILER;
 Persistent<String> STRING_CACHE_runGC;
@@ -338,6 +339,7 @@ void js_string_cache_init() {
 	STRING_CACHE_create = Persistent<String>::New(String::New("create"));
 	STRING_CACHE_clearTimeout = Persistent<String>::New(String::New("clearTimeout"));
 	STRING_CACHE_sendActivityToBack = Persistent<String>::New(String::New("sendActivityToBack"));
+	STRING_CACHE_stayAwake = Persistent<String>::New(String::New("stayAwake"));
 	STRING_CACHE_fillText = Persistent<String>::New(String::New("fillText"));
 	STRING_CACHE_PROFILER = Persistent<String>::New(String::New("PROFILER"));
 	STRING_CACHE_runGC = Persistent<String>::New(String::New("runGC"));
