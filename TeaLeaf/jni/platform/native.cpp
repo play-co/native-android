@@ -126,6 +126,12 @@ void set_halfsized_textures(bool on) {
 	shim->env->CallVoidMethod(shim->instance, method, (jboolean)on);
 }
 
+void native_stay_awake(bool on) {
+	native_shim *shim = get_native_shim();
+	jmethodID method = shim->env->GetMethodID(shim->type, "setStayAwake", "(Z)V");
+	shim->env->CallVoidMethod(shim->instance, method, (jboolean)on);
+}
+
 void native_reload() {
 	native_shim *shim = get_native_shim();
 	jmethodID method = shim->env->GetMethodID(shim->type, "reload", "()V");
