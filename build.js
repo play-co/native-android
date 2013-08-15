@@ -1219,10 +1219,13 @@ exports.build = function(builder, project, opts, next) {
 		});
 	}, function() {
 		if (argv.install || argv.open) {
-			var keepStorage = argv.clearstorage ? "" : " -k";
-			var cmd = 'adb uninstall' + keepStorage + ' "' + packageName + '"';
+			var keepStorage = argv.clearstorage ? "" : "-k";
+			var cmd = 'adb uninstall ' + keepStorage + ' "' + packageName + '"';
 			logger.log('Install: Running ' + cmd + '...');
-			builder.common.child('adb', ['uninstall', packageName], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+			var argz = ['shell', 'pm', 'uninstall'];
+			keepStorage && argz.push(keepStorage);
+			argz.push(packageName);
+			builder.common.child('adb', argz, {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 		}
 	}, function() {
 		if (argv.install || argv.open) {
