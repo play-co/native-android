@@ -495,15 +495,12 @@ Handle<Value> defStrokeText(const Arguments& args) {
 
 		String::Utf8Value str2(args[8]);
 		const char *baseline = ToCString(str2);
-		if (!strcmp(baseline, "top")) {
-			y_offset = 0;
-		} else if (!strcmp(baseline, "bottom")) {
+		if (!strcmp(baseline, "bottom")) {
 			y_offset = texture->originalHeight;
 		} else if (!strcmp(baseline, "middle")) {
 			y_offset = texture->originalHeight/2;
-		} else {
-			//TODO get the real value in Java and store it
-			y_offset = texture->originalHeight * 0.95;
+		} else { // top
+			y_offset = 0;
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset - (int)line_width, y - y_offset, texture->originalWidth, texture->originalHeight};
@@ -547,15 +544,12 @@ Handle<Value> defFillText(const Arguments& args) {
 
 		String::Utf8Value str2(args[8]);
 		const char *baseline = ToCString(str2);
-		if (!strcmp(baseline, "top")) {
-			y_offset = 0;
-		} else if (!strcmp(baseline, "bottom")) {
+		if (!strcmp(baseline, "bottom")) {
 			y_offset = texture->originalHeight;
 		} else if (!strcmp(baseline, "middle")) {
 			y_offset = texture->originalHeight/2;
-		} else {
-			//TODO get the real value in Java and store it
-			y_offset = texture->originalHeight * 0.95;
+		} else { // top
+			y_offset = 0;
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
