@@ -10,9 +10,9 @@ import android.view.ViewTreeObserver;
 import android.view.View.OnKeyListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import com.tealeaf.event.InputPromptKeyUpEvent;
-import com.tealeaf.event.InputPromptSubmitEvent;
-import com.tealeaf.event.InputPromptMoveEvent;
+import com.tealeaf.event.InputKeyboardKeyUpEvent;
+import com.tealeaf.event.InputKeyboardSubmitEvent;
+import com.tealeaf.event.InputKeyboardFocusNextEvent;
 import android.view.View;
 import android.text.TextWatcher;
 import android.text.Editable;
@@ -111,7 +111,7 @@ public class TextEditViewHandler {
 				// propagate text changes to JS to update views
 				if (registerTextChange) {
 					logger.log("KeyUp textChange in TextEditView");
-					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString(), beforeText, editText.getSelectionStart()));
+					EventQueue.pushEvent(new InputKeyboardKeyUpEvent(s.toString(), beforeText, editText.getSelectionStart()));
 				} else {
 					registerTextChange = true;
 				}
@@ -119,7 +119,7 @@ public class TextEditViewHandler {
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				beforeText = s.toString();	
+				beforeText = s.toString();
 			}
 
 			@Override
@@ -131,10 +131,10 @@ public class TextEditViewHandler {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
-					EventQueue.pushEvent(new InputPromptSubmitEvent(0, editText.getText().toString()));
+					EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, editText.getText().toString()));
 					closeKeyboard();
 				} else if (actionId == EditorInfo.IME_ACTION_NEXT) {
-					EventQueue.pushEvent(new InputPromptMoveEvent(true));	
+					EventQueue.pushEvent(new InputKeyboardFocusNextEvent(true));
 				}
 
 				return false;
@@ -149,20 +149,20 @@ public class TextEditViewHandler {
 		doneButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptSubmitEvent(0, editText.getText().toString()));
+				EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, editText.getText().toString()));
 				closeKeyboard();
 			}
 		});
 		backButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptMoveEvent(false));	
+				EventQueue.pushEvent(new InputKeyboardFocusNextEvent(false));
 			}
 		});
 		forwardButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptMoveEvent(true));	
+				EventQueue.pushEvent(new InputKeyboardFocusNextEvent(true));
 			}
 		});
 

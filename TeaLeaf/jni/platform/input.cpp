@@ -26,7 +26,7 @@ int input_open_prompt(const char *title, const char *message, const char *ok_tex
 	jstring jok = env->NewStringUTF(ok_text);
 	jstring jcancel = env->NewStringUTF(cancel_text);
 
-	jmethodID method = env->GetMethodID(shim->type, "showInputPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)I");
+	jmethodID method = env->GetMethodID(shim->type, "openPrompt", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)I");
 	jint id = env->CallIntMethod(shim->instance, method, jtitle, jmessage, jok, jcancel, jvalue, auto_show_keyboard, is_password);
 
 	env->DeleteLocalRef(jtitle);

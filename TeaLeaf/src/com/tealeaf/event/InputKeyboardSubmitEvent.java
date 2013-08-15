@@ -1,5 +1,4 @@
-/**
- * @license
+/* @license
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
@@ -15,16 +14,16 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptKeyUpEvent extends Event {
-    @SuppressWarnings("unused")
-    private String text;
-    private String prevText;
-    private int cursorPos;
+public class InputKeyboardSubmitEvent extends Event {
+	
+	@SuppressWarnings("unused")
+	private int id;
+	@SuppressWarnings("unused")
+	private String text;
 
-    public InputPromptKeyUpEvent(String text, String prevText, int cursorPos) {
-        super("inputPromptKeyUp");
-        this.text = text; 
-        this.prevText = prevText;
-        this.cursorPos = cursorPos;
-    }
+	public InputKeyboardSubmitEvent(int id, String text) {
+		super("InputKeyboardSubmit");
+		this.id = id;
+		this.text = text;
+	}
 }

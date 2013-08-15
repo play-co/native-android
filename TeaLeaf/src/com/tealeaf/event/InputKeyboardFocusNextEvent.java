@@ -1,4 +1,5 @@
-/* @license
+/**
+ * @license
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
@@ -14,16 +15,12 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptSubmitEvent extends Event {
-	
-	@SuppressWarnings("unused")
-	private int id;
-	@SuppressWarnings("unused")
-	private String text;
+public class InputKeyboardFocusNextEvent extends Event {
+    @SuppressWarnings("unused")
+    private boolean next;
 
-	public InputPromptSubmitEvent(int id, String text) {
-		super("inputPromptSubmit");
-		this.id = id;
-		this.text = text;
-	}
+    public InputKeyboardFocusNextEvent(boolean next) {
+        super("InputKeyboardFocusNext");
+        this.next = next;
+    }
 }

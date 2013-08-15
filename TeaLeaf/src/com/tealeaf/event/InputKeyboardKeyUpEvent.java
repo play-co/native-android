@@ -15,12 +15,16 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptMoveEvent extends Event {
+public class InputKeyboardKeyUpEvent extends Event {
     @SuppressWarnings("unused")
-    private boolean next;
+    private String text;
+    private String prevText;
+    private int cursorPos;
 
-    public InputPromptMoveEvent(boolean next) {
-        super("inputPromptMove");
-        this.next = next;
+    public InputKeyboardKeyUpEvent(String text, String prevText, int cursorPos) {
+        super("InputKeyboardKeyUp");
+        this.text = text; 
+        this.prevText = prevText;
+        this.cursorPos = cursorPos;
     }
 }
