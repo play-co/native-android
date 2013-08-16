@@ -919,7 +919,7 @@ function updateManifest(builder, opts, next) {
 			copy(params, {
 				"package": opts.namespace,
 				title: "@string/title",
-				activity: "." + opts.activity,
+				activity: opts.namespace + "." + opts.activity,
 				version: "" + opts.version,
 				appid: opts.appID,
 				shortname: opts.shortName,
