@@ -159,20 +159,25 @@ function injectPluginXML(builder, opts, next) {
 		if (results && results.length > 0 && xml && xml.length > 0) {
 			var XML_START_PLUGINS_MANIFEST = "<!--START_PLUGINS_MANIFEST-->";
 			var XML_END_PLUGINS_MANIFEST = "<!--END_PLUGINS_MANIFEST-->";
+			var XML_START_PLUGINS_ACTIVITY = "<!--START_PLUGINS_ACTIVITY-->";
+			var XML_END_PLUGINS_ACTIVITY = "<!--END_PLUGINS_ACTIVITY-->";
 			var XML_START_PLUGINS_APPLICATION = "<!--START_PLUGINS_APPLICATION-->";
 			var XML_END_PLUGINS_APPLICATION = "<!--END_PLUGINS_APPLICATION-->";
 
 			var manifestXmlManifestStr = "";
+			var manifestXmlActivityStr = "";
 			var manifestXmlApplicationStr = "";
 
 			for (var i = 0; i < results.length; ++i) {
 				var pluginXml = results[i];
 
-				manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST,	XML_END_PLUGINS_MANIFEST);
+				manifestXmlManifestStr += getTextBetween(pluginXml, XML_START_PLUGINS_MANIFEST, XML_END_PLUGINS_MANIFEST);
+				manifestXmlActivityStr += getTextBetween(pluginXml, XML_START_PLUGINS_ACTIVITY, XML_END_PLUGINS_ACTIVITY);
 				manifestXmlApplicationStr += getTextBetween(pluginXml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION);
 			}
 
 			xml = replaceTextBetween(xml, XML_START_PLUGINS_MANIFEST, XML_END_PLUGINS_MANIFEST, manifestXmlManifestStr);
+			xml = replaceTextBetween(xml, XML_START_PLUGINS_ACTIVITY, XML_END_PLUGINS_ACTIVITY, manifestXmlActivityStr);
 			xml = replaceTextBetween(xml, XML_START_PLUGINS_APPLICATION, XML_END_PLUGINS_APPLICATION, manifestXmlApplicationStr);
 			fs.writeFile(manifestXml, xml, "utf-8", f.wait());
 		} else {
