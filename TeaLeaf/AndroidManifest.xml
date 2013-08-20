@@ -55,6 +55,8 @@
 				<category android:name="android.intent.category.BROWSABLE" />
 				<data android:host="*" android:scheme="tealeaf" />
 			</intent-filter>
+<!--START_PLUGINS_ACTIVITY-->
+<!--END_PLUGINS_ACTIVITY-->
 		</activity>
 
 		<activity android:name="com.tealeaf.CrashRecover" android:configChanges="keyboard|keyboardHidden|orientation" android:excludeFromRecents="true" android:exported="false" android:stateNotNeeded="true" android:process=":CrashRecover" />
