@@ -1146,7 +1146,7 @@ exports.build = function(builder, project, opts, next) {
 	var f = ff(function () {
 		installAddons(builder, project, opts, addonConfig, f());
 	}, function() {
-		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
+		require(builder.common.paths.nativeBuild("native")).writeNativeResources(builder, project, opts, f.waitPlain());
 
 		makeAndroidProject(builder, {
 			project: project,
