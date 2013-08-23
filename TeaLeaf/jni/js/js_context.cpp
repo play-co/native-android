@@ -54,7 +54,6 @@ Handle<Value> defDrawImage(const Arguments& args) {
 	float destY = args[7]->NumberValue();
 	float destW = args[8]->NumberValue();
 	float destH = args[9]->NumberValue();
-	//int composite_op = args[10]->Int32Value();
 
 	rect_2d src_rect = {srcX, srcY, srcW, srcH};
 	rect_2d dest_rect = {destX, destY, destW, destH};
@@ -222,11 +221,9 @@ Handle<Value> defFillRect(const Arguments& args) {
 	rgba color;
 	rgba_parse(&color, ToCString(str_color));
 
-	int composite_op = args[5]->Int32Value();
-
 	rect_2d rect = {x, y, width, height};
 
-	context_2d_fillRect(GET_CONTEXT2D(), &rect, &color, composite_op);
+	context_2d_fillRect(GET_CONTEXT2D(), &rect, &color);
 
 	return Undefined();
 }
@@ -245,19 +242,17 @@ Handle<Value> defStrokeRect(const Arguments& args) {
 	double line_width1 = args[5]->Int32Value();
 	double line_width2 = line_width1 / 2;
 
-	int composite_op = args[6]->Int32Value();
-
 	rect_2d left_rect = {x - line_width2, y - line_width2, line_width1, height + line_width1};
-	context_2d_fillRect(ctx, &left_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &left_rect, &color);
 
 	rect_2d right_rect = {x + width - line_width2, y - line_width2, line_width1, height + line_width1};
-	context_2d_fillRect(ctx, &right_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &right_rect, &color);
 
 	rect_2d top_rect = {x + line_width2, y - line_width2, width - line_width1, line_width1};
-	context_2d_fillRect(ctx, &top_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &top_rect, &color);
 
 	rect_2d bottom_rect = {x + line_width2, y + height - line_width2, width - line_width1, line_width1};
-	context_2d_fillRect(ctx, &bottom_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &bottom_rect, &color);
 
 	return Undefined();
 }
@@ -490,7 +485,6 @@ Handle<Value> defStrokeText(const Arguments& args) {
 		String::Utf8Value str(args[7]);
 		const char *align = ToCString(str);
 
-		int composite_op = args[9]->Int32Value();
 		int x_offset = 0;
 		int y_offset = 0;
 		if (!strcmp(align, "left")) {
@@ -512,7 +506,7 @@ Handle<Value> defStrokeText(const Arguments& args) {
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset - (int)line_width, y - y_offset, texture->originalWidth, texture->originalHeight};
-		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a);
 	}
 	LOGFN("endstroketext");
 	return Undefined();
@@ -539,7 +533,6 @@ Handle<Value> defFillText(const Arguments& args) {
 		String::Utf8Value str(args[7]);
 		const char *align = ToCString(str);
 
-		int composite_op = args[9]->Int32Value();
 		int x_offset = 0;
 		int y_offset = 0;
 		if (!strcmp(align, "left")) {
@@ -561,7 +554,7 @@ Handle<Value> defFillText(const Arguments& args) {
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
-		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a);
 	}
 	LOGFN("endfilltext");
 	return Undefined();
