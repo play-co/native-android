@@ -54,12 +54,12 @@ Handle<Value> defDrawImage(const Arguments& args) {
 	float destY = args[7]->NumberValue();
 	float destW = args[8]->NumberValue();
 	float destH = args[9]->NumberValue();
-	int composite_op = args[10]->Int32Value();
+	//int composite_op = args[10]->Int32Value();
 
 	rect_2d src_rect = {srcX, srcY, srcW, srcH};
 	rect_2d dest_rect = {destX, destY, destW, destH};
 
-	context_2d_drawImage(GET_CONTEXT2D(), srcTex, url, &src_rect, &dest_rect, composite_op);
+	context_2d_drawImage(GET_CONTEXT2D(), srcTex, url, &src_rect, &dest_rect);
 	LOGFN("endDrawImage");
 	return Undefined();
 }
@@ -454,7 +454,7 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 					url = strdup(ToCString(src_tex_str));
 				}
 
-				context_2d_drawImage(context, 0, url, &src_rect, &dest_rect, source_over);
+				context_2d_drawImage(context, 0, url, &src_rect, &dest_rect);
 
 				x += (ow - 2) * scale + tracking - outline;
 			} else {
@@ -707,7 +707,7 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 	const char *src_tex = ToCString(str2);
 	int tex_name = args[5]->Int32Value();
 	Handle<Object> defs = args[6]->ToObject();
-	int composite_op = args[7]->Int32Value();
+	//int composite_op = args[7]->Int32Value();
 
 
 	int space_width = defs->Get(STRING_CACHE_spaceWidth)->Int32Value();
@@ -730,7 +730,7 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 				rect_2d src_rect = {x1, y1, w, h};
 				rect_2d dest_rect = {x, y, w * scale, h * scale};
 				x += a * scale;
-				context_2d_drawImage(GET_CONTEXT2D(), tex_name, src_tex, &src_rect, &dest_rect, composite_op);
+				context_2d_drawImage(GET_CONTEXT2D(), tex_name, src_tex, &src_rect, &dest_rect);
 				x += c * scale;
 			}
 		}
@@ -738,6 +738,23 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 	return Undefined();
 }
 
+Handle<Value> defSetGlobalCompositeOperation(const Arguments& args) {
+	LOGFN("setGlobalCompositeOperation");
+	HandleScope handleScope;
+	int composite_op = args[0]->Int32Value();
+	context_2d_setGlobalCompositeOperation(GET_CONTEXT2D(), composite_op);
+	LOGFN("endsetGlobalCompositeOperation");
+	return Undefined();
+}
+
+Handle<Value> defGetGlobalCompositeOperation(const Arguments& args) {
+	LOGFN("getGlobalCompositeOperation");
+	HandleScope handleScope;
+	int composite_op = context_2d_getGlobalCompositeOperation(GET_CONTEXT2D());
+
+	LOGFN("endgetGlobalCompositeOperation");
+	return Number::New(composite_op);
+}
 
 void js_gl_init() {
 }
@@ -769,6 +786,8 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 	context_2d_class_template->Set(STRING_CACHE_enableScissor, FunctionTemplate::New(defEnableScissor));
 	context_2d_class_template->Set(STRING_CACHE_disableScissor, FunctionTemplate::New(defDisableScissor));
 	context_2d_class_template->Set(STRING_CACHE_drawPointSprites, FunctionTemplate::New(defDrawPointSprites));
+	context_2d_class_template->Set(String::New("setGlobalCompositeOperation"), FunctionTemplate::New(defSetGlobalCompositeOperation));
+	context_2d_class_template->Set(String::New("getGlobalCompositeOperation"), FunctionTemplate::New(defGetGlobalCompositeOperation));
 
 	// bitmap fonts
 	context_2d_class_template->Set(STRING_CACHE_measureTextBitmap, FunctionTemplate::New(defMeasureTextBitmap));
