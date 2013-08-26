@@ -448,6 +448,8 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 	});
 }
 
+exports.transformXSL = transformXSL;
+
 var PUNCTUATION_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~]/g;
 var PUNCTUATION_OR_SPACE_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~ ]/g;
 
