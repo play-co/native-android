@@ -478,7 +478,7 @@ Handle<Value> defStrokeText(const Arguments& args) {
 	int size = args[5]->Int32Value();
 	String::Utf8Value font_str(args[6]);
 	const char *font = ToCString(font_str);
-	double line_width = args[10]->NumberValue();
+	double line_width = args[9]->NumberValue();
 	texture_2d *texture = text_manager_get_stroked_text(font, size * FONT_SCALE, text, &color, max_width, (float)line_width);
 
 	if (texture) {
