@@ -82,6 +82,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/draw_textures.c                              \
 			core/events.c                                     \
 			core/geometry.c                                   \
+			core/graphics_utils.c                            \
 			core/image-cache/src/image_cache.c                \
 			core/image-cache/src/crypto/sha1.c                \
 			core/image_loader.c                               \
