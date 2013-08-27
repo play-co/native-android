@@ -448,6 +448,8 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 	});
 }
 
+exports.transformXSL = transformXSL;
+
 var PUNCTUATION_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~]/g;
 var PUNCTUATION_OR_SPACE_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~ ]/g;
 
@@ -1245,9 +1247,10 @@ exports.build = function(builder, project, opts, next) {
 			logger.log('Install: Running ' + cmd + '...');
 			builder.common.child('adb', ['shell', 'am', 'start', '-n', startCmd], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 		}
-	}, function () {
-		next(0);
+
+		f(destDir);
 	}).error(function (err) {
 		logger.error("Build failure:", err, err.stack);
-	});
+		process.exit(2);
+	}).next(next);
 };
