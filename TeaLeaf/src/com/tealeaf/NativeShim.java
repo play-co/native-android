@@ -450,7 +450,7 @@ public class NativeShim {
 		if (options.isDevelop() && options.get("forceURL", false)) {
 			// load native.js.mp3 from the file system
 			// read file in
-			String path = resourceManager.getStorageDirectory() + "/build/debug/native-android/";
+			String path = resourceManager.getStorageDirectory();
 			String result = null;
 			DataInputStream in = null;
 			try {
