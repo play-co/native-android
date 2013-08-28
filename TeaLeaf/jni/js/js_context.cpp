@@ -749,6 +749,47 @@ Handle<Value> defGetGlobalCompositeOperation(const Arguments& args) {
 	return Number::New(composite_op);
 }
 
+/**
+   Retrieves the given context 
+
+   @param	args[0] => the given context2d, can be connected to an on/off-screen buffer
+   @param	args[1] => filename to save the on/off-screen buffer with
+   @return 	Undefined
+**/
+Handle<Value> defSaveBufferToFile(const Arguments& args) {
+	//get this context 2d instance
+//	Handle<Object> js_ctx = Handle<Object>::Cast(args[0]);
+//	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(String::New("_ctx")));
+//	context_2d *ctx = GET_CONTEXT2D_FROM(_ctx);
+//	//get filename for the fbo to be saved to
+//	String::Utf8Value filename_str(args[1]);
+//	const char *filename = ToCString(filename_str);
+//	bool did_save = context_2d_save_buffer_to_file(ctx, filename); 
+	return Boolean::New(true);
+}
+
+/**
+   Retrieves the given context 
+   @param	args[0] => the given context2d, can be connected to an on/off-screen buffer
+   @return 	Undefined
+**/
+Handle<Value> defToDataURL(const Arguments& args) {
+	//get this context 2d instance
+	Handle<Object> js_ctx = Handle<Object>::Cast(args[0]);
+	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(String::New("_ctx")));
+	context_2d *ctx = GET_CONTEXT2D_FROM(_ctx);
+	char * data = context_2d_save_buffer_to_base64(ctx, "PNG"); 
+	Handle<Value> str;
+	if (data != NULL) {
+		str = String::New(data);
+		free(data);
+	} else {
+		str = String::New("");
+	}
+	return str;
+}
+
+
 void js_gl_init() {
 }
 
@@ -797,6 +838,8 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 
 Handle<ObjectTemplate> js_gl_get_template() {
 	Handle<ObjectTemplate> gl = ObjectTemplate::New();
+	gl->Set(String::New("saveBufferToFile"), FunctionTemplate::New(defSaveBufferToFile));
+	gl->Set(String::New("toDataURL"), FunctionTemplate::New(defToDataURL));
 	gl->Set(STRING_CACHE_Context2D, FunctionTemplate::New(context_2d_class_ctor));
 	gl->Set(STRING_CACHE_flushImages, FunctionTemplate::New(defFlushImages));
 	gl->Set(STRING_CACHE__loadImage, FunctionTemplate::New(defLoadImage));

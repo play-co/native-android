@@ -86,6 +86,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/image-cache/src/image_cache.c                \
 			core/image-cache/src/crypto/sha1.c                \
 			core/image_loader.c                               \
+			core/image_writer.c                               \
 			core/object_pool.c                                \
 			core/rgba.c                                       \
 			core/tealeaf_canvas.c                             \
