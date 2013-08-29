@@ -90,7 +90,7 @@ void sound_manager_seek_to(const char *url, float position) {
 	env->DeleteLocalRef(s);
 }
 
-void sound_manager_halt(const char *url) {
+void sound_manager_halt() {
 	native_shim *shim = get_native_shim();
 	JNIEnv *env = shim->env;
 	jobject manager = shim->instance;
