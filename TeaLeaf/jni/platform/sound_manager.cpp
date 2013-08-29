@@ -89,3 +89,12 @@ void sound_manager_seek_to(const char *url, float position) {
 	env->CallVoidMethod(manager, method, s, position);
 	env->DeleteLocalRef(s);
 }
+
+void sound_manager_halt(const char *url) {
+	native_shim *shim = get_native_shim();
+	JNIEnv *env = shim->env;
+	jobject manager = shim->instance;
+	jclass type = shim->type;
+	jmethodID method = env->GetMethodID(type, "haltSounds", "()V");
+	env->CallVoidMethod(manager, method);
+}

@@ -415,6 +415,9 @@ public class NativeShim {
 	public void seekTo(String url, float position) {
 		soundQueue.seekTo(url, position);
 	}
+	public void haltSounds() {
+		soundQueue.haltSounds();
+	}
 
 	// Sockets
 	public void sendData(int id, String data) {
