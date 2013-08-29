@@ -838,7 +838,6 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 
 Handle<ObjectTemplate> js_gl_get_template() {
 	Handle<ObjectTemplate> gl = ObjectTemplate::New();
-	gl->Set(String::New("saveBufferToFile"), FunctionTemplate::New(defSaveBufferToFile));
 	gl->Set(String::New("toDataURL"), FunctionTemplate::New(defToDataURL));
 	gl->Set(STRING_CACHE_Context2D, FunctionTemplate::New(context_2d_class_ctor));
 	gl->Set(STRING_CACHE_flushImages, FunctionTemplate::New(defFlushImages));
