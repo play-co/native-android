@@ -91,10 +91,10 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 		//form the simulate url
 		String simulateUrl = "http://" + host + ":" + port + "/simulate/debug/" + appInfo.id + "/native-android/";
 
-		//first get native.js.mp3
-		String url = simulateUrl + "native.js.mp3";
+		//first get native.js
+		String url = simulateUrl + "native.js";
 		http = new HTTP();
-		String nativejsPath = storageDir + "/" + "native.js.mp3";
+		String nativejsPath = storageDir + "/" + "native.js";
 		http.getFile(URI.create(url), nativejsPath);
 
 		//get loading.png
@@ -137,7 +137,7 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 			while (files.hasNext()) {
 				String filePath = files.next();
 				lastFilename = filePath;
-				if (filePath.contains("native.js.mp3")) {
+				if (filePath.contains("native.js")) {
 					continue;
 				}
 
