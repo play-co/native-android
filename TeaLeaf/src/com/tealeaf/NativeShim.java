@@ -451,7 +451,7 @@ public class NativeShim {
 		TeaLeafOptions options = context.getOptions();
 		String sourceString = null;
 		if (options.isDevelop() && options.get("forceURL", false)) {
-			// load native.js.mp3 from the file system
+			// load native.js from the file system
 			// read file in
 			String path = resourceManager.getStorageDirectory();
 			String result = null;

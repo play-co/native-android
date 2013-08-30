@@ -438,7 +438,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 						state = FIRST_LOAD;
 					} else {
 						state = FIRST_INIT_FAIL;
-						logger.log("{js} ERROR: Unable to retrieve native.js.mp3");
+						logger.log("{js} ERROR: Unable to retrieve native.js");
 					}
 				}
 			}
@@ -498,10 +498,10 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				}
 				break;
 			case FIRST_INIT_FAIL:
-				logger.log("{js} Retrying native.js.mp3 download...");
+				logger.log("{js} Retrying native.js download...");
 				state = WAIT_FOR_RETRY;
 				handleInitFail("Connect error",
-						"Unable to contact server to download native.js.mp3");
+						"Unable to contact server to download native.js");
 				break;
 			case WAIT_FOR_RETRY:
 				break;
