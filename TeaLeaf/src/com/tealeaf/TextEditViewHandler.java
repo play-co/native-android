@@ -252,7 +252,7 @@ public class TextEditViewHandler {
 				break;
 		}
 
-		editText.setInputType(type | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		editText.setInputType(type | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
 
 		if (maxLength == -1) {
 			editText.setFilters(new InputFilter[] {});
