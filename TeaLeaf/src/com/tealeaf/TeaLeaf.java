@@ -621,21 +621,46 @@ public class TeaLeaf extends FragmentActivity {
         // rotate as needed
         Bitmap bmp;
 
-        int newWidth = bitmap.getWidth();
-        int newHeight = bitmap.getHeight();
+		//only allow the largest size to be 768 for now, several phones
+		//including the galaxy s3 seem to crash with rotating very large 
+		//images (out of memory errors) from the gallery
+		int w = bitmap.getWidth();
+		int h = bitmap.getHeight();
+		Bitmap scaled = bitmap;
+		if (w > h && w > 768) {
+			float ratio = 768.f / (float)w;		
+			w = 768;
+			h = (int) (ratio * h);
+			scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+			if (bitmap != scaled) {
+				bitmap.recycle();
+			}
+		} if (h > w && h > 768) {
+			float ratio = 768.f / (float)h;		
+			h = 768;
+			w = (int) (ratio * w);
+			scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+			if (bitmap != scaled) {
+				bitmap.recycle();
+			}
+		}
+
+        int newWidth = scaled.getWidth();
+        int newHeight = scaled.getHeight();
+
         int degrees = 0;
         if (rotate == ROTATE_90 || rotate == ROTATE_270) {
-            newWidth = bitmap.getHeight();
-            newHeight = bitmap.getWidth();
+            newWidth = scaled.getHeight();
+            newHeight = scaled.getWidth();
         }
 
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);
 
-        bmp = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                bitmap.getHeight(), matrix, true);
-        if (bitmap != bmp) {
-            bitmap.recycle();
+        bmp = Bitmap.createBitmap(scaled, 0, 0, scaled.getWidth(),
+                scaled.getHeight(), matrix, true);
+        if (scaled != bmp) {
+            scaled.recycle();
         }
 
         return bmp;
