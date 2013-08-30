@@ -21,8 +21,10 @@ using namespace v8;
 
 Handle<Value> js_camera_get_photo(const Arguments& args) {
 	String::Utf8Value str(args[0]);
+	int width = args[1]->Int32Value();
+	int height = args[2]->Int32Value();
 	const char *cstr = ToCString(str);
-	return Number::New(camera_get_photo(cstr));
+	return Number::New(camera_get_photo(cstr, width, height));
 }
 
 Handle<Value> js_camera_get_next_id(const Arguments& args) {
@@ -38,8 +40,10 @@ Handle<ObjectTemplate> js_camera_get_template() {
 
 Handle<Value> js_gallery_get_photo(const Arguments& args) {
 	String::Utf8Value str(args[0]);
+	int width = args[1]->Int32Value();
+	int height = args[2]->Int32Value();
 	const char *cstr = ToCString(str);
-	return Number::New(gallery_get_photo(cstr));
+	return Number::New(gallery_get_photo(cstr, width, height));
 }
 
 Handle<Value> js_gallery_get_next_id(const Arguments& args) {
