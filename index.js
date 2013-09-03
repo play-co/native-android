@@ -45,7 +45,7 @@ exports.load = function(common) {
 		}
 	});
 
-	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname, "build");
+	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname);
 }
 
 exports.testapp = function(common, opts, next) {

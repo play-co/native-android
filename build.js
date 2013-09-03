@@ -506,7 +506,6 @@ function buildAndroidProject(builder, destDir, debug, next) {
 	}, next);
 }
 
-
 function saveLocalizedStringsXmls(destDir, titles) {
 	var stringsXmlPath = path.join(destDir, "res/values/strings.xml");
 	var stringsXml = fs.readFileSync(stringsXmlPath, "utf-8");
@@ -554,7 +553,6 @@ function makeAndroidProject(builder, opts, next) {
 			titles['en'] = opts.title;
 		}
 		saveLocalizedStringsXmls(opts.destDir, titles);
-
 		updateManifest(builder, opts, f.waitPlain());
 		updateActivity(opts, f.waitPlain());
 	}).error(function(err) {
