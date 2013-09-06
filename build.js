@@ -1197,32 +1197,36 @@ exports.build = function(builder, project, opts, next) {
 		var onDoneBuilding = f();
 
 		buildAndroidProject(builder, destDir, debug, function (success) {
-			var apk = "";
-			if (!debug) {
-				apk = shortName + "-aligned.apk";
+			if (opts.skipAPK) {
+				// Skip adb commands also
+				next(0);
 			} else {
-				apk = shortName + "-debug.apk";
-			}
-
-			(!debug ? signAPK : nextStep)(builder, shortName, destDir, function () {
-				apkPath = path.join(apkDir, shortName + ".apk");
-				if (fs.existsSync(apkPath)) {
-					fs.unlinkSync(apkPath);
-				}
-
-				var destApkPath = path.join(destDir, "bin/" + apk);
-				if (fs.existsSync(destApkPath)) {
-					wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
-					builder.common.copyFileSync(destApkPath, apkPath);
-					logger.log("built", clc.yellowBright(packageName));
-					logger.log("saved to " + clc.blueBright(apkPath));
-					onDoneBuilding();
+				var apk = "";
+				if (!debug) {
+					apk = shortName + "-aligned.apk";
 				} else {
-					logger.error("No file at " + destApkPath);
-					next(2);
+					apk = shortName + "-debug.apk";
 				}
 
-			});
+				(!debug ? signAPK : nextStep)(builder, shortName, destDir, function () {
+					apkPath = path.join(apkDir, shortName + ".apk");
+					if (fs.existsSync(apkPath)) {
+						fs.unlinkSync(apkPath);
+					}
+
+					var destApkPath = path.join(destDir, "bin/" + apk);
+					if (fs.existsSync(destApkPath)) {
+						wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
+						builder.common.copyFileSync(destApkPath, apkPath);
+						logger.log("built", clc.yellowBright(packageName));
+						logger.log("saved to " + clc.blueBright(apkPath));
+						onDoneBuilding();
+					} else {
+						logger.error("No file at " + destApkPath);
+						next(2);
+					}
+				});
+			}
 		});
 	}, function() {
 		if (argv.install || argv.open) {
