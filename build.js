@@ -487,11 +487,15 @@ function buildSupportProjects(builder, opts, next) {
 
 	var f = ff(this, function() {
 		tealeafDir = path.join(__dirname, "TeaLeaf");
-		if (opts.clean) {
+		if (opts.clean || opts.arch) {
 			builder.common.child('make', ['clean'], {cwd: __dirname}, f.slot());
 		}
 	}, function() {
-		builder.common.child('ndk-build', ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")], { cwd: tealeafDir }, f.wait()); 
+		var args = ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")];
+		if (opts.arch) {
+			args.push('APP_ABI=' + opts.arch);
+		}
+		builder.common.child('ndk-build', args , { cwd: tealeafDir }, f.wait()); 
 	}, function() {
 		builder.common.child('ant', [(opts.debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
@@ -1173,6 +1177,7 @@ exports.build = function(builder, project, opts, next) {
 		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, {
 			debug: debug,
+			arch: argv.arch,
 			clean: cleanProj
 		}, f.waitPlain());
 	}, function() {
