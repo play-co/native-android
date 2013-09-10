@@ -23,7 +23,7 @@ import android.view.MotionEvent;
 import android.os.SystemClock;
 
 import com.tealeaf.event.InputKeyboardCancelEvent;
-import com.tealeaf.event.InputKeyboardSubmitEvent;
+import com.tealeaf.event.InputPromptSubmitEvent;
 
 public class InputPrompt {
 
@@ -92,7 +92,7 @@ public class InputPrompt {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							String value = input.getText().toString();
-							EventQueue.pushEvent(new InputKeyboardSubmitEvent(id, value));
+							EventQueue.pushEvent(new InputPromptSubmitEvent(id, value));
 						}
 					}
 				);

@@ -67,6 +67,8 @@ static inline void build_style_frame(anim_frame *frame, Handle<Object> target) {
 	ADD_PROP(ANCHOR_Y, anchorY);
 	ADD_PROP(OPACITY, opacity);
 	ADD_PROP(SCALE, scale);
+	ADD_PROP(SCALE_X, scaleX);
+	ADD_PROP(SCALE_Y, scaleY);
 
 	frame->type = STYLE_FRAME;
 }

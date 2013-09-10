@@ -304,6 +304,81 @@ void timestep_view_set_scale(v8::Local<v8::String> property, v8::Local<v8::Value
 
 
 
+v8::Handle<v8::Value> timestep_view_get_scaleX(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view get scaleX");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	double prop = obj->scale_x;
+	//LOG("done in timestep_view get scaleX");
+	return v8::Number::New(prop);
+	
+}
+
+
+
+void timestep_view_set_scaleX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view set scaleX");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	obj->scale_x = value->ToNumber()->Value();
+	
+	//LOG("done in timestep_view set scaleX");
+}
+
+
+
+v8::Handle<v8::Value> timestep_view_get_scaleY(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view get scaleY");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	double prop = obj->scale_y;
+	//LOG("done in timestep_view get scaleY");
+	return v8::Number::New(prop);
+	
+}
+
+
+
+void timestep_view_set_scaleY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view set scaleY");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	obj->scale_y = value->ToNumber()->Value();
+	
+	//LOG("done in timestep_view set scaleY");
+}
+
+
+
+v8::Handle<v8::Value> timestep_view_get_absScale(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view get absScale");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	double prop = obj->abs_scale;
+	//LOG("done in timestep_view get absScale");
+	return v8::Number::New(prop);
+	
+}
+
+
+
+void timestep_view_set_absScale(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
+	//LOG("in timestep_view set absScale");
+	v8::Local<v8::Object> thiz = info.Holder();
+	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+	
+	obj->abs_scale = value->ToNumber()->Value();
+	
+	//LOG("done in timestep_view set absScale");
+}
+
+
+
 v8::Handle<v8::Value> timestep_view_get_clip(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
 	//LOG("in timestep_view get clip");
 	v8::Local<v8::Object> thiz = info.Holder();
@@ -640,6 +715,21 @@ v8::Handle<v8::Value> timestep_view_get_scale(v8::Local<v8::String> property, co
 void timestep_view_set_scale(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
 
 timestep_view->SetAccessor(v8::String::New("scale"), timestep_view_get_scale, timestep_view_set_scale);
+v8::Handle<v8::Value> timestep_view_get_scaleX(v8::Local<v8::String> property, const v8::AccessorInfo &info);
+
+void timestep_view_set_scaleX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+
+timestep_view->SetAccessor(v8::String::New("scaleX"), timestep_view_get_scaleX, timestep_view_set_scaleX);
+v8::Handle<v8::Value> timestep_view_get_scaleY(v8::Local<v8::String> property, const v8::AccessorInfo &info);
+
+void timestep_view_set_scaleY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+
+timestep_view->SetAccessor(v8::String::New("scaleY"), timestep_view_get_scaleY, timestep_view_set_scaleY);
+v8::Handle<v8::Value> timestep_view_get_absScale(v8::Local<v8::String> property, const v8::AccessorInfo &info);
+
+void timestep_view_set_absScale(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+
+timestep_view->SetAccessor(v8::String::New("absScale"), timestep_view_get_absScale, timestep_view_set_absScale);
 v8::Handle<v8::Value> timestep_view_get_clip(v8::Local<v8::String> property, const v8::AccessorInfo &info);
 
 void timestep_view_set_clip(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
