@@ -775,8 +775,18 @@ function copySplash(builder, project, destDir, next) {
 
 			// If no input file exists,
 			if (!srcFile) {
-				logger.warn("No splash screen images provided for size", outSize);
-			} else {
+				srcFile = builder.common.paths.lib("defsplash.png");
+
+				if (!srcFile || !fs.existsSync(srcFile)) {
+					logger.warn("Default splash file does not exist:", srcFile);
+					srcFile = null;
+				} else {
+					logger.warn("No splash screen images provided for size", outSize, "so using default image", srcFile);
+				}
+			}
+
+			// If a source file was found,
+			if (srcFile) {
 				outFile = path.join(destPath, outFile);
 
 				// If copying,
