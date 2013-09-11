@@ -5,6 +5,21 @@ LOCAL_LDFLAGS := -Wl,-Map,tealeaf.map
 -include ${LOCAL_PATH}/profiler/android-ndk-profiler.mk
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := curl-prebuilt
+LOCAL_SRC_FILES := lib/libcurl.a 
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := crypto-prebuilt
+LOCAL_SRC_FILES := lib/libcrypto.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := ssl-prebuilt
+LOCAL_SRC_FILES := lib/libssl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libv8a
 LOCAL_SRC_FILES := lib/libv8.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -43,7 +58,8 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_events.cpp                                  \
 			js/js_gc.cpp                                      \
 			js/js_haptics.cpp                                 \
-			js/js_input_prompt.cpp	                	      \
+			js/js_input.cpp	                                  \
+			js/js_status_bar.cpp	                	      \
 			js/js_local_storage.cpp                           \
 			js/js_locale.cpp		                          \
 			js/js_location.cpp                                \
@@ -66,7 +82,11 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/draw_textures.c                              \
 			core/events.c                                     \
 			core/geometry.c                                   \
+			core/graphics_utils.c                            \
+			core/image-cache/src/image_cache.c                \
+			core/image-cache/src/crypto/sha1.c                \
 			core/image_loader.c                               \
+			core/image_writer.c                               \
 			core/object_pool.c                                \
 			core/rgba.c                                       \
 			core/tealeaf_canvas.c                             \
@@ -80,7 +100,8 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			platform/device.cpp                               \
 			platform/dialog.cpp                               \
 			platform/haptics.cpp                              \
-			platform/input_prompt.cpp	                      \
+			platform/input.cpp                                \
+			platform/status_bar.cpp                           \
 			platform/local_storage.cpp                        \
 			platform/get_locale.cpp		                      \
 			platform/location_manager.cpp                     \
@@ -112,7 +133,7 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 			lib/v8-profiler/node_buffer.cpp		              \
 			lib/v8-profiler/profiler.cpp
 
-LOCAL_STATIC_LIBRARIES := libzip cpufeatures libjpeg libpng libjansson
+LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libjpeg libpng libjansson
 LOCAL_LDLIBS :=-llog -lGLESv2 -lz #-fuse-ld=gold REQUIRES: android-ndk-r8b
 LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
 
@@ -125,6 +146,9 @@ LOCAL_STATIC_LIBRARIES += libv8a
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include
+LOCAL_SHARED_LIBRARIES += ssl-prebuilt
+LOCAL_SHARED_LIBRARIES += crypto-prebuilt
 
 #RELEASE will stub out the LOG function
 ifeq (${RELEASE}, 1)

@@ -14,16 +14,13 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptSubmitEvent extends Event {
-	
-	@SuppressWarnings("unused")
-	private int id;
-	@SuppressWarnings("unused")
-	private String text;
+public class PhotoLoadedEvent extends Event {
+    String url;
+    String data; 
 
-	public InputPromptSubmitEvent(int id, String text) {
-		super("InputPromptSubmit");
-		this.id = id;
-		this.text = text;
+	public PhotoLoadedEvent(String url, String data) {
+		super("PhotoLoaded");
+        this.url = url;
+        this.data = data;
 	}
 }

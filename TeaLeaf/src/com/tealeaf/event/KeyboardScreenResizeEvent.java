@@ -14,16 +14,11 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptSubmitEvent extends Event {
+public class KeyboardScreenResizeEvent extends Event {
 	
-	@SuppressWarnings("unused")
-	private int id;
-	@SuppressWarnings("unused")
-	private String text;
-
-	public InputPromptSubmitEvent(int id, String text) {
-		super("InputPromptSubmit");
-		this.id = id;
-		this.text = text;
+	private int height;
+	public KeyboardScreenResizeEvent(int height) {
+		super("keyboardScreenResize");
+		this.height = height;
 	}
 }

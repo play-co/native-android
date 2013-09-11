@@ -23,6 +23,7 @@ extern "C" {
 #include "core/tealeaf_context.h"
 #include "core/rgba.h"
 #include "core/draw_textures.h"
+#include "core/log.h"
 }
 #include "platform/text_manager.h"
 #include <string.h>
@@ -53,12 +54,11 @@ Handle<Value> defDrawImage(const Arguments& args) {
 	float destY = args[7]->NumberValue();
 	float destW = args[8]->NumberValue();
 	float destH = args[9]->NumberValue();
-	int composite_op = args[10]->Int32Value();
 
 	rect_2d src_rect = {srcX, srcY, srcW, srcH};
 	rect_2d dest_rect = {destX, destY, destW, destH};
 
-	context_2d_drawImage(GET_CONTEXT2D(), srcTex, url, &src_rect, &dest_rect, composite_op);
+	context_2d_drawImage(GET_CONTEXT2D(), srcTex, url, &src_rect, &dest_rect);
 	LOGFN("endDrawImage");
 	return Undefined();
 }
@@ -84,9 +84,16 @@ Handle<Value> defDrawPointSprites(const Arguments& args) {
 }
 
 Handle<Value> defDestroyImage(const Arguments& args) {
-	// TODO: Can we remove this?
-
-	return Undefined();
+	LOGFN("destroyImage");
+    HandleScope handleScope;
+    String::Utf8Value str(args[0]);
+    const char *url = ToCString(str);
+    texture_2d *tex = texture_manager_get_texture(texture_manager_get(), url);
+    if (tex && tex->loaded) {
+        texture_manager_free_texture(texture_manager_get(), tex);
+    }
+	LOGFN("endDestroyImage");
+    return Undefined();
 }
 
 Handle<Value> defRotate(const Arguments& args) {
@@ -214,11 +221,9 @@ Handle<Value> defFillRect(const Arguments& args) {
 	rgba color;
 	rgba_parse(&color, ToCString(str_color));
 
-	int composite_op = args[5]->Int32Value();
-
 	rect_2d rect = {x, y, width, height};
 
-	context_2d_fillRect(GET_CONTEXT2D(), &rect, &color, composite_op);
+	context_2d_fillRect(GET_CONTEXT2D(), &rect, &color);
 
 	return Undefined();
 }
@@ -237,19 +242,17 @@ Handle<Value> defStrokeRect(const Arguments& args) {
 	double line_width1 = args[5]->Int32Value();
 	double line_width2 = line_width1 / 2;
 
-	int composite_op = args[6]->Int32Value();
-
 	rect_2d left_rect = {x - line_width2, y - line_width2, line_width1, height + line_width1};
-	context_2d_fillRect(ctx, &left_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &left_rect, &color);
 
 	rect_2d right_rect = {x + width - line_width2, y - line_width2, line_width1, height + line_width1};
-	context_2d_fillRect(ctx, &right_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &right_rect, &color);
 
 	rect_2d top_rect = {x + line_width2, y - line_width2, width - line_width1, line_width1};
-	context_2d_fillRect(ctx, &top_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &top_rect, &color);
 
 	rect_2d bottom_rect = {x + line_width2, y + height - line_width2, width - line_width1, line_width1};
-	context_2d_fillRect(ctx, &bottom_rect, &color, composite_op);
+	context_2d_fillRect(ctx, &bottom_rect, &color);
 
 	return Undefined();
 }
@@ -446,7 +449,7 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 					url = strdup(ToCString(src_tex_str));
 				}
 
-				context_2d_drawImage(context, 0, url, &src_rect, &dest_rect, source_over);
+				context_2d_drawImage(context, 0, url, &src_rect, &dest_rect);
 
 				x += (ow - 2) * scale + tracking - outline;
 			} else {
@@ -475,14 +478,13 @@ Handle<Value> defStrokeText(const Arguments& args) {
 	int size = args[5]->Int32Value();
 	String::Utf8Value font_str(args[6]);
 	const char *font = ToCString(font_str);
-	double line_width = args[10]->NumberValue();
+	double line_width = args[9]->NumberValue();
 	texture_2d *texture = text_manager_get_stroked_text(font, size * FONT_SCALE, text, &color, max_width, (float)line_width);
 
 	if (texture) {
 		String::Utf8Value str(args[7]);
 		const char *align = ToCString(str);
 
-		int composite_op = args[9]->Int32Value();
 		int x_offset = 0;
 		int y_offset = 0;
 		if (!strcmp(align, "left")) {
@@ -504,7 +506,7 @@ Handle<Value> defStrokeText(const Arguments& args) {
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset - (int)line_width, y - y_offset, texture->originalWidth, texture->originalHeight};
-		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a);
 	}
 	LOGFN("endstroketext");
 	return Undefined();
@@ -531,7 +533,6 @@ Handle<Value> defFillText(const Arguments& args) {
 		String::Utf8Value str(args[7]);
 		const char *align = ToCString(str);
 
-		int composite_op = args[9]->Int32Value();
 		int x_offset = 0;
 		int y_offset = 0;
 		if (!strcmp(align, "left")) {
@@ -553,7 +554,7 @@ Handle<Value> defFillText(const Arguments& args) {
 		}
 		rect_2d src_rect = {0, 0, texture->originalWidth, texture->originalHeight};
 		rect_2d dest_rect = {x - x_offset, y - y_offset, texture->originalWidth, texture->originalHeight};
-		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a, composite_op);
+		context_2d_fillText(GET_CONTEXT2D(), texture, &src_rect, &dest_rect, color.a);
 	}
 	LOGFN("endfilltext");
 	return Undefined();
@@ -699,7 +700,7 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 	const char *src_tex = ToCString(str2);
 	int tex_name = args[5]->Int32Value();
 	Handle<Object> defs = args[6]->ToObject();
-	int composite_op = args[7]->Int32Value();
+	//int composite_op = args[7]->Int32Value();
 
 
 	int space_width = defs->Get(STRING_CACHE_spaceWidth)->Int32Value();
@@ -722,12 +723,70 @@ Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
 				rect_2d src_rect = {x1, y1, w, h};
 				rect_2d dest_rect = {x, y, w * scale, h * scale};
 				x += a * scale;
-				context_2d_drawImage(GET_CONTEXT2D(), tex_name, src_tex, &src_rect, &dest_rect, composite_op);
+				context_2d_drawImage(GET_CONTEXT2D(), tex_name, src_tex, &src_rect, &dest_rect);
 				x += c * scale;
 			}
 		}
 	}
 	return Undefined();
+}
+
+Handle<Value> defSetGlobalCompositeOperation(const Arguments& args) {
+	LOGFN("setGlobalCompositeOperation");
+	HandleScope handleScope;
+	int composite_op = args[0]->Int32Value();
+	context_2d_setGlobalCompositeOperation(GET_CONTEXT2D(), composite_op);
+	LOGFN("endsetGlobalCompositeOperation");
+	return Undefined();
+}
+
+Handle<Value> defGetGlobalCompositeOperation(const Arguments& args) {
+	LOGFN("getGlobalCompositeOperation");
+	HandleScope handleScope;
+	int composite_op = context_2d_getGlobalCompositeOperation(GET_CONTEXT2D());
+
+	LOGFN("endgetGlobalCompositeOperation");
+	return Number::New(composite_op);
+}
+
+/**
+   Retrieves the given context 
+
+   @param	args[0] => the given context2d, can be connected to an on/off-screen buffer
+   @param	args[1] => filename to save the on/off-screen buffer with
+   @return 	Undefined
+**/
+Handle<Value> defSaveBufferToFile(const Arguments& args) {
+	//get this context 2d instance
+//	Handle<Object> js_ctx = Handle<Object>::Cast(args[0]);
+//	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(String::New("_ctx")));
+//	context_2d *ctx = GET_CONTEXT2D_FROM(_ctx);
+//	//get filename for the fbo to be saved to
+//	String::Utf8Value filename_str(args[1]);
+//	const char *filename = ToCString(filename_str);
+//	bool did_save = context_2d_save_buffer_to_file(ctx, filename); 
+	return Boolean::New(true);
+}
+
+/**
+   Retrieves the given context 
+   @param	args[0] => the given context2d, can be connected to an on/off-screen buffer
+   @return 	Undefined
+**/
+Handle<Value> defToDataURL(const Arguments& args) {
+	//get this context 2d instance
+	Handle<Object> js_ctx = Handle<Object>::Cast(args[0]);
+	Handle<Object> _ctx = Handle<Object>::Cast(js_ctx->Get(String::New("_ctx")));
+	context_2d *ctx = GET_CONTEXT2D_FROM(_ctx);
+	char * data = context_2d_save_buffer_to_base64(ctx, "PNG"); 
+	Handle<Value> str;
+	if (data != NULL) {
+		str = String::New(data);
+		free(data);
+	} else {
+		str = String::New("");
+	}
+	return str;
 }
 
 
@@ -761,6 +820,8 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 	context_2d_class_template->Set(STRING_CACHE_enableScissor, FunctionTemplate::New(defEnableScissor));
 	context_2d_class_template->Set(STRING_CACHE_disableScissor, FunctionTemplate::New(defDisableScissor));
 	context_2d_class_template->Set(STRING_CACHE_drawPointSprites, FunctionTemplate::New(defDrawPointSprites));
+	context_2d_class_template->Set(String::New("setGlobalCompositeOperation"), FunctionTemplate::New(defSetGlobalCompositeOperation));
+	context_2d_class_template->Set(String::New("getGlobalCompositeOperation"), FunctionTemplate::New(defGetGlobalCompositeOperation));
 
 	// bitmap fonts
 	context_2d_class_template->Set(STRING_CACHE_measureTextBitmap, FunctionTemplate::New(defMeasureTextBitmap));
@@ -777,6 +838,7 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 
 Handle<ObjectTemplate> js_gl_get_template() {
 	Handle<ObjectTemplate> gl = ObjectTemplate::New();
+	gl->Set(String::New("toDataURL"), FunctionTemplate::New(defToDataURL));
 	gl->Set(STRING_CACHE_Context2D, FunctionTemplate::New(context_2d_class_ctor));
 	gl->Set(STRING_CACHE_flushImages, FunctionTemplate::New(defFlushImages));
 	gl->Set(STRING_CACHE__loadImage, FunctionTemplate::New(defLoadImage));

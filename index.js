@@ -29,22 +29,21 @@ exports.init = function(common) {
 };
 
 exports.load = function(common) {
+	var defaults = {
+		"android:keystore": "",
+		"android:key": "",
+		"android:keypass": "",
+		"android:storepass": ""
+	};
+
 	common.config.set("android:root", path.resolve(__dirname))
 
-	//check to see the misc keys are at least present
-	if (!common.config.get("android:keystore")) 
-		common.config.set("android:keystore", "");
-
-	if (!common.config.get("android:key")) 
-		common.config.set("android:key", "");
-
-	if (!common.config.get("android:keypass")) 
-		common.config.set("android:keypass", "");
-
-	if (!common.config.get("android:storepass")) 
-		common.config.set("android:storepass", "");
-	
-	common.config.write();
+	// check to see the misc keys are at least present
+	Object.keys(defaults).forEach(function (key) {
+		if (!common.config.get(key)) {
+			common.config.set(key, defaults[key]);
+		}
+	});
 
 	require(common.paths.root('src', 'testapp')).registerTarget("native-android", __dirname);
 }
@@ -68,3 +67,4 @@ exports.testapp = function(common, opts, next) {
 		next();
 	});
 }
+

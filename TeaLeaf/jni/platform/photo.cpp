@@ -17,6 +17,26 @@
 #include "platform/photo.h"
 #include "platform/platform.h"
 
+int camera_get_photo(const char *url, int width, int height) {
+	native_shim* shim = get_native_shim();
+	JNIEnv *env = shim->env;
+	jstring jurl = env->NewStringUTF(url);
+	jmethodID method = env->GetMethodID(shim->type, "cameraGetPhoto", "(II)I");
+	jint result = env->CallIntMethod(shim->instance, method, width, height);
+	env->DeleteLocalRef(jurl);
+	return result;
+}
+
+int gallery_get_photo(const char *url, int width, int height) {
+	native_shim* shim = get_native_shim();
+	JNIEnv *env = shim->env;
+	jstring jurl = env->NewStringUTF(url);
+	jmethodID method = env->GetMethodID(shim->type, "galleryGetPhoto", "(II)I");
+	jint result = env->CallIntMethod(shim->instance, method, width, height);
+	env->DeleteLocalRef(jurl);
+	return result;
+}
+
 int camera_get_next_id() {
 	native_shim* shim = get_native_shim();
 	JNIEnv *env = shim->env;

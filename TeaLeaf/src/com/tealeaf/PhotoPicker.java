@@ -34,8 +34,8 @@ public class PhotoPicker {
 		resourceManager = manager;
 	}
 
-	public static final byte CAPTURE_IMAGE = (byte) 45;
-	public static final byte PICK_IMAGE = (byte) 46;
+	public static final int CAPTURE_IMAGE = 1000;
+	public static final int PICK_IMAGE = 1001;
 
 	public int getNextCameraId() {
 		return settings.getInt("@__camera_id__", 1);
@@ -52,13 +52,13 @@ public class PhotoPicker {
 
 	public void take(int id) {
 		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		int requestCode = (CAPTURE_IMAGE << 24) | (id & 0xFFFFFF);
+		int requestCode = CAPTURE_IMAGE;
 		moveNextCameraId();
 		activity.startActivityForResult(camera, requestCode);
 	}
 	public void choose(int id) {
 		Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-		int requestCode = (PICK_IMAGE << 24) | (id & 0xFFFFFF);
+		int requestCode = PICK_IMAGE;
 		moveNextGalleryId();
 		activity.startActivityForResult(gallery, requestCode);
 	}
@@ -80,13 +80,21 @@ public class PhotoPicker {
 		}
 	}
 
+    //also deletes the file!!!
 	public Bitmap getResult(String type, int id) {
 		Bitmap bitmap = null;
+        String filename = resourceManager.resolveFile(type + id + ".jpg");
 		try {
-			bitmap = BitmapFactory.decodeFile(resourceManager.resolveFile(type + id + ".jpg"));
+			bitmap = BitmapFactory.decodeFile(filename);
 		} catch(Exception e) {
 			logger.log("{photos} ERROR: Unable to load picture", e);
 		}
+        if (bitmap != null) {
+            File file = new File(filename);
+            if (file != null && file.exists()) {
+                file.delete();
+            }
+        }
 		return bitmap;
 	}
 }

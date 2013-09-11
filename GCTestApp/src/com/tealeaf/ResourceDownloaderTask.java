@@ -89,12 +89,12 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 		}
 
 		//form the simulate url
-		String simulateUrl = "http://" + host + ":" + port + "/simulate/" + appInfo.id + "/native-android/";
+		String simulateUrl = "http://" + host + ":" + port + "/simulate/debug/" + appInfo.id + "/native-android/";
 
-		//first get native.js.mp3
-		String url = simulateUrl + "native.js.mp3";
+		//first get native.js
+		String url = simulateUrl + "native.js";
 		http = new HTTP();
-		String nativejsPath = storageDir + "/" + "native.js.mp3";
+		String nativejsPath = storageDir + "/" + "native.js";
 		http.getFile(URI.create(url), nativejsPath);
 
 		//get loading.png
@@ -121,6 +121,7 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 
 		JSONObject serverHashes = null;
 		try {
+			logger.log("JARED BODY", body);
 			// loop through all resources and download any
 			// that we don't have cached locally
 			serverHashes = new JSONObject(body);
@@ -136,7 +137,7 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 			while (files.hasNext()) {
 				String filePath = files.next();
 				lastFilename = filePath;
-				if (filePath.contains("native.js.mp3")) {
+				if (filePath.contains("native.js")) {
 					continue;
 				}
 
@@ -168,7 +169,7 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 
 				if (!cached || !(new File(fullPath).exists())) {
 					// get the file and cache it to disk
-					url = "http://" + host + ":" + port + "/simulate/" + appInfo.id + "/native-android/" + filePath;
+					url = "http://" + host + ":" + port + "/simulate/debug/" + appInfo.id + "/native-android/" + filePath;
 					url = url.replace(" ", "%20");
 					http.getFile(URI.create(url), fullPath, requestHeaders);
 				}

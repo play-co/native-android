@@ -1,5 +1,4 @@
-/**
- * @license
+/* @license
  * This file is part of the Game Closure SDK.
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
@@ -15,12 +14,9 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptMoveEvent extends Event {
-    @SuppressWarnings("unused")
-    private boolean next;
+public class PhotoBeginLoadedEvent extends Event {
 
-    public InputPromptMoveEvent(boolean next) {
-        super("inputPromptMove");
-        this.next = next;
-    }
+	public PhotoBeginLoadedEvent() {
+		super("PhotoBeginLoaded");
+	}
 }

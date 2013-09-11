@@ -14,13 +14,12 @@
  */
 package com.tealeaf.event;
 
-
-public class InputPromptCancelEvent extends Event {
+public class InputKeyboardCancelEvent extends Event {
 	@SuppressWarnings("unused")
 	private int id;
 
-	public InputPromptCancelEvent(int id) {
-		super("inputPromptCancel");
+	public InputKeyboardCancelEvent(int id) {
+		super("InputKeyboardCancel");
 		this.id = id;
 	}
 }

@@ -12,13 +12,13 @@
  * You should have received a copy of the Mozilla Public License v. 2.0
  * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
-#ifndef JS_INPUT_PROMPT_H
-#define JS_INPUT_PROMPT_H
+#ifndef JS_STATUS_BAR_H
+#define JS_STATUS_BAR_H
 
 #include "js/js.h"
 
 using v8::Handle;
 using v8::ObjectTemplate;
 
-Handle<ObjectTemplate> js_input_prompt_get_template();
-#endif //JS_INPUT_PROMPT_H
+Handle<ObjectTemplate> js_status_bar_get_template();
+#endif // JS_STATUS_BAR_H

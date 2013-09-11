@@ -15,6 +15,7 @@
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 
 <!--START_PLUGINS_MANIFEST-->
@@ -39,7 +40,8 @@
 		<meta-data android:name="pushUrl" android:value="https://api.gameclosure.com/push/%s/?device=%s&amp;version=%s" />
 		<meta-data android:name="contactsUrl" android:value="https://api.gameclosure.com/users/me/contacts/?device=%s" />
 
-		<activity android:name=".TeaLeaf" android:configChanges="keyboardHidden|orientation|screenSize" android:label="TeaLeaf" android:screenOrientation="portrait">
+		<activity android:name=".TeaLeaf" android:configChanges="keyboardHidden|orientation|screenSize" android:label="TeaLeaf" 
+				android:screenOrientation="portrait" android:windowSoftInputMode="stateUnspecified|adjustPan" >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />

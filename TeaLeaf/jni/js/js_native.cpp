@@ -42,7 +42,8 @@ extern "C" {
 #include "js/js_build.h"
 #include "js/js_locale.h"
 #include "js/js_profiler.h"
-#include "js/js_input_prompt.h"
+#include "js/js_input.h"
+#include "js/js_status_bar.h"
 #include "js/js_location.h"
 
 #include "platform/textbox.h"
@@ -206,7 +207,8 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	NATIVE->Set(STRING_CACHE_build, js_build_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_locale, js_locale_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_profiler, js_profiler_get_template()->NewInstance());
-	NATIVE->Set(STRING_CACHE_inputPrompt, js_input_prompt_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_input, js_input_get_template()->NewInstance());
+	NATIVE->Set(STRING_CACHE_statusBar, js_status_bar_get_template()->NewInstance());
 
 	// market
 	Handle<Object> market = Object::New();

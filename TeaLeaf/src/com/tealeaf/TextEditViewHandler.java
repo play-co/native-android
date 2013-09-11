@@ -5,11 +5,14 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.graphics.Rect;
+import android.view.ViewTreeObserver;
 import android.view.View.OnKeyListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import com.tealeaf.event.InputPromptKeyUpEvent;
-import com.tealeaf.event.InputPromptMoveEvent;
+import com.tealeaf.event.InputKeyboardKeyUpEvent;
+import com.tealeaf.event.InputKeyboardSubmitEvent;
+import com.tealeaf.event.InputKeyboardFocusNextEvent;
 import android.view.View;
 import android.text.TextWatcher;
 import android.text.Editable;
@@ -20,6 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.view.KeyEvent;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -27,6 +31,10 @@ import com.tealeaf.util.ILogger;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Animation.AnimationListener;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.view.Display;
+import android.widget.Toast;
 
 /**
  * Allows JS to open up a keyboard that has an EditText attached
@@ -36,13 +44,16 @@ import android.view.animation.Animation.AnimationListener;
  */
 public class TextEditViewHandler {
 
-	private Activity activity;
+	private TeaLeaf activity;
 	private View editTextHandler;
+	private View editTextFrame;
 	private TextEditView editText;
 	private boolean isActive = false;
 	private boolean registerTextChange = true;
 	private InputName inputName = InputName.DEFAULT;
 	private boolean hasForward = false;
+	private int lastKnownHeight = -1;
+	private boolean triggerFrameVisibility = false;
 
 	public enum InputName {
 		DEFAULT,
@@ -52,23 +63,55 @@ public class TextEditViewHandler {
 		CAPITAL
 	}
 
-	public TextEditViewHandler(Activity activity) {
-		this.activity = activity;
+	public TextEditViewHandler(TeaLeaf tealeaf) {
+		this.activity = tealeaf;
 
 		LayoutInflater inflater = activity.getLayoutInflater();
 		editTextHandler = inflater.inflate(R.layout.edit_text_handler, null);
-		editTextHandler.setOnTouchListener(this.getScreenCaptureListener());
+		editTextHandler.setOnClickListener(this.getScreenCaptureListener());
+
+		// setup screen listener
+		final FrameLayout group = this.activity.getGroup();
+		editTextFrame = editTextHandler.findViewById(R.id.handler_wrapper);
+
+		// TODO: we could use the observer in TeaLeaf.java to avoid duplicate code here...
+		group.getViewTreeObserver()
+			 .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			 public void onGlobalLayout() {
+			 	Rect r = new Rect();		
+				group.getWindowVisibleDisplayFrame(r);
+
+				Display display = activity.getWindow()
+				 						  .getWindowManager()
+				 						  .getDefaultDisplay();
+
+				int originalHeight = display.getHeight();
+				final int visibleHeight = r.bottom - r.top;
+				int heightDiff = originalHeight - visibleHeight;
+
+				// if keyboard appeared the height will change
+				// triggerFrameVisibility means a keyboard was activated
+				if ((lastKnownHeight != visibleHeight || activity.getResources().getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) && triggerFrameVisibility) {
+					updateEditFramePosition(visibleHeight);
+					triggerFrameVisibility = false;
+				}
+
+				lastKnownHeight = visibleHeight;
+			}
+		});
 
 		// setup EditText
 		editText = (TextEditView) editTextHandler.findViewById(R.id.handler_text);
 		editText.setTextEditViewHandler(this);
 		editText.addTextChangedListener(new TextWatcher() {
+			private String beforeText = "";
+
 			@Override
 			public void afterTextChanged(Editable s) {
 				// propagate text changes to JS to update views
 				if (registerTextChange) {
 					logger.log("KeyUp textChange in TextEditView");
-					EventQueue.pushEvent(new InputPromptKeyUpEvent(s.toString()));
+					EventQueue.pushEvent(new InputKeyboardKeyUpEvent(s.toString(), beforeText, editText.getSelectionStart()));
 				} else {
 					registerTextChange = true;
 				}
@@ -76,7 +119,7 @@ public class TextEditViewHandler {
 
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			
+				beforeText = s.toString();
 			}
 
 			@Override
@@ -88,9 +131,10 @@ public class TextEditViewHandler {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
-					deactivate();	
+					EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, editText.getText().toString()));
+					closeKeyboard();
 				} else if (actionId == EditorInfo.IME_ACTION_NEXT) {
-					EventQueue.pushEvent(new InputPromptMoveEvent(true));	
+					EventQueue.pushEvent(new InputKeyboardFocusNextEvent(true));
 				}
 
 				return false;
@@ -100,17 +144,25 @@ public class TextEditViewHandler {
 		// setup forward and back keys
 		View backButton = editTextHandler.findViewById(R.id.back_button);
 		View forwardButton = editTextHandler.findViewById(R.id.forward_button);
+		View doneButton = editTextHandler.findViewById(R.id.done_button);
 
+		doneButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, editText.getText().toString()));
+				closeKeyboard();
+			}
+		});
 		backButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptMoveEvent(false));	
+				EventQueue.pushEvent(new InputKeyboardFocusNextEvent(false));
 			}
 		});
 		forwardButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				EventQueue.pushEvent(new InputPromptMoveEvent(true));	
+				EventQueue.pushEvent(new InputKeyboardFocusNextEvent(true));
 			}
 		});
 
@@ -119,6 +171,19 @@ public class TextEditViewHandler {
 																		  RelativeLayout.LayoutParams.FILL_PARENT);
 
 		activity.addContentView(editTextHandler, rlp);
+	}
+
+	public void updateEditFramePosition(int visibleHeight) {
+		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+		params.setMargins(0, visibleHeight - editTextFrame.getMeasuredHeight(), 0, 0);
+		editTextFrame.setLayoutParams(params);
+
+		(new Handler()).postDelayed(new Runnable() {
+			public void run() {
+				editTextHandler.setVisibility(View.VISIBLE);
+				editTextHandler.requestLayout();
+			}	
+		}, 100);
 	}
 
 	/**
@@ -131,19 +196,31 @@ public class TextEditViewHandler {
 	/**
 	 * Perform actions necessary when TextEditView pops up.
 	 */
-	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, int maxLength) {
+	public void activate(String text, String hint, boolean hasBackward, boolean hasForward, String inputType, String inputReturnButton, int maxLength, int cursorPos) {
 
-		editText.setImeOptions(hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE);
+		if (inputReturnButton.equals("done")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		} else if (inputReturnButton.equals("next")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		} else if (inputReturnButton.equals("search")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+		} else if (inputReturnButton.equals("send")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_SEND);
+		} else if (inputReturnButton.equals("go")) {
+			editText.setImeOptions(EditorInfo.IME_ACTION_GO);
+		} else {
+			int action = hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE;
+			if (inputReturnButton.equals("default")) {
+				editText.setImeOptions(action);
+			} else {
+				editText.setImeActionLabel(inputReturnButton, action);
+			}
+		}
 
 		if (!isActive) {
 			isActive = true;
-			editTextHandler.setVisibility(View.VISIBLE);
-			
-			Animation animFadeIn = AnimationUtils.loadAnimation(activity.getApplicationContext(),
-																android.R.anim.fade_in);
-			animFadeIn.setDuration(250);
-			editTextHandler.setAnimation(animFadeIn);
-
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+			triggerFrameVisibility = true;
 
 			// In order to show keyboard directly after making EditText visible we must show keyboard
 			// independent of EditText and then requestFocus.
@@ -159,13 +236,13 @@ public class TextEditViewHandler {
 
 		switch (inputName) {
 			case NUMBER:
-				type = InputType.TYPE_CLASS_NUMBER;	
+				type = InputType.TYPE_CLASS_NUMBER;
 				break;
 			case PHONE:
 				type = InputType.TYPE_CLASS_PHONE;
 				break;
 			case PASSWORD:
-				type = InputType.TYPE_TEXT_VARIATION_PASSWORD;	
+				type = InputType.TYPE_TEXT_VARIATION_PASSWORD;
 				break;
 			case CAPITAL:
 				type = InputType.TYPE_TEXT_FLAG_CAP_WORDS;
@@ -175,10 +252,11 @@ public class TextEditViewHandler {
 				break;
 		}
 
+		//for auto correct use this flag -> InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
 		editText.setInputType(type | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
 		if (maxLength == -1) {
-			editText.setFilters(new InputFilter[] {});	
+			editText.setFilters(new InputFilter[] {});
 		} else {
 			editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxLength) });
 		}
@@ -190,14 +268,24 @@ public class TextEditViewHandler {
 		editText.setFocusableInTouchMode(true);
 		editText.setText(text);
 		editText.setHint(hint);
-		editText.setSelection(editText.getText().length());
+		editText.setSelection(cursorPos < 0 || cursorPos > editText.length() ? editText.getText().length() : cursorPos);
 
 		// Button options
 		View backButton = editTextHandler.findViewById(R.id.back_button);
 		View forwardButton = editTextHandler.findViewById(R.id.forward_button);
+		View doneButton = editTextHandler.findViewById(R.id.done_button);
 
-		backButton.setEnabled(hasBackward);
-		forwardButton.setEnabled(hasForward);
+		if (!hasForward && !hasBackward) {
+			backButton.setVisibility(View.GONE);
+			forwardButton.setVisibility(View.GONE);
+			doneButton.setVisibility(View.VISIBLE);
+		} else {
+			backButton.setVisibility(View.VISIBLE);
+			forwardButton.setVisibility(View.VISIBLE);
+			doneButton.setVisibility(View.GONE);
+			backButton.setEnabled(hasBackward);
+			forwardButton.setEnabled(hasForward);
+		}
 
 		this.hasForward = hasForward;
 	}
@@ -208,7 +296,12 @@ public class TextEditViewHandler {
 	public void deactivate() {
 		if (isActive) {
 			isActive = false;
-			editTextHandler.setVisibility(View.GONE);
+			editTextHandler.setVisibility(View.INVISIBLE);
+
+			// return to top of screen
+			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) editTextFrame.getLayoutParams();
+			params.setMargins(0, 0, 0, 0);
+			editTextFrame.setLayoutParams(params);
 		}
 	}
 
@@ -220,15 +313,13 @@ public class TextEditViewHandler {
 		this.deactivate();	
 	}
 
-	public OnTouchListener getScreenCaptureListener() {
-		return new OnTouchListener() {
+	public OnClickListener getScreenCaptureListener() {
+		return new OnClickListener() {
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
+			public void onClick(View v) {
 				if (isActive) {
 					closeKeyboard();
 				}
-
-				return false;
 			}
 		};	
 	}
@@ -247,9 +338,9 @@ public class TextEditViewHandler {
 			// you cannot use standard onBackPressed for this key press.
 			if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
 				if (handler != null) {
-					handler.deactivate();	
+					handler.deactivate();
 				}
-			}	
+			}
 
 			return super.onKeyPreIme(keyCode, event);
 		}

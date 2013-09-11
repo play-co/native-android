@@ -14,15 +14,15 @@
  */
 package com.tealeaf.event;
 
-public class InputPromptSubmitEvent extends Event {
+public class InputKeyboardSubmitEvent extends Event {
 	
 	@SuppressWarnings("unused")
 	private int id;
 	@SuppressWarnings("unused")
 	private String text;
 
-	public InputPromptSubmitEvent(int id, String text) {
-		super("InputPromptSubmit");
+	public InputKeyboardSubmitEvent(int id, String text) {
+		super("InputKeyboardSubmit");
 		this.id = id;
 		this.text = text;
 	}

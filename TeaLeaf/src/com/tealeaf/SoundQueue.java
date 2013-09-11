@@ -94,6 +94,10 @@ public class SoundQueue implements Runnable {
 		addEvent(new Event(EventType.SEEK_TO, url, 0, false, position));
 	}
 	
+	public void haltSounds() {
+		addEvent(new Event(EventType.APP_PAUSED));
+	}
+	
 	public void onPause() { addEvent(new Event(EventType.APP_PAUSED)); }
 	public void onResume() { addEvent(new Event(EventType.APP_RESUMED)); }
 	

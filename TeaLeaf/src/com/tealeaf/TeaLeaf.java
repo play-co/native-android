@@ -14,11 +14,15 @@
  */
 package com.tealeaf;
 
+import java.io.InputStream;
+import java.io.File;
 import android.content.pm.ActivityInfo;
 import com.tealeaf.event.BackButtonEvent;
 import com.tealeaf.event.LaunchTypeEvent;
 import com.tealeaf.event.OnUpdatedEvent;
 import com.tealeaf.event.PauseEvent;
+import com.tealeaf.event.PhotoBeginLoadedEvent;
+import com.tealeaf.event.KeyboardScreenResizeEvent;
 import com.tealeaf.event.WindowFocusAcquiredEvent;
 import com.tealeaf.event.WindowFocusLostEvent;
 import com.tealeaf.event.JSUpdateNotificationEvent;
@@ -27,6 +31,13 @@ import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
+import android.graphics.Rect;
+import android.view.ViewTreeObserver;
+
+import android.os.AsyncTask;
+import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
+import android.media.ExifInterface;
 import android.content.BroadcastReceiver;
 import android.content.res.Configuration;
 import android.content.Context;
@@ -36,8 +47,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -52,6 +65,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 import android.support.v4.app.FragmentActivity;
 
@@ -228,7 +242,7 @@ public class TeaLeaf extends FragmentActivity {
 		   }
 		}
 
-		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 		group = new FrameLayout(this);
 		setContentView(group);
@@ -256,7 +270,7 @@ public class TeaLeaf extends FragmentActivity {
 		glView = new TeaLeafGLSurfaceView(this);
 
 		int orientation = getRequestedOrientation();
-		android.view.Display display = getWindow().getWindowManager().getDefaultDisplay();
+		Display display = getWindow().getWindowManager().getDefaultDisplay();
 		int width = display.getWidth();
 		int height = display.getHeight();
 		if ((orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE &&  height > width) || (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && width > height)) {
@@ -265,7 +279,7 @@ public class TeaLeaf extends FragmentActivity {
 			height = tempWidth;
 		}
 
-		android.widget.AbsoluteLayout absLayout = new android.widget.AbsoluteLayout(this);
+		AbsoluteLayout absLayout = new AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
 
@@ -282,7 +296,24 @@ public class TeaLeaf extends FragmentActivity {
 		paused = false;
 		menuButtonHandler = MenuButtonHandlerFactory.getButtonHandler(this);
 
+		group.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(){
+			public void onGlobalLayout(){
+				// get visible area of the view
+				Rect r = new Rect();
+				group.getWindowVisibleDisplayFrame(r);
+				
+				// get display height
+				Display display = getWindow().getWindowManager().getDefaultDisplay();
+				int height = display.getHeight();
+				
+				// if our visible height is less than 75% normal, assume keyboard on screen
+				int visibleHeight = r.bottom - r.top;
 
+				// TODO
+				// maybe this should be renamed
+				EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
+			}
+		});
 	}
 
 	public void pauseGL() {
@@ -460,11 +491,12 @@ public class TeaLeaf extends FragmentActivity {
 
 	@Override
 	public void onBackPressed() {
-		Object [] objs = PluginManager.callAll("consumeOnBackPressed");
+		String [] objs = PluginManager.callAll("consumeOnBackPressed");
 
 		boolean consume = true;
-		for (Object o : objs) {
-			if (o != null && ((Boolean) o).booleanValue()) {
+		
+		for (String o : objs) {
+			if (o != null && Boolean.valueOf(o)) {
 				consume = true;
 				break;
 			}
@@ -581,43 +613,195 @@ public class TeaLeaf extends FragmentActivity {
 
 	}
 
+    static int ROTATE_0 = 0;
+    static int ROTATE_90 = 90;
+    static int ROTATE_180 = 180;
+    static int ROTATE_270 = 270;
+    private Bitmap rotateBitmap(Bitmap bitmap, int rotate) {
+        // rotate as needed
+        Bitmap bmp;
+
+		//only allow the largest size to be 768 for now, several phones
+		//including the galaxy s3 seem to crash with rotating very large 
+		//images (out of memory errors) from the gallery
+		int w = bitmap.getWidth();
+		int h = bitmap.getHeight();
+		Bitmap scaled = bitmap;
+		if (w > h && w > 768) {
+			float ratio = 768.f / (float)w;		
+			w = 768;
+			h = (int) (ratio * h);
+			scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+			if (bitmap != scaled) {
+				bitmap.recycle();
+			}
+		} if (h > w && h > 768) {
+			float ratio = 768.f / (float)h;		
+			h = 768;
+			w = (int) (ratio * w);
+			scaled = Bitmap.createScaledBitmap(bitmap, w, h, true);
+			if (bitmap != scaled) {
+				bitmap.recycle();
+			}
+		}
+
+        int newWidth = scaled.getWidth();
+        int newHeight = scaled.getHeight();
+
+        int degrees = 0;
+        if (rotate == ROTATE_90 || rotate == ROTATE_270) {
+            newWidth = scaled.getHeight();
+            newHeight = scaled.getWidth();
+        }
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotate);
+
+        bmp = Bitmap.createBitmap(scaled, 0, 0, scaled.getWidth(),
+                scaled.getHeight(), matrix, true);
+        if (scaled != bmp) {
+            scaled.recycle();
+        }
+
+        return bmp;
+    }
+
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
+		logger.log("GOT ACTIVITY RESULT WITH", request, result);
+		
 
-		int id = (request & 0xFFFFFF);
-		request = request >> 24;
 		switch(request) {
 			case PhotoPicker.CAPTURE_IMAGE:
 				if(result == RESULT_OK) {
-					glView.getTextureLoader().saveCameraPhoto(id, (Bitmap)data.getExtras().get("data"));
-					glView.getTextureLoader().finishCameraPicture(id);
+					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
+					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
+					glView.getTextureLoader().finishCameraPicture();
 				} else {
-					glView.getTextureLoader().failedCameraPicture(id);
+					glView.getTextureLoader().failedCameraPicture();
 				}
 				break;
 			case PhotoPicker.PICK_IMAGE:
 				if(result == RESULT_OK) {
-					Uri selectedimage = data.getData();
-					String[] filepathcolumn = {android.provider.MediaStore.Images.Media.DATA};
-					android.database.Cursor cursor = getContentResolver().query(selectedimage, filepathcolumn, null, null, null);
-					cursor.moveToFirst();
-					int columnindex = cursor.getColumnIndex(filepathcolumn[0]);
-					String filepath = cursor.getString(columnindex);
-					cursor.close();
-					glView.getTextureLoader().saveGalleryPicture(id, BitmapFactory.decodeFile(filepath));
-					glView.getTextureLoader().finishGalleryPicture(id);
+					final Uri selectedImage = data.getData();
+					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
+					
+					String[] filePathColumn = { MediaColumns.DATA,
+												MediaStore.Images.ImageColumns.ORIENTATION };
+
+					String _filepath = null;
+
+					try {
+						Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+						cursor.moveToFirst();
+
+						int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+						_filepath = cursor.getString(columnIndex);
+						columnIndex = cursor.getColumnIndex(filePathColumn[1]);
+						int orientation = cursor.getInt(columnIndex);
+						cursor.close();
+					} catch (Exception e) {
+					
+					}
+
+					final String filePath = _filepath;
+
+					new Thread(new Runnable() {
+						public void run(){
+							if (filePath == null) {
+								BitmapFactory.Options options = new BitmapFactory.Options();
+								InputStream inputStream;
+								Bitmap bmp = null;
+
+								try {
+									inputStream = getContentResolver().openInputStream(selectedImage);
+									bmp = BitmapFactory.decodeStream(inputStream, null, options);
+									inputStream.close();
+								} catch (Exception e) {
+									logger.log(e);
+
+								}
+
+								if (bmp != null) {
+									glView.getTextureLoader()
+									.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+									glView.getTextureLoader()
+									.finishGalleryPicture();
+								} else {
+									glView.getTextureLoader().failedCameraPicture();
+								}
+
+							} else {
+								Bitmap bmp = null;
+
+								try {
+									bmp = BitmapFactory.decodeFile(filePath);	
+								} catch (OutOfMemoryError e) {
+									System.gc();
+									BitmapFactory.Options options = new BitmapFactory.Options();
+									options.inSampleSize = 4;
+									bmp = BitmapFactory.decodeFile(filePath, options);
+								}
+
+								if (bmp != null) {
+									try {
+										File f = new File(filePath);
+										ExifInterface exif = new ExifInterface(
+												f.getAbsolutePath());
+										int orientation = exif.getAttributeInt(
+												ExifInterface.TAG_ORIENTATION,
+												ExifInterface.ORIENTATION_NORMAL);
+										if (orientation != ExifInterface.ORIENTATION_NORMAL) {
+											int rotateBy = 0;
+											switch(orientation) {
+												case ExifInterface.ORIENTATION_ROTATE_90:
+													rotateBy = ROTATE_90;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_180:
+													rotateBy = ROTATE_180;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_270:
+													rotateBy = ROTATE_270;
+													break;
+											}
+											Bitmap rotatedBmp = rotateBitmap(bmp, rotateBy);
+											if (rotatedBmp != bmp) {
+												bmp.recycle();
+											}
+											bmp = rotatedBmp;
+										}
+									} catch(Exception e) {
+										logger.log(e);
+									}
+
+									if (bmp != null) {
+										glView.getTextureLoader()
+										.saveGalleryPicture(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+										glView.getTextureLoader()
+										.finishGalleryPicture();
+									} else {
+										glView.getTextureLoader().failedCameraPicture();
+									}
+								}
+							}
+						}
+					}).start();
+
 				} else {
-					glView.getTextureLoader().failedGalleryPicture(id);
+					glView.getTextureLoader().failedGalleryPicture();
 				}
 				break;
 		}
-
 	}
 
 	public TextEditViewHandler getTextEditViewHandler() {
 		return textEditView;
+	}
+
+	public FrameLayout getGroup() {
+		return group;	
 	}
 
 	public void reload() {

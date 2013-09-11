@@ -31,7 +31,10 @@ var logger;
 
 var installAddons = function(builder, project, opts, addonConfig, next) {
 	var paths = builder.common.paths;
-	var addons = project && project.manifest && project.manifest.addons;
+	var addons = project.getAddonConfig();
+	if (!Array.isArray(addons)) {
+		addons = Object.keys(addons);
+	}
 
 	var f = ff(this, function() {
 
@@ -302,16 +305,7 @@ var installAddonCode = function(builder, opts, next) {
 
 		fs.readFile(path.join(destDir, "project.properties"), "utf-8", f());
 
-		var jarGroup = f.group();
-
-		for (var ii = 0; ii < jars.length; ++ii) {
-			var jar = jars[ii];
-
-			fs.readFile(jar, "binary", jarGroup.slot());
-
-			jarPaths.push(jar);
-		}
-	}, function(results, properties, jarResults) {
+	}, function(results, properties) {
 		if (results && results.length > 0) {
 			for (var ii = 0; ii < results.length; ++ii) {
 				var data = results[ii];
@@ -348,8 +342,6 @@ var installAddonCode = function(builder, opts, next) {
 						fs.writeFile(outFile, data, 'utf-8', f.wait());
 					} else {
 						var outFile = path.join(destDir, filePath);
-
-						wrench.mkdirSyncRecursive(path.dirname(outFile));
 
 						fs.writeFile(outFile, data, 'binary', f.wait());
 					}
@@ -397,18 +389,12 @@ var installAddonCode = function(builder, opts, next) {
 			logger.log("No library properties to add");
 		}
 
-		if (jarResults && jarResults.length > 0) {
-			for (var ii = 0; ii < jarResults.length; ++ii) {
-				var data = jarResults[ii];
-
-				if (data) {
-					var jarPath = jarPaths[ii];
-					var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
-
-					logger.log("Installing JAR file:", jarDestPath);
-
-					fs.writeFile(jarDestPath, data, "binary", f.wait());
-				}
+		if (jars && jars.length > 0) {
+			for (var ii = 0; ii < jars.length; ++ii) {
+				var jarPath = jars[ii];
+				var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
+				logger.log("Installing JAR file:", jarDestPath);
+				fs.symlinkSync(jarPath, jarDestPath, 'junction');
 			}
 		} else {
 			logger.log("No JAR file data to install");
@@ -434,7 +420,7 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 		for (var key in params) {
 			if (typeof params[key] != 'string') {
 				if (params[key] == undefined || typeof params[key] == 'object') {
-					logger.error("settings for AndroidManifest: value for", clc.yellow.bright(key), "is not a string");
+					logger.error("settings for AndroidManifest: value for", clc.yellowBright(key), "is not a string");
 				}
 
 				params[key] = JSON.stringify(params[key]);
@@ -464,6 +450,8 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 		process.exit(1);
 	});
 }
+
+exports.transformXSL = transformXSL;
 
 var PUNCTUATION_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~]/g;
 var PUNCTUATION_OR_SPACE_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~ ]/g;
@@ -502,11 +490,15 @@ function buildSupportProjects(builder, opts, next) {
 
 	var f = ff(this, function() {
 		tealeafDir = path.join(__dirname, "TeaLeaf");
-		if (opts.clean) {
+		if (opts.clean || opts.arch) {
 			builder.common.child('make', ['clean'], {cwd: __dirname}, f.slot());
 		}
 	}, function() {
-		builder.common.child('ndk-build', ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")], { cwd: tealeafDir }, f.wait()); 
+		var args = ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")];
+		if (opts.arch) {
+			args.push('APP_ABI=' + opts.arch);
+		}
+		builder.common.child('ndk-build', args , { cwd: tealeafDir }, f.wait()); 
 	}, function() {
 		builder.common.child('ant', [(opts.debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
@@ -519,6 +511,26 @@ function buildAndroidProject(builder, destDir, debug, next) {
 	builder.common.child('ant', [(debug ? "debug" : "release")], {
 		cwd: destDir
 	}, next);
+}
+
+function saveLocalizedStringsXmls(destDir, titles) {
+	var stringsXmlPath = path.join(destDir, "res/values/strings.xml");
+	var stringsXml = fs.readFileSync(stringsXmlPath, "utf-8");
+	for (var t in titles) {
+		var title = titles[t];
+		var i = stringsXml.indexOf('</resources>');
+		var first = stringsXml.substring(0, i);
+		var second = stringsXml.substring(i);
+		var inner = '<string name="title">' + title + '</string>';
+		var finalXml = first + inner + second;
+		//default en
+		if (t === 'en') {
+			fs.writeFileSync(path.join(destDir, "res/values/strings.xml"), finalXml, 'utf-8');
+		} else {
+			fs.mkdirSync(path.join(destDir, "res/values-" + t));
+			fs.writeFileSync(path.join(destDir, "res/values-" + t + "/strings.xml"), finalXml, 'utf-8');
+		}
+	}
 }
 
 function makeAndroidProject(builder, opts, next) {
@@ -537,6 +549,17 @@ function makeAndroidProject(builder, opts, next) {
 	}, function() {
 		fs.appendFile(path.join(opts.destDir, 'project.properties'), 'out.dexed.absolute.dir=../.dex/\nsource.dir=src\n',f());
 	}, function() {
+		var titles = opts.titles;
+		console.log(titles);
+		if (titles) {
+			if (titles.length == 0) {
+				titles['en'] = opts.title;
+			}
+		}  else {
+			titles = {};
+			titles['en'] = opts.title;
+		}
+		saveLocalizedStringsXmls(opts.destDir, titles);
 		updateManifest(builder, opts, f.waitPlain());
 		updateActivity(opts, f.waitPlain());
 	}).error(function(err) {
@@ -658,7 +681,7 @@ function copyIcons(builder, project, destDir) {
 function copySplash(builder, project, destDir, next) {
 	var destPath = path.join(destDir, "assets/resources");
 	wrench.mkdirSyncRecursive(destPath);
-	
+
 	var splashes = [
 		{
 			copyFile: "portrait512",
@@ -752,8 +775,18 @@ function copySplash(builder, project, destDir, next) {
 
 			// If no input file exists,
 			if (!srcFile) {
-				logger.warn("No splash screen images provided for size", outSize);
-			} else {
+				srcFile = builder.common.paths.lib("defsplash.png");
+
+				if (!srcFile || !fs.existsSync(srcFile)) {
+					logger.warn("Default splash file does not exist:", srcFile);
+					srcFile = null;
+				} else {
+					logger.warn("No splash screen images provided for size", outSize, "so using default image", srcFile);
+				}
+			}
+
+			// If a source file was found,
+			if (srcFile) {
 				outFile = path.join(destPath, outFile);
 
 				// If copying,
@@ -906,14 +939,14 @@ function updateManifest(builder, opts, next) {
 			copy(params, defaults);
 			copy(params, opts.project.manifest.android);
 			copy(params, {
-					"package": opts.namespace,
-					title: opts.title,
-					activity: "." + opts.activity,
-					version: "" + opts.version,
-					appid: opts.appID,
-					shortname: opts.shortName,
-					orientation: orientation,
-					studioName: opts.studioName,
+				"package": opts.namespace,
+				title: "@string/title",
+				activity: opts.namespace + "." + opts.activity,
+				version: "" + opts.version,
+				appid: opts.appID,
+				shortname: opts.shortName,
+				orientation: orientation,
+				studioName: opts.studioName,
 				gameHash: gameHash,
 				sdkHash: sdkHash,
 				androidHash: androidHash,
@@ -1096,7 +1129,8 @@ exports.build = function(builder, project, opts, next) {
 
 	// Project title.
 	var title = project.manifest.title;
-	if (title === null) {
+	var titles = project.manifest.titles;
+	if (title === null && titles === null) {
 		title = shortName;
 	}
 	// Create Android Activity name.
@@ -1129,7 +1163,7 @@ exports.build = function(builder, project, opts, next) {
 	var f = ff(function () {
 		installAddons(builder, project, opts, addonConfig, f());
 	}, function() {
-		require(builder.common.paths.nativeBuild("native")).writeNativeResources(project, opts, f.waitPlain());
+		require(builder.common.paths.nativeBuild("native")).writeNativeResources(builder, project, opts, f.waitPlain());
 
 		makeAndroidProject(builder, {
 			project: project,
@@ -1146,6 +1180,7 @@ exports.build = function(builder, project, opts, next) {
 			studioName: studioName,
 			addonConfig: addonConfig,
 			disableLogs: disableLogs,
+			titles: titles,
 			target: androidTarget
 		}, f.waitPlain());
 
@@ -1153,6 +1188,7 @@ exports.build = function(builder, project, opts, next) {
 		builder.common.config.set("lastBuildWasDebug", debug);
 		buildSupportProjects(builder, {
 			debug: debug,
+			arch: argv.arch,
 			clean: cleanProj
 		}, f.waitPlain());
 	}, function() {
@@ -1177,32 +1213,36 @@ exports.build = function(builder, project, opts, next) {
 		var onDoneBuilding = f();
 
 		buildAndroidProject(builder, destDir, debug, function (success) {
-			var apk = "";
-			if (!debug) {
-				apk = shortName + "-aligned.apk";
+			if (opts.skipAPK) {
+				// Skip adb commands also
+				next(0);
 			} else {
-				apk = shortName + "-debug.apk";
-			}
-
-			(!debug ? signAPK : nextStep)(builder, shortName, destDir, function () {
-				apkPath = path.join(apkDir, shortName + ".apk");
-				if (fs.existsSync(apkPath)) {
-					fs.unlinkSync(apkPath);
-				}
-
-				var destApkPath = path.join(destDir, "bin/" + apk);
-				if (fs.existsSync(destApkPath)) {
-					wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
-					builder.common.copyFileSync(destApkPath, apkPath);
-					logger.log("built", clc.yellow.bright(packageName));
-					logger.log("saved to " + clc.blue.bright(apkPath));
-					onDoneBuilding();
+				var apk = "";
+				if (!debug) {
+					apk = shortName + "-aligned.apk";
 				} else {
-					logger.error("No file at " + destApkPath);
-					next(2);
+					apk = shortName + "-debug.apk";
 				}
 
-			});
+				(!debug ? signAPK : nextStep)(builder, shortName, destDir, function () {
+					apkPath = path.join(apkDir, shortName + ".apk");
+					if (fs.existsSync(apkPath)) {
+						fs.unlinkSync(apkPath);
+					}
+
+					var destApkPath = path.join(destDir, "bin/" + apk);
+					if (fs.existsSync(destApkPath)) {
+						wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
+						builder.common.copyFileSync(destApkPath, apkPath);
+						logger.log("built", clc.yellowBright(packageName));
+						logger.log("saved to " + clc.blueBright(apkPath));
+						onDoneBuilding();
+					} else {
+						logger.error("No file at " + destApkPath);
+						next(2);
+					}
+				});
+			}
 		});
 	}, function() {
 		if (argv.install || argv.open) {
@@ -1227,10 +1267,10 @@ exports.build = function(builder, project, opts, next) {
 			logger.log('Install: Running ' + cmd + '...');
 			builder.common.child('adb', ['shell', 'am', 'start', '-n', startCmd], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 		}
-	}, function () {
-		next(0);
+
+		f(destDir);
 	}).error(function (err) {
 		logger.error("Build failure:", err, err.stack);
-	});
+		process.exit(2);
+	}).next(next);
 };
-

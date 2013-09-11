@@ -56,7 +56,7 @@ public class Unpacker extends AsyncTask<Void, Void, Void> {
 		File dir = new File(destination + File.separator + directory);
 		dir.mkdirs();
 		for (String file : files) {
-			if(file.contains(".png") || file.contains(".jpg") || file.contains("native.js.mp3")) {
+			if(file.contains(".png") || file.contains(".jpg") || file.contains("native.js")) {
 				continue;
 			}
 			String fullPath = directory + File.separator + file;

@@ -61,6 +61,7 @@ public class NativeShim {
 	private ConnectivityManager connectivityManager;
 	private NetworkStateReceiver networkStateReceiver;
 	private boolean onlineStatus;
+	private int statusBarHeight;
 	private Gson gson = new Gson();
 	public NativeShim(TextManager textManager, TextureLoader textureLoader, SoundQueue soundQueue,
 			LocalStorage localStorage, ContactList contactList,
@@ -81,6 +82,13 @@ public class NativeShim {
 		this.networkStateReceiver = new NetworkStateReceiver(this);
 		this.onlineStatus = false;
 		this.updateOnlineStatus();
+
+		this.statusBarHeight = 0;
+		int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			this.statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+			logger.log("status bar height:", this.statusBarHeight);
+		}
 
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		context.registerReceiver(this.networkStateReceiver, filter);
@@ -174,15 +182,22 @@ public class NativeShim {
 	}
 
 	private int textInputId = 0;
-	public int showInputPrompt(final String title, final String message, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
-		return InputPrompt.getInstance().showInputPrompt(context, title, message, value, autoShowKeyboard, isPassword);
+	public int openPrompt(final String title, final String message, final String okText, final String cancelText, final String value, final boolean autoShowKeyboard, final boolean isPassword) {
+		return InputPrompt.getInstance().open(context, title, message, okText, cancelText, value, autoShowKeyboard, isPassword);
 	}
 	
-	public void showSoftKeyboard(final String text, final String hint, final boolean hasBackward, final boolean hasForward, final String inputType, final int maxLength) {
+	public void showSoftKeyboard(final String text,
+								 final String hint,
+								 final boolean hasBackward,
+								 final boolean hasForward,
+								 final String inputType,
+								 final String inputReturnButton,
+								 final int maxLength,
+								 final int cursorPos) {
 		context.runOnUiThread(new Runnable() {
 			public void run() {
 				TextEditViewHandler textEditView = context.getTextEditViewHandler();
-				textEditView.activate(text, hint, hasBackward, hasForward, inputType, maxLength);
+				textEditView.activate(text, hint, hasBackward, hasForward, inputType, inputReturnButton, maxLength, cursorPos);
 			}
 		});
 	}
@@ -192,6 +207,26 @@ public class NativeShim {
 			public void run() {
 				TextEditViewHandler textEditView = context.getTextEditViewHandler();
 				textEditView.closeKeyboard();
+			}
+		});
+	}
+
+	public int getStatusBarHeight() {
+		return statusBarHeight;
+	}
+
+	public void showStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			}
+		});
+	}
+
+	public void hideStatusBar() {
+		context.runOnUiThread(new Runnable() {
+			public void run() {
+				context.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			}
 		});
 	}
@@ -318,12 +353,27 @@ public class NativeShim {
 		int textSize = textManager.measureText(font, size, text);
 		return textSize;
 	}
+
 	public void loadTexture(String url) {
 		textureLoader.loadTexture(url);
 	}
+
+    public int cameraGetPhoto(int width, int height) {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadCameraPicture("" + id, width, height);
+        return id;
+    }
+
+    public int galleryGetPhoto(int width, int height) {
+        int id = textureLoader.getNextCameraId();
+        textureLoader.loadGalleryPicture("" + id, width, height);
+        return id;
+    }
+
 	public int getNextCameraId() {
 		return textureLoader.getNextCameraId();
 	}
+
 	public int getNextGalleryId() {
 		return textureLoader.getNextGalleryId();
 	}
@@ -365,6 +415,9 @@ public class NativeShim {
 	public void seekTo(String url, float position) {
 		soundQueue.seekTo(url, position);
 	}
+	public void haltSounds() {
+		soundQueue.haltSounds();
+	}
 
 	// Sockets
 	public void sendData(int id, String data) {
@@ -398,9 +451,9 @@ public class NativeShim {
 		TeaLeafOptions options = context.getOptions();
 		String sourceString = null;
 		if (options.isDevelop() && options.get("forceURL", false)) {
-			// load native.js.mp3 from the file system
+			// load native.js from the file system
 			// read file in
-			String path = resourceManager.getStorageDirectory() + "/build/debug/native-android/";
+			String path = resourceManager.getStorageDirectory();
 			String result = null;
 			DataInputStream in = null;
 			try {
@@ -461,12 +514,11 @@ public class NativeShim {
 	}
 
 	// plugins
-	public void pluginsCall(final String className,final String methodName, final Object[] params) {
-		context.runOnUiThread(new Runnable() {
-			public void run() {
-				PluginManager.call(className, methodName, params);
-			}
-		});
+	public String pluginsCall(final String className,final String methodName, final Object[] params) {
+//		there may be issues not running this on the ui thread however
+//		it is required for now and there doesn't seem to be any immediate
+//		concerns with it running on any thread
+        return PluginManager.call(className, methodName, params);
 	}
 
 	// native
