@@ -18,6 +18,8 @@ import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
+import org.json.JSONObject;
 import java.lang.StringBuilder;
 import java.io.*;
 
@@ -46,6 +48,7 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 public class NativeShim {
+	private static HashMap<String, TeaLeafCallable> callables = new HashMap<String, TeaLeafCallable>();
 	private SoundQueue soundQueue;
 	private TextureLoader textureLoader;
 	private TextManager textManager;
@@ -97,6 +100,7 @@ public class NativeShim {
 
 	public void onPause() {
 	}
+
 	public void onResume() {
 	}
 
@@ -511,6 +515,36 @@ public class NativeShim {
 	//location manager
 	public void setLocation(String uri) {
 		locationManager.setLocation(uri);
+	}
+
+
+	//love me some blocks
+	{
+	}
+
+	//call
+	public String call(String method, String args) {
+		JSONObject jsonArgs = null;
+		try {
+			jsonArgs = new JSONObject(args);
+		} catch (Exception e) {
+			jsonArgs = new JSONObject();
+			logger.log("NativeShim.call", e);
+		}
+
+		JSONObject jsonRet = null;
+		try  {
+			jsonRet = callables.get(method).call(jsonArgs);
+		} catch (Exception e) {
+			logger.log(e);
+			jsonRet = new JSONObject();
+		}
+
+		return jsonRet.toString();
+	}
+
+	public static void RegisterCallable(String method, TeaLeafCallable callable) {
+		callables.put(method, callable);
 	}
 
 	// plugins

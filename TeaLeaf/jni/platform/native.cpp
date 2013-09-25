@@ -137,3 +137,21 @@ void native_reload() {
 	jmethodID method = shim->env->GetMethodID(shim->type, "reload", "()V");
 	shim->env->CallVoidMethod(shim->instance, method);
 }
+
+char *native_call(const char *method, const char *args) {
+
+	native_shim* shim = get_native_shim();
+	jmethodID jmethod = shim->env->GetMethodID(shim->type, "call", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+
+	jstring methodStr = shim->env->NewStringUTF(method);
+	jstring argsStr = shim->env->NewStringUTF(args);
+
+	jstring jdata = (jstring) shim->env->CallObjectMethod(shim->instance, jmethod, methodStr, argsStr);
+    char *ret_data = NULL;
+	GET_STR(shim->env, jdata, ret_data);
+	shim->env->DeleteLocalRef(jdata);
+	shim->env->DeleteLocalRef(methodStr);
+	shim->env->DeleteLocalRef(argsStr);
+    return ret_data;
+
+}

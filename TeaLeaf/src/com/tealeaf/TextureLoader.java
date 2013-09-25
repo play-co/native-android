@@ -74,6 +74,10 @@ public class TextureLoader implements Runnable {
 		this.photoPicker = new PhotoPicker(tealeaf, tealeaf.getSettings(), resourceManager);
 	}
 
+	public TextManager getTextManager() {
+		return this.textManager;
+	}
+
 	public void run() {
 		running = true;
 

@@ -86,18 +86,13 @@ public class TextManager {
 		return (int)textPaint.measureText(text);
 	}
 
-	private TextPaint getTextPaint(String fontKey, int fontSize, int textStyle, String text, int r, int g, int b, int a, float strokeWidth) {
-		TextPaint textPaint = new TextPaint();
-		textPaint.setAntiAlias(true);
-		textPaint.setARGB(a, r, g, b);
-		Typeface tf = null;
-
-		boolean isBold = false;
-
+	public Typeface getTypeface(String fontKey) {
 		// fontName contains only the name and is in the original casing
 		// fontKey includes the font weight and name and is lower case
 		String fontName = fontKey;
 		fontKey = fontKey.toLowerCase();
+		Typeface tf = null;
+		boolean isBold = false;
 
 		if (fontKey.startsWith("normal ")) {
 			fontName = fontName.substring(7);
@@ -133,6 +128,15 @@ public class TextManager {
 			}
 		}
 
+		return tf;
+	}
+
+	private TextPaint getTextPaint(String fontKey, int fontSize, int textStyle, String text, int r, int g, int b, int a, float strokeWidth) {
+		TextPaint textPaint = new TextPaint();
+		textPaint.setAntiAlias(true);
+		textPaint.setARGB(a, r, g, b);
+		Typeface tf = getTypeface(fontKey);
+	
 		textPaint.setTypeface(tf);
 		textPaint.setTextSize(fontSize);
 

@@ -100,6 +100,10 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		orientationListener.enable();
 	}
 
+	public OnTouchListener getOnTouchListener() {
+		return renderer;
+	}
+
 	public void queueResumeEvent() {
 		synchronized (this) {
 			sendResumeEvent = true;

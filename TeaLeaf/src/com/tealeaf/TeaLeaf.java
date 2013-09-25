@@ -15,48 +15,56 @@
 package com.tealeaf;
 
 import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.File;
 import android.content.pm.ActivityInfo;
+import com.tealeaf.ActivityState;
 import com.tealeaf.event.BackButtonEvent;
+import com.tealeaf.event.JSUpdateNotificationEvent;
+import com.tealeaf.event.KeyboardScreenResizeEvent;
 import com.tealeaf.event.LaunchTypeEvent;
+import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.event.OnUpdatedEvent;
 import com.tealeaf.event.PauseEvent;
 import com.tealeaf.event.PhotoBeginLoadedEvent;
-import com.tealeaf.event.KeyboardScreenResizeEvent;
 import com.tealeaf.event.WindowFocusAcquiredEvent;
 import com.tealeaf.event.WindowFocusLostEvent;
-import com.tealeaf.event.JSUpdateNotificationEvent;
-import com.tealeaf.ActivityState;
-import com.tealeaf.event.MarketUpdateNotificationEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
 import android.graphics.Rect;
 import android.view.ViewTreeObserver;
 
-import android.os.AsyncTask;
-import android.provider.MediaStore;
-import android.provider.MediaStore.MediaColumns;
-import android.media.ExifInterface;
 import android.content.BroadcastReceiver;
-import android.content.res.Configuration;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.Paint;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.AudioManager;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore.MediaColumns;
+import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -66,8 +74,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
+import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.support.v4.app.FragmentActivity;
+import android.widget.RelativeLayout;
+
+import org.json.JSONObject;
 
 /*
  * FIXME general things
@@ -114,6 +125,9 @@ public class TeaLeaf extends FragmentActivity {
 	boolean didLoseFocus = true;
 	boolean didRegainFocus = false;
 
+	//edit text
+	public EditTextView editText;
+
 	/**
 	 *
 	 * @return true if the app is running and in foreground and false if it's
@@ -154,6 +168,7 @@ public class TeaLeaf extends FragmentActivity {
 		}
 		return overlay;
 	}
+
 	public synchronized TextInputView getTextInputView() {
 		if(textboxview == null) {
 			textboxview = new TextInputView(TeaLeaf.this);
@@ -279,9 +294,12 @@ public class TeaLeaf extends FragmentActivity {
 			height = tempWidth;
 		}
 
-		AbsoluteLayout absLayout = new AbsoluteLayout(this);
+		final AbsoluteLayout absLayout = new AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
+
+		editText = EditTextView.Get(this);
+		absLayout.addView(editText);
 
 		group.addView(absLayout);
 
@@ -314,6 +332,28 @@ public class TeaLeaf extends FragmentActivity {
 				EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
 			}
 		});
+	}
+
+	public Bitmap getBitmapFromView(EditText view) {
+		//Define a bitmap with the same size as the view
+		logger.log("jared bitmap size", view.getWidth(), view.getHeight());
+		Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+		//Bind a canvas to it
+		Canvas canvas = new Canvas(returnedBitmap);
+		//Get the view's background
+		Drawable bgDrawable =view.getBackground();
+		if (bgDrawable!=null) {
+			//has background drawable, then draw it on the canvas
+			bgDrawable.draw(canvas);
+		} 
+		// draw the view on the canvas
+		view.draw(canvas);
+		Paint p = new Paint();
+		p.setColor(Color.BLACK);
+		p.setTextSize(24);
+		canvas.drawText("'ello mate", 0, 0, p);
+		//return the bitmap
+		return returnedBitmap;
 	}
 
 	public void pauseGL() {

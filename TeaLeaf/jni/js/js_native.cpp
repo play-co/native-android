@@ -172,10 +172,26 @@ Handle<Value> js_used_heap(Local<String> property,
 	return handle_scope.Close(Number::New(used_heap));
 }
 
+//call
+Handle<Value> js_native_call(const Arguments& args) {
+	LOGFN("call");
+	String::Utf8Value method(args[0]);
+	const char *methodStr = ToCString(method);
+	String::Utf8Value arguments(args[1]);
+	const char *argumentsStr = ToCString(arguments);
+	char *ret = native_call(methodStr, argumentsStr);
+	Handle<Value> retStr = String::New(ret);
+	free(ret);
+	LOGFN("call end");
+	return retStr;
+}
+
+
 Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* native_hash) {
 	Handle<ObjectTemplate> NATIVE = ObjectTemplate::New();
 
 	// functions
+	NATIVE->Set(String::New("_call"), FunctionTemplate::New(js_native_call));
 	NATIVE->Set(STRING_CACHE_getFileSync, FunctionTemplate::New(native_fetch));
 	NATIVE->Set(STRING_CACHE_eval, FunctionTemplate::New(native_eval));
 	NATIVE->Set(STRING_CACHE_startGame, FunctionTemplate::New(native_start_game));
