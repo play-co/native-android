@@ -66,6 +66,11 @@
 
 		<receiver android:name="com.google.ads.InstallReceiver" android:exported="true"/>
 		<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true" />
+		<receiver android:name="com.tealeaf.TeaLeafReceiver" android:exported="true">
+			<intent-filter>
+				<action android:name="com.android.vending.INSTALL_REFERRER" />
+			</intent-filter>
+		</receiver>
 
 <!--START_PLUGINS_APPLICATION-->
 <!--END_PLUGINS_APPLICATION-->
