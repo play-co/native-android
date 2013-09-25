@@ -287,7 +287,6 @@ public class TextureLoader implements Runnable {
 	private Bitmap scaleTo(int width, int height, Bitmap bitmap) {
 		float bmpWidth = (float)bitmap.getWidth();
 		float bmpHeight = (float)bitmap.getHeight();
-		logger.log("jared has", bmpWidth, bmpHeight);
 		
 		float scale = 1.f;
 		//width is closer
@@ -300,7 +299,6 @@ public class TextureLoader implements Runnable {
 			clampedSize = width;
 		}
 	
-		logger.log("jared has", scale, bmpWidth, bmpHeight);
         Bitmap bmpScaled = Bitmap.createScaledBitmap(bitmap,
                                                      (int)(scale * bmpWidth),
                                                      (int)(scale * bmpHeight), true);

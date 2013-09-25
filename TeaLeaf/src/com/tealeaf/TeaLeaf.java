@@ -336,7 +336,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	public Bitmap getBitmapFromView(EditText view) {
 		//Define a bitmap with the same size as the view
-		logger.log("jared bitmap size", view.getWidth(), view.getHeight());
 		Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
 		//Bind a canvas to it
 		Canvas canvas = new Canvas(returnedBitmap);
