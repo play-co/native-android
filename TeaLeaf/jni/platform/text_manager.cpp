@@ -15,6 +15,7 @@
  * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "platform/platform.h"
+#include "platform/device.h"
 extern "C" {
 #include "core/texture_2d.h"
 #include "core/texture_manager.h"
@@ -37,19 +38,26 @@ texture_2d *text_manager_get_stroked_text(const char *font_name, int size, const
 texture_2d *text_manager_get_text(const char *font_name, int size, const char *text, rgba *color, int max_width, int text_style, float stroke_width) {
 
 	char buf[256] = {'\0'};
+	float scale = device_get_text_scale();
 	snprintf(buf, sizeof(buf), "@TEXT%s|%i|%i|%i|%i|%i|%i|%i|%f|%s",
-			font_name, size,
+			font_name,(int) (scale * size),
 			(int) (255 * color->r),
 			(int) (255 * color->g),
 			(int) (255 * color->b),
 			(int) (255 * color->a),
-			max_width,
+			(int)(scale * max_width),
 			text_style,
-			stroke_width,
+			scale * stroke_width,
 			text); // text has to go last!
 
-	texture_2d *tex = texture_manager_load_texture(texture_manager_get(), buf);
-
+	texture_2d *tex = texture_manager_get_texture(texture_manager_get(), buf);
+	if (!tex) {
+		tex = texture_manager_load_texture(texture_manager_get(), buf);
+		tex->originalWidth /= scale;
+		tex->originalHeight /= scale;
+		tex->width /= scale;
+		tex->height /= scale;
+	}
 	return tex;
 }
 

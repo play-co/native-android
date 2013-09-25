@@ -49,3 +49,12 @@ CEXPORT void device_hide_splash() {
 	// On Android there is no pre-splash stuff, just the core OpenGL splash so
 	// this is a no-op.
 }
+
+static float text_scale = 1.0;
+CEXPORT float device_get_text_scale() {
+	return text_scale;
+}
+
+CEXPORT void device_set_text_scale(float scale) {
+	text_scale = scale;
+}

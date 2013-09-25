@@ -33,9 +33,24 @@ Handle<Value> js_device_info(Local<String> name, const AccessorInfo &info) {
 	return result;
 }
 
+static Handle<Value> js_set_text_scale(const Arguments &args) {
+	float scale = args[0]->NumberValue();
+	device_set_text_scale(scale);
+	return Undefined();
+}
+
+static Handle<Value> js_get_text_scale(const Arguments &args) {
+	float scale = device_get_text_scale();
+	return Number::New(scale);
+}
+
+
+
 Handle<ObjectTemplate> js_device_get_template() {
 	Handle<ObjectTemplate> device = ObjectTemplate::New();
 	device->SetAccessor(STRING_CACHE_globalID, js_device_global_id);
 	device->SetAccessor(STRING_CACHE_native_info, js_device_info);
+	device->Set(String::New("setTextScale"), FunctionTemplate::New(js_set_text_scale));
+	device->Set(String::New("getTextScale"), FunctionTemplate::New(js_get_text_scale));
 	return device;
 }
