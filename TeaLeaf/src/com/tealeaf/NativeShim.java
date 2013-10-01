@@ -723,7 +723,7 @@ public class NativeShim {
 
 	//Install stuff
 	public String getInstallReferrer() {
-		return context.getSettings().getString("referrer", "");
+		return context.getSettings().getString("installReferrer.referrer", "");
 	}
 
 	//Local
