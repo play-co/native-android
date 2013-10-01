@@ -16,7 +16,6 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -37,7 +36,6 @@ public class EditTextView extends EditText {
 	private Activity activity;
 	private boolean registerTextChange = true;
 	private OnTouchListener currentTouchListener = null;
-	private OnGlobalLayoutListener onGlobalLayoutListener;
 	private boolean isOpened = false;
 
 	public enum InputName {
@@ -229,7 +227,6 @@ public class EditTextView extends EditText {
 								instance.setPadding(paddingLeft, 0, paddingRight, 0);
 								InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
 								imm.showSoftInput(instance, 0);	
-								instance.setListenerToRootView();
 
 							} catch (Exception e) {
 								logger.log(e);
@@ -249,53 +246,17 @@ public class EditTextView extends EditText {
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 							instance.hideKeyboard();
 							instance.setVisibility(View.GONE);
-							instance.removeListenerToRootView();
 						}
 					});
 					return obj;
 				}
 			});
 
-			instance.onGlobalLayoutListener = new OnGlobalLayoutListener() {
-				@Override
-				public void onGlobalLayout() {
-
-					View group = (View)TeaLeaf.get().getGroup();
-					// get visible area of the view
-					Rect r = new Rect();
-					group.getWindowVisibleDisplayFrame(r);
-					
-					// get display height
-					Display display = instance.activity.getWindow().getWindowManager().getDefaultDisplay();
-					int height = display.getHeight();
-					
-					// if our visible height is less than 75% normal, assume keyboard on screen
-					int visibleHeight = r.bottom - r.top;
-
-					if (visibleHeight < .75 * height && !instance.isOpened) {
-						instance.isOpened = true;
-					} else if(instance.isOpened){
-						EventQueue.pushEvent(new Event("editText.onFinishEditing"));
-					}
-
-				}
-			};
 
 		}
 
 		return instance;
 	}
-
-	public void setListenerToRootView() {
-		View activityRootView = (View)TeaLeaf.get().getGroup();
-		activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(this.onGlobalLayoutListener);
-	}
-
-	public void removeListenerToRootView() {
-		View activityRootView = (View)TeaLeaf.get().getGroup();
-		activityRootView.getViewTreeObserver().removeGlobalOnLayoutListener(this.onGlobalLayoutListener);
-	}
-
 
 	private void hideKeyboard() {
 		isOpened = false;
