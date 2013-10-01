@@ -20,10 +20,21 @@ public class InputKeyboardSubmitEvent extends Event {
 	private int id;
 	@SuppressWarnings("unused")
 	private String text;
+	private boolean close;
+
+	public InputKeyboardSubmitEvent(int id, String text, boolean close) {
+		super("InputKeyboardSubmit");
+		this.id = id;
+		this.text = text;
+		this.close = close;
+	}
 
 	public InputKeyboardSubmitEvent(int id, String text) {
 		super("InputKeyboardSubmit");
 		this.id = id;
 		this.text = text;
+		this.close = false;
 	}
+
 }
+

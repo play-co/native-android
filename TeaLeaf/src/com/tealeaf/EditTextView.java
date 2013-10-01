@@ -102,8 +102,9 @@ public class EditTextView extends EditText {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, instance.getText().toString()));
-						instance.hideKeyboard();
+						EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, instance.getText().toString(), false));
+						return true;
+						//instance.hideKeyboard();
 					} else if (actionId == EditorInfo.IME_ACTION_NEXT) {
 						EventQueue.pushEvent(new InputKeyboardFocusNextEvent(true));
 					}
@@ -255,6 +256,19 @@ public class EditTextView extends EditText {
 					return obj;
 				}
 			});
+
+			NativeShim.RegisterCallable("editText.setText", new TeaLeafCallable() {
+				public JSONObject call(final JSONObject obj) {
+
+					activity.runOnUiThread(new Runnable() {
+						public void run() {
+							instance.setText(obj.optString("text", ""));
+						}
+					});
+					return obj;
+				}
+			});
+
 			instance.onGlobalLayoutListener = new OnGlobalLayoutListener() {
 				@Override
 				public void onGlobalLayout() {
