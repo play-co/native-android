@@ -175,6 +175,28 @@ public class EditTextView extends EditText {
 								inputName = InputName.valueOf(inputType.toUpperCase().trim());
 
 
+								boolean hasForward = obj.optBoolean("hasForward", false);
+								String inputReturnButton = obj.optString("inputReturnButton", "done");
+								if (inputReturnButton.equals("done")) {
+									instance.setImeOptions(EditorInfo.IME_ACTION_DONE);
+								} else if (inputReturnButton.equals("next")) {
+									instance.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+								} else if (inputReturnButton.equals("search")) {
+									instance.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+								} else if (inputReturnButton.equals("send")) {
+									instance.setImeOptions(EditorInfo.IME_ACTION_SEND);
+								} else if (inputReturnButton.equals("go")) {
+									instance.setImeOptions(EditorInfo.IME_ACTION_GO);
+								} else {
+									int action = hasForward ? EditorInfo.IME_ACTION_NEXT : EditorInfo.IME_ACTION_DONE;
+									if (inputReturnButton.equals("default")) {
+										instance.setImeOptions(action);
+									} else {
+										instance.setImeActionLabel(inputReturnButton, action);
+									}
+								}
+
+
 								//cursor pos
 								int cursorPos = obj.optInt("cursorPos", instance.length());
 								instance.setSelection(cursorPos < 0 || cursorPos > instance.length() ? instance.getText().length() : cursorPos);
