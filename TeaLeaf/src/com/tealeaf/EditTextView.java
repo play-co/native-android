@@ -176,7 +176,7 @@ public class EditTextView extends EditText {
 
 
 								boolean hasForward = obj.optBoolean("hasForward", false);
-								String inputReturnButton = obj.optString("inputReturnButton", "done");
+								String inputReturnButton = obj.optString("inputReturnType", "done");
 								if (inputReturnButton.equals("done")) {
 									instance.setImeOptions(EditorInfo.IME_ACTION_DONE);
 								} else if (inputReturnButton.equals("next")) {
