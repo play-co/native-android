@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Display;
@@ -36,6 +37,7 @@ public class EditTextView extends EditText {
 	private Activity activity;
 	private boolean registerTextChange = true;
 	private OnTouchListener currentTouchListener = null;
+	private OnGlobalLayoutListener onGlobalLayoutListener;
 	private boolean isOpened = false;
 
 	public enum InputName {
@@ -117,6 +119,7 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
+							instance.setListenerToRootView();
 							try {
 								instance.registerTextChange = false;
 								instance.setVisibility(View.VISIBLE);
@@ -243,6 +246,7 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
+							instance.removeListenerToRootView();
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 							instance.hideKeyboard();
 							instance.setVisibility(View.GONE);
@@ -251,11 +255,48 @@ public class EditTextView extends EditText {
 					return obj;
 				}
 			});
+			instance.onGlobalLayoutListener = new OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+
+					View group = (View)TeaLeaf.get().getGroup();
+					// get visible area of the view
+					Rect r = new Rect();
+					group.getWindowVisibleDisplayFrame(r);
+
+					// get display height
+					Display display = instance.activity.getWindow().getWindowManager().getDefaultDisplay();
+					int height = display.getHeight();
+
+					// if our visible height is less than 75% normal, assume keyboard on screen
+					int visibleHeight = r.bottom - r.top;
+
+					if (visibleHeight == height && instance.isOpened) {
+						//TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
+						//instance.hideKeyboard();
+						//instance.setVisibility(View.GONE);
+						EventQueue.pushEvent(new Event("editText.onFinishEditing"));
+					} else {
+						instance.isOpened = true;
+					}
+
+				}
+			};
 
 
 		}
 
 		return instance;
+	}
+
+	public void setListenerToRootView() {
+		View activityRootView = (View)TeaLeaf.get().getGroup();
+		activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(this.onGlobalLayoutListener);
+	}
+
+	public void removeListenerToRootView() {
+		View activityRootView = (View)TeaLeaf.get().getGroup();
+		activityRootView.getViewTreeObserver().removeGlobalOnLayoutListener(this.onGlobalLayoutListener);
 	}
 
 	private void hideKeyboard() {
@@ -269,7 +310,7 @@ public class EditTextView extends EditText {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				EventQueue.pushEvent(new Event("editText.onFinishEditing"));
-				return false;
+				return TeaLeaf.get().glView.getOnTouchListener().onTouch(TeaLeaf.get().glView, event);
 			}
 		};	
 	}
