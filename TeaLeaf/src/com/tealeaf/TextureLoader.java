@@ -300,12 +300,11 @@ public class TextureLoader implements Runnable {
 		}
 	
         Bitmap bmpScaled = Bitmap.createScaledBitmap(bitmap,
-                                                     (int)(scale * bmpWidth),
-                                                     (int)(scale * bmpHeight), true);
+                                                     (int)(scale * bmpWidth + .5),
+                                                     (int)(scale * bmpHeight + .5), true);
         if (bmpScaled != bitmap) {
         	bitmap.recycle();
         }
-
 
         // crop to a square
         final Bitmap bmpCrop = Bitmap.createBitmap(bmpScaled,
