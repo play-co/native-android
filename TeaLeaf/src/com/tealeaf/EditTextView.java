@@ -291,9 +291,8 @@ public class EditTextView extends EditText {
 
 					if (visibleHeight == height) {
 						if (instance.isOpened) {
-							//TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
-							//instance.hideKeyboard();
-							//instance.setVisibility(View.GONE);
+							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
+							instance.setVisibility(View.GONE);
 							instance.isOpened = false;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
 						}
@@ -321,7 +320,6 @@ public class EditTextView extends EditText {
 	}
 
 	private void hideKeyboard() {
-		isOpened = false;
 		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindowToken(), 0);	
 	}
@@ -330,7 +328,7 @@ public class EditTextView extends EditText {
 		return new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				EventQueue.pushEvent(new Event("editText.onFinishEditing"));
+				instance.hideKeyboard();
 				return TeaLeaf.get().glView.getOnTouchListener().onTouch(TeaLeaf.get().glView, event);
 			}
 		};	
