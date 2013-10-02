@@ -39,6 +39,7 @@ public class EditTextView extends EditText {
 	private OnTouchListener currentTouchListener = null;
 	private OnGlobalLayoutListener onGlobalLayoutListener;
 	private boolean isOpened = false;
+	private boolean closeOnDone = false;
 
 	public enum InputName {
 		DEFAULT,
@@ -102,7 +103,7 @@ public class EditTextView extends EditText {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, instance.getText().toString(), false));
+						EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, instance.getText().toString(), instance.closeOnDone));
 						return true;
 						//instance.hideKeyboard();
 					} else if (actionId == EditorInfo.IME_ACTION_NEXT) {
@@ -127,6 +128,9 @@ public class EditTextView extends EditText {
 								instance.requestFocus();
 								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
 								TeaLeaf.get().glView.setOnTouchListener(instance.getScreenCaptureListener());
+
+
+								instance.closeOnDone = obj.optBoolean("closeOnDone", true);
 
 								//set x, y, width and height
 								int x = obj.optInt("x", 0);
@@ -289,6 +293,7 @@ public class EditTextView extends EditText {
 						//TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 						//instance.hideKeyboard();
 						//instance.setVisibility(View.GONE);
+						instance.isOpened = false;
 						EventQueue.pushEvent(new Event("editText.onFinishEditing"));
 					} else {
 						instance.isOpened = true;
