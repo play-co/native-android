@@ -647,6 +647,9 @@ static void context_2d_class_finalize(Persistent<Value> ctx, void *param) {
 	context_2d *_ctx = static_cast<context_2d*>( param );
 	context_2d_delete(_ctx);
 
+	int size = _ctx->backing_width * _ctx->backing_height * 4;
+	V8::AdjustAmountOfExternalAllocatedMemory(-size);
+
 	ctx.Dispose();
 	ctx.Clear();
 
