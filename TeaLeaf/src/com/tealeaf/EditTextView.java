@@ -221,8 +221,8 @@ public class EditTextView extends EditText {
 										break;
 								}
 
-								//for no auto correct use this flag ->  InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+								//for auto correct use this flag ->  InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
 								//padding
 								int paddingLeft = obj.optInt("paddingLeft", 0);
