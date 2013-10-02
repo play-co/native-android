@@ -254,7 +254,7 @@ extern "C" {
 		GET_STR(env, url, url_str);
 		//scale is defaulted to 1 currently. i.e. No scaling.
 		int scale = 1;
-		texture_manager_on_texture_loaded(texture_manager_get(), url_str,  name, width, height, original_width, original_height, num_channels, scale, false, 0);
+		texture_manager_on_texture_loaded(texture_manager_get(), url_str,  name, width, height, original_width, original_height, num_channels, scale, false);
 		free(url_str);
 	}
 
