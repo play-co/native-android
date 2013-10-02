@@ -289,12 +289,14 @@ public class EditTextView extends EditText {
 					// if our visible height is less than 75% normal, assume keyboard on screen
 					int visibleHeight = r.bottom - r.top;
 
-					if (visibleHeight == height && instance.isOpened) {
-						//TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
-						//instance.hideKeyboard();
-						//instance.setVisibility(View.GONE);
-						instance.isOpened = false;
-						EventQueue.pushEvent(new Event("editText.onFinishEditing"));
+					if (visibleHeight == height) {
+						if (instance.isOpened) {
+							//TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
+							//instance.hideKeyboard();
+							//instance.setVisibility(View.GONE);
+							instance.isOpened = false;
+							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
+						}
 					} else {
 						instance.isOpened = true;
 					}
