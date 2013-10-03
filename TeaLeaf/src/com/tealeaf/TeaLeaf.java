@@ -297,9 +297,7 @@ public class TeaLeaf extends FragmentActivity {
 		final AbsoluteLayout absLayout = new AbsoluteLayout(this);
 		absLayout.setLayoutParams(new android.view.ViewGroup.LayoutParams(width, height));
 		absLayout.addView(glView, new android.view.ViewGroup.LayoutParams(width, height));
-
-		editText = EditTextView.Get(this);
-		absLayout.addView(editText);
+		editText = EditTextView.Init(this, absLayout);
 
 		group.addView(absLayout);
 

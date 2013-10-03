@@ -17,6 +17,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import com.tealeaf.event.Event;
 import com.tealeaf.event.InputKeyboardFocusNextEvent;
 import com.tealeaf.event.InputKeyboardKeyUpEvent;
+import android.view.WindowManager.LayoutParams;
 import com.tealeaf.event.InputKeyboardSubmitEvent;
 import java.util.Map;
 import org.json.JSONObject;
@@ -40,6 +42,7 @@ public class EditTextView extends EditText {
 	private OnGlobalLayoutListener onGlobalLayoutListener;
 	private boolean isOpened = false;
 	private boolean closeOnDone = false;
+	private static EditText offscreenEditText;
 
 	public enum InputName {
 		DEFAULT,
@@ -67,10 +70,27 @@ public class EditTextView extends EditText {
 		this.setSingleLine(true);
 	}
 
+	public static EditText getOffscreenEditText() {
+		return offscreenEditText;
+	}
+
+
+	public static EditTextView Init(Activity activity, ViewGroup parent) {
+		EditTextView e = EditTextView.Get(activity);
+		parent.addView(e);
+		parent.addView(offscreenEditText);
+		return e;
+	}
 
 	public static EditTextView Get(final Activity activity) {
 		if (instance == null && activity != null) {
 			instance = (EditTextView)activity.getLayoutInflater().inflate(R.layout.edit_text_view, null);
+
+			offscreenEditText = new EditText(activity);
+			offscreenEditText.setVisibility(View.VISIBLE);
+			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(100, 10, 0, -10);
+			offscreenEditText.setLayoutParams(layoutParams);
+
 			instance.activity = activity;
 
 
@@ -126,6 +146,7 @@ public class EditTextView extends EditText {
 								instance.registerTextChange = false;
 								instance.setVisibility(View.VISIBLE);
 								instance.requestFocus();
+								offscreenEditText.setVisibility(View.GONE);
 								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
 								TeaLeaf.get().glView.setOnTouchListener(instance.getScreenCaptureListener());
 
@@ -305,6 +326,21 @@ public class EditTextView extends EditText {
 
 
 		}
+
+		NativeShim.RegisterCallable("softKeyboard.open", new TeaLeafCallable() {
+			public JSONObject call(final JSONObject obj) {
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+						offscreenEditText.setVisibility(View.VISIBLE);
+						offscreenEditText.requestFocus();
+						InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.showSoftInput(offscreenEditText, 0);	
+
+					}
+				});
+				return obj;
+			}
+		});
 
 		return instance;
 	}
