@@ -3,6 +3,7 @@ package com.tealeaf;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.widget.RelativeLayout;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -15,6 +16,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +45,8 @@ public class EditTextView extends EditText {
 	private boolean isOpened = false;
 	private boolean closeOnDone = false;
 	private static EditText offscreenEditText;
+	private static View editTextFullLayout;
+	private static View editTextLayout;
 
 	public enum InputName {
 		DEFAULT,
@@ -75,20 +79,26 @@ public class EditTextView extends EditText {
 	}
 
 
-	public static EditTextView Init(Activity activity, ViewGroup parent) {
+	public static EditTextView Init(Activity activity) {
+
+		LayoutInflater inflater = activity.getLayoutInflater();
+		editTextFullLayout = inflater.inflate(R.layout.edit_text_layer, null);
+		editTextFullLayout.setOnTouchListener(EditTextView.getScreenCaptureListener());
+		editTextLayout = editTextFullLayout.findViewById(R.id.edit_text_layout);
+
 		EditTextView e = EditTextView.Get(activity);
-		parent.addView(e);
-		parent.addView(offscreenEditText);
+		//parent.addView(e);
+		//parent.addView(offscreenEditText);
 		return e;
 	}
 
 	public static EditTextView Get(final Activity activity) {
 		if (instance == null && activity != null) {
-			instance = (EditTextView)activity.getLayoutInflater().inflate(R.layout.edit_text_view, null);
+			instance = (EditTextView) editTextFullLayout.findViewById(R.id.edit_text);
 
-			offscreenEditText = new EditText(activity);
-			offscreenEditText.setVisibility(View.VISIBLE);
-			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(100, 10, 0, -10);
+			offscreenEditText = (EditText) editTextFullLayout.findViewById(R.id.offscreen_edit_text);
+			offscreenEditText.setVisibility(View.INVISIBLE);
+			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(100, 10, 0, 0);
 			offscreenEditText.setLayoutParams(layoutParams);
 
 			instance.activity = activity;
@@ -144,11 +154,13 @@ public class EditTextView extends EditText {
 							instance.setListenerToRootView();
 							try {
 								instance.registerTextChange = false;
+								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
+
+								editTextFullLayout.setVisibility(View.VISIBLE);
 								instance.setVisibility(View.VISIBLE);
 								instance.requestFocus();
-								offscreenEditText.setVisibility(View.GONE);
-								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
-								TeaLeaf.get().glView.setOnTouchListener(instance.getScreenCaptureListener());
+
+								//TeaLeaf.get().glView.setOnTouchListener(EditTextView.getScreenCaptureListener());
 
 
 								instance.closeOnDone = obj.optBoolean("closeOnDone", true);
@@ -158,6 +170,7 @@ public class EditTextView extends EditText {
 								int y = obj.optInt("y", 0);
 								int width = obj.optInt("width", 0);
 								int height = obj.optInt("height", 0);
+
 								AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(width, height, x, y);
 								instance.setLayoutParams(layoutParams);
 
@@ -247,18 +260,18 @@ public class EditTextView extends EditText {
 								}
 
 								//for auto correct use this flag ->  InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
 
 								//padding
 								int paddingLeft = obj.optInt("paddingLeft", 0);
 								int paddingRight = obj.optInt("paddingRight", 0);
 
 								instance.setPadding(paddingLeft, 0, paddingRight, 0);
-								InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-								imm.showSoftInput(instance, 0);	
+
+								showKeyboard(instance);
 
 							} catch (Exception e) {
-								logger.log(e);
+								logger.log(e.getMessage());
 							}
 						}
 					});
@@ -275,7 +288,6 @@ public class EditTextView extends EditText {
 							instance.removeListenerToRootView();
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 							instance.hideKeyboard();
-							instance.setVisibility(View.GONE);
 						}
 					});
 					return obj;
@@ -313,6 +325,7 @@ public class EditTextView extends EditText {
 					if (visibleHeight == height) {
 						if (instance.isOpened) {
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
+							editTextFullLayout.setVisibility(View.INVISIBLE);
 							instance.setVisibility(View.GONE);
 							instance.isOpened = false;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
@@ -323,7 +336,9 @@ public class EditTextView extends EditText {
 
 				}
 			};
-
+			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT,
+					RelativeLayout.LayoutParams.FILL_PARENT);
+			activity.addContentView(editTextFullLayout, rlp);
 
 		}
 
@@ -331,11 +346,12 @@ public class EditTextView extends EditText {
 			public JSONObject call(final JSONObject obj) {
 				activity.runOnUiThread(new Runnable() {
 					public void run() {
+						editTextFullLayout.setVisibility(View.VISIBLE);
 						offscreenEditText.setVisibility(View.VISIBLE);
 						offscreenEditText.requestFocus();
-						InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.showSoftInput(offscreenEditText, 0);	
-
+						editTextFullLayout.setVisibility(View.INVISIBLE);
+						offscreenEditText.setVisibility(View.GONE);
+						showKeyboard(offscreenEditText);
 					}
 				});
 				return obj;
@@ -343,6 +359,11 @@ public class EditTextView extends EditText {
 		});
 
 		return instance;
+	}
+
+	private static void showKeyboard(EditText editTextFocus) {
+		InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(editTextFocus, 0);	
 	}
 
 	public void setListenerToRootView() {
@@ -358,9 +379,12 @@ public class EditTextView extends EditText {
 	private void hideKeyboard() {
 		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindowToken(), 0);	
+		instance.setVisibility(View.GONE);
+		offscreenEditText.setVisibility(View.GONE);
+		editTextFullLayout.setVisibility(View.INVISIBLE);
 	}
 
-	public OnTouchListener getScreenCaptureListener() {
+	private static OnTouchListener getScreenCaptureListener() {
 		return new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
