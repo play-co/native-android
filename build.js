@@ -568,31 +568,59 @@ function makeAndroidProject(builder, opts, next) {
 	}).success(next);
 }
 
-function signAPK(builder, shortName, destDir, next) {
-	logger.log('Signing APK at', path.join(destDir, "bin"));
+function signAPK(builder, shortName, destDir, debug, next) {
+	var signArgs, alignArgs;
+	var binDir = path.join(destDir, "bin");
+
+	logger.log('Signing APK at ', binDir);
 
 	var keystore = builder.common.config.get('android.keystore');
 	var storepass = builder.common.config.get('android.storepass');
 	var keypass = builder.common.config.get('android.keypass');
 	var key = builder.common.config.get('android.key');
 
-	builder.common.child('jarsigner', [
-		"-sigalg", "MD5withRSA", "-digestalg", "SHA1",
-		"-keystore", keystore, "-storepass", storepass, "-keypass", keypass,
-		"-signedjar", shortName + "-unaligned.apk",
-		shortName + "-release-unsigned.apk", key
-	], {
-		cwd: path.join(destDir, "bin")
-	}, function (err) {
-		builder.common.child('zipalign', [
+	if (debug) {
+		var keyPath = path.join(process.env['HOME'], '.android', 'debug.keystore');
+		signArgs = [
+			"-sigalg", "MD5withRSA", "-digestalg", "SHA1",
+			"-keystore", keyPath, "-storepass", "android",
+			"-signedjar", shortName + "-debug-unaligned.apk",
+			shortName + "-debug.apk", "androiddebugkey"
+				];
+		alignArgs = [
+			"-f", "-v", "4", shortName + "-debug-unaligned.apk", shortName + "-debug.apk"
+			];
+	} else {
+		signArgs = [
+			"-sigalg", "MD5withRSA", "-digestalg", "SHA1",
+			"-keystore", keystore, "-storepass", storepass, "-keypass", keypass,
+			"-signedjar", shortName + "-unaligned.apk",
+			shortName + "-release-unsigned.apk", key
+				];
+		alignArgs = [
 			"-f", "-v", "4", shortName + "-unaligned.apk", shortName + "-aligned.apk"
-		], {
-			cwd: path.join(destDir, 'bin')
-		}, function () {
-			next();
-		});
+			];
+	}
+
+	var f = ff(function() {
+		builder.common.child('jarsigner', signArgs, {cwd: binDir}, f.slotPlain());
+	}, function(err) {
+		if(err) {
+			logger.error("Unable to sign APK");
+			process.exit(2);
+		}
+		builder.common.child('zipalign', alignArgs , {cwd: binDir}, next);
 	});
 }
+
+
+function repackAPK(builder, destDir, apkName, next) {
+	var apkPath = path.join('bin', apkName);
+	console.log(destDir, apkPath, apkName);
+	builder.common.child('zip', [apkPath, '-d', 'META-INF/*'], {cwd: destDir}, function() {
+		builder.common.child('zip', [apkPath, '-u'], {cwd: destDir}, next)
+	});
+};
 
 function copyFonts(builder, project, destDir) {
 	var fontDir = path.join(destDir, 'assets/fonts');
@@ -1089,7 +1117,10 @@ exports.build = function(builder, project, opts, next) {
 
 	// Command line options.
 	var debug = argv.debug;
+
 	var clean = argv.clean;
+
+	var repack = argv.repack;
 
 	// Disable logs if --logging is not specified and in release mode.
 	var disableLogs = !argv.logging && !debug;
@@ -1125,7 +1156,9 @@ exports.build = function(builder, project, opts, next) {
 	var destDir = path.join(__dirname, "build/" + shortName);
 
 	// Remove existing build directory.
-	wrench.rmdirSyncRecursive(destDir, true);
+	if (!repack) {
+		wrench.rmdirSyncRecursive(destDir, true);
+	}
 
 	// Project title.
 	var title = project.manifest.title;
@@ -1159,91 +1192,95 @@ exports.build = function(builder, project, opts, next) {
 	// Parallelize android project setup and sprite building.
 	var apkPath;
 	var addonConfig = {};
+	var apkBuildName = "";
+	if (!debug) {
+		apkBuildName = shortName + "-aligned.apk";
+	} else {
+		apkBuildName = shortName + "-debug.apk";
+	}
 
 	var f = ff(function () {
-		installAddons(builder, project, opts, addonConfig, f());
+		if (!repack) {
+			installAddons(builder, project, opts, addonConfig, f());
+		}
 	}, function() {
-		require(builder.common.paths.nativeBuild("native")).writeNativeResources(builder, project, opts, f.waitPlain());
+			require(builder.common.paths.nativeBuild("native")).writeNativeResources(builder, project, opts, f.waitPlain());
 
-		makeAndroidProject(builder, {
-			project: project,
-			namespace: packageName,
-			activity: activity,
-			title: title,
-			appID: appID,
-			shortName: shortName,
-			version: opts.version,
-			debug: debug,
-			destDir: destDir,
-			servicesURL: servicesURL,
-			metadata: metadata,
-			studioName: studioName,
-			addonConfig: addonConfig,
-			disableLogs: disableLogs,
-			titles: titles,
-			target: androidTarget
-		}, f.waitPlain());
+		if (!repack) {
+			makeAndroidProject(builder, {
+				project: project,
+				namespace: packageName,
+				activity: activity,
+				title: title,
+				appID: appID,
+				shortName: shortName,
+				version: opts.version,
+				debug: debug,
+				destDir: destDir,
+				servicesURL: servicesURL,
+				metadata: metadata,
+				studioName: studioName,
+				addonConfig: addonConfig,
+				disableLogs: disableLogs,
+				titles: titles,
+				target: androidTarget
+			}, f.waitPlain());
 
-		var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
-		builder.common.config.set("lastBuildWasDebug", debug);
-		buildSupportProjects(builder, {
-			debug: debug,
-			arch: argv.arch,
-			clean: cleanProj
-		}, f.waitPlain());
+			var cleanProj = (builder.common.config.get("lastBuildWasDebug") != debug) || clean;
+			builder.common.config.set("lastBuildWasDebug", debug);
+			buildSupportProjects(builder, {
+				debug: debug,
+				arch: argv.arch,
+				clean: cleanProj
+			}, f.waitPlain());
+		}
 	}, function() {
-		installAddonGameFiles(builder, {
-			addonConfig: addonConfig,
-			project: project
-		}, f());
+		if (!repack) {
+			installAddonGameFiles(builder, {
+				addonConfig: addonConfig,
+				project: project
+			}, f());
+		}
 	}, function() {
-		copyFonts(builder, project, destDir);
-		copyIcons(builder, project, destDir);
-		copyMusic(builder, project, destDir);
-		copyResDir(project, destDir);
-		copySplash(builder, project, destDir, f());
+		if (!repack) {
+			copyFonts(builder, project, destDir);
+			copyIcons(builder, project, destDir);
+			copyMusic(builder, project, destDir);
+			copyResDir(project, destDir);
+			copySplash(builder, project, destDir, f());
 
-		installAddonCode(builder, {
-			addonConfig: addonConfig,
-			destDir: destDir,
-			project: project,
-			target: androidTarget
-		}, f());
-	}, function() {
-		var onDoneBuilding = f();
-
-		buildAndroidProject(builder, destDir, debug, function (success) {
-			if (opts.skipAPK) {
-				// Skip adb commands also
-				next(0);
-			} else {
-				var apk = "";
-				if (!debug) {
-					apk = shortName + "-aligned.apk";
-				} else {
-					apk = shortName + "-debug.apk";
-				}
-
-				(!debug ? signAPK : nextStep)(builder, shortName, destDir, function () {
-					apkPath = path.join(apkDir, shortName + ".apk");
-					if (fs.existsSync(apkPath)) {
-						fs.unlinkSync(apkPath);
-					}
-
-					var destApkPath = path.join(destDir, "bin/" + apk);
-					if (fs.existsSync(destApkPath)) {
-						wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
-						builder.common.copyFileSync(destApkPath, apkPath);
-						logger.log("built", clc.yellowBright(packageName));
-						logger.log("saved to " + clc.blueBright(apkPath));
-						onDoneBuilding();
-					} else {
-						logger.error("No file at " + destApkPath);
-						next(2);
-					}
-				});
-			}
-		});
+			installAddonCode(builder, {
+				addonConfig: addonConfig,
+				destDir: destDir,
+				project: project,
+				target: androidTarget
+			}, f());
+		}
+	}, function () {
+		if (!repack) {
+			buildAndroidProject(builder, destDir, debug, f());
+		} else {
+			repackAPK(builder, destDir, apkBuildName, f());
+		}
+	}, function () {
+		if (!debug || repack) {
+			signAPK(builder, shortName, destDir, debug, f());
+		}
+	}, function () {
+		apkPath = path.join(apkDir, shortName + ".apk"); 
+		if (fs.existsSync(apkPath)) {
+			fs.unlinkSync(apkPath);
+		}
+		var destApkPath = path.join(destDir, "bin", apkBuildName); 
+		if (fs.existsSync(destApkPath)) {
+			wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
+			builder.common.copyFileSync(destApkPath, apkPath);
+			logger.log("built", clc.yellowBright(packageName));
+			logger.log("saved to " + clc.blueBright(apkPath));
+		} else {
+			logger.error("No file at " + destApkPath);
+			next(2);
+		}
 	}, function() {
 		if (argv.install || argv.open) {
 			var keepStorage = argv.clearstorage ? "" : "-k";
