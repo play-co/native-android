@@ -369,7 +369,7 @@ public class NativeShim {
     }
 
     public int galleryGetPhoto(int width, int height) {
-        int id = textureLoader.getNextCameraId();
+        int id = textureLoader.getNextGalleryId();
         textureLoader.loadGalleryPicture("" + id, width, height);
         return id;
     }

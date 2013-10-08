@@ -703,6 +703,8 @@ public class TeaLeaf extends FragmentActivity {
         return bmp;
     }
 
+
+
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
@@ -714,7 +716,30 @@ public class TeaLeaf extends FragmentActivity {
 			case PhotoPicker.CAPTURE_IMAGE:
 				if(result == RESULT_OK) {
 					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
-					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), (Bitmap)data.getExtras().get("data"));
+					Bitmap bmp = null;
+					Uri imageUri = null;
+
+					if (data != null) {
+						Bundle extras = data.getExtras();
+						//try and get bitmap off of intent
+						if (extras != null) {
+							bmp = (Bitmap) extras.get("data");
+						}
+
+						//if not, try and get the image uri
+						if (bmp == null)  {
+							imageUri = data.getData();
+						}
+					}
+
+					//try the large file on disk
+					File f = PhotoPicker.getCaptureImageTmpFile();
+					if (f != null && f.exists()) {
+						bmp = BitmapFactory.decodeFile(f.getAbsolutePath());
+						f.delete();
+					}
+
+					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), bmp);
 					glView.getTextureLoader().finishCameraPicture();
 				} else {
 					glView.getTextureLoader().failedCameraPicture();

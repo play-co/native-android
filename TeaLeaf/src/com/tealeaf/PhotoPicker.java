@@ -19,10 +19,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import android.net.Uri;
 
 public class PhotoPicker {
 	private Activity activity;
@@ -52,10 +54,15 @@ public class PhotoPicker {
 
 	public void take(int id) {
 		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File largeFile = getCaptureImageTmpFile();
+		if (largeFile != null) {
+			camera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(largeFile));
+		}
 		int requestCode = CAPTURE_IMAGE;
 		moveNextCameraId();
 		activity.startActivityForResult(camera, requestCode);
 	}
+
 	public void choose(int id) {
 		Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
 		int requestCode = PICK_IMAGE;
@@ -97,4 +104,17 @@ public class PhotoPicker {
         }
 		return bitmap;
 	}
+
+    private static File captureImageTmpFile = null;
+    public static File getCaptureImageTmpFile() {
+        if (captureImageTmpFile == null) {
+            try {
+                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", Environment.getExternalStorageDirectory());
+            } catch(Exception e) {
+				logger.log(e);
+            }
+        }
+        return captureImageTmpFile;
+    }
+
 }
