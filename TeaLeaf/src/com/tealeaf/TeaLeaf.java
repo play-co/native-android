@@ -703,8 +703,6 @@ public class TeaLeaf extends FragmentActivity {
         return bmp;
     }
 
-
-
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
 		super.onActivityResult(request, result, data);
@@ -717,7 +715,6 @@ public class TeaLeaf extends FragmentActivity {
 				if(result == RESULT_OK) {
 					EventQueue.pushEvent(new PhotoBeginLoadedEvent());
 					Bitmap bmp = null;
-					Uri imageUri = null;
 
 					if (data != null) {
 						Bundle extras = data.getExtras();
@@ -726,21 +723,73 @@ public class TeaLeaf extends FragmentActivity {
 							bmp = (Bitmap) extras.get("data");
 						}
 
-						//if not, try and get the image uri
-						if (bmp == null)  {
-							imageUri = data.getData();
-						}
 					}
 
 					//try the large file on disk
-					File f = PhotoPicker.getCaptureImageTmpFile();
+					final File f = PhotoPicker.getCaptureImageTmpFile();
 					if (f != null && f.exists()) {
-						bmp = BitmapFactory.decodeFile(f.getAbsolutePath());
-						f.delete();
-					}
+						new Thread(new Runnable() {
+							public void run(){
+								Bitmap bmp = null;
+								String filePath = f.getAbsolutePath();
 
-					glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), bmp);
-					glView.getTextureLoader().finishCameraPicture();
+								try {
+									bmp = BitmapFactory.decodeFile(filePath);	
+								} catch (OutOfMemoryError e) {
+									System.gc();
+									BitmapFactory.Options options = new BitmapFactory.Options();
+									options.inSampleSize = 4;
+									bmp = BitmapFactory.decodeFile(filePath, options);
+								}
+
+								if (bmp != null) {
+									try {
+										File f = new File(filePath);
+										ExifInterface exif = new ExifInterface(
+											f.getAbsolutePath());
+										int orientation = exif.getAttributeInt(
+											ExifInterface.TAG_ORIENTATION,
+											ExifInterface.ORIENTATION_NORMAL);
+										if (orientation != ExifInterface.ORIENTATION_NORMAL) {
+											int rotateBy = 0;
+											switch(orientation) {
+												case ExifInterface.ORIENTATION_ROTATE_90:
+													rotateBy = ROTATE_90;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_180:
+													rotateBy = ROTATE_180;
+													break;
+												case ExifInterface.ORIENTATION_ROTATE_270:
+													rotateBy = ROTATE_270;
+													break;
+											}
+											Bitmap rotatedBmp = rotateBitmap(bmp, rotateBy);
+											if (rotatedBmp != bmp) {
+												bmp.recycle();
+											}
+											bmp = rotatedBmp;
+										}
+									} catch(Exception e) {
+										logger.log(e);
+									}
+									f.delete();
+
+									if (bmp != null) {
+										glView.getTextureLoader()
+											.saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+										glView.getTextureLoader()
+											.finishCameraPicture();
+									} else {
+										glView.getTextureLoader().failedCameraPicture();
+									}
+								}
+							}
+						}).start();
+
+					} else {
+						glView.getTextureLoader().saveCameraPhoto(glView.getTextureLoader().getCurrentPhotoId(), bmp);
+						glView.getTextureLoader().finishCameraPicture();
+					}
 				} else {
 					glView.getTextureLoader().failedCameraPicture();
 				}
@@ -792,7 +841,7 @@ public class TeaLeaf extends FragmentActivity {
 									glView.getTextureLoader()
 									.finishGalleryPicture();
 								} else {
-									glView.getTextureLoader().failedCameraPicture();
+									glView.getTextureLoader().failedGalleryPicture();
 								}
 
 							} else {
@@ -844,7 +893,7 @@ public class TeaLeaf extends FragmentActivity {
 										glView.getTextureLoader()
 										.finishGalleryPicture();
 									} else {
-										glView.getTextureLoader().failedCameraPicture();
+										glView.getTextureLoader().failedGalleryPicture();
 									}
 								}
 							}
