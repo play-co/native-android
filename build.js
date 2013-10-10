@@ -499,8 +499,6 @@ function buildSupportProjects(builder, opts, next) {
 			args.push('APP_ABI=' + opts.arch);
 		}
 		builder.common.child('ndk-build', args , { cwd: tealeafDir }, f.wait()); 
-	}, function() {
-		builder.common.child('ant', [(opts.debug ? "debug" : "release")], { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
 		logger.error("Could not build support projects:", e, e.stack);
 		process.exit(2);
