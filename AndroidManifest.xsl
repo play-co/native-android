@@ -61,6 +61,10 @@
 		</xsl:attribute>
 	</xsl:template>
 
+	<xsl:template match="application/@android:label[.='TeaLeaf']">
+		<xsl:attribute name="android:label"><xsl:value-of select="$title" /></xsl:attribute>
+	</xsl:template>
+
 	<xsl:template match="activity/@android:label[.='TeaLeaf']">
 		<xsl:attribute name="android:label"><xsl:value-of select="$title" /></xsl:attribute>
 	</xsl:template>
