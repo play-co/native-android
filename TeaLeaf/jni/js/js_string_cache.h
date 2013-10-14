@@ -52,6 +52,7 @@ extern Persistent<String> STRING_CACHE_name;
 extern Persistent<String> STRING_CACHE_h;
 extern Persistent<String> STRING_CACHE_fillTextBitmap;
 extern Persistent<String> STRING_CACHE_loadIdentity;
+extern Persistent<String> STRING_CACHE_transform;
 extern Persistent<String> STRING_CACHE_reload;
 extern Persistent<String> STRING_CACHE_simulateID;
 extern Persistent<String> STRING_CACHE_x;
