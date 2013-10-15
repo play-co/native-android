@@ -32,7 +32,7 @@
 #include "libzip/zipint.h"
 
 extern "C" {
-#include "core/image-cache/include/image_cache.h"
+#include "core/texture_manager.h"
 #include "core/image_loader.h"
 #include "core/core.h"
 }
@@ -51,7 +51,7 @@ CEXPORT void resource_loader_initialize(const char *path) {
 		return;
 	}
 	storage_dir = get_storage_directory();
-    image_cache_init(storage_dir);
+    image_cache_init(storage_dir, &image_cache_load_callback);
 }
 CEXPORT void resource_loader_deinitialize() {
     image_cache_destroy();
