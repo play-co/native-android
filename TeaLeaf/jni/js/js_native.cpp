@@ -45,6 +45,7 @@ extern "C" {
 #include "js/js_input.h"
 #include "js/js_status_bar.h"
 #include "js/js_location.h"
+#include "js/js_image_cache.h"
 
 #include "platform/textbox.h"
 #include "platform/native.h"
@@ -225,6 +226,7 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	NATIVE->Set(STRING_CACHE_profiler, js_profiler_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_input, js_input_get_template()->NewInstance());
 	NATIVE->Set(STRING_CACHE_statusBar, js_status_bar_get_template()->NewInstance());
+	NATIVE->Set(String::New("imageCache"), js_image_cache_get_template()->NewInstance());
 
 	// market
 	Handle<Object> market = Object::New();

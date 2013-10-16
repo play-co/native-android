@@ -58,6 +58,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_events.cpp                                  \
 			js/js_gc.cpp                                      \
 			js/js_haptics.cpp                                 \
+			js/js_image_cache.cpp                             \
 			js/js_input.cpp	                                  \
 			js/js_status_bar.cpp	                	      \
 			js/js_local_storage.cpp                           \
