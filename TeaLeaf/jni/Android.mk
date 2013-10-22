@@ -69,7 +69,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			js/js_overlay.cpp                                 \
 			js/js_photo.cpp                                   \
 			js/js_profiler.cpp		                          \
-			js/js_plugins.cpp                                  \
+			js/js_plugins.cpp                                 \
 			js/js_socket.cpp                                  \
 			js/js_sound.cpp                                   \
 			js/js_textbox.cpp                                 \
@@ -83,9 +83,9 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/draw_textures.c                              \
 			core/events.c                                     \
 			core/geometry.c                                   \
-			core/graphics_utils.c                            \
+			core/graphics_utils.c                             \
 			core/image-cache/src/image_cache.c                \
-			core/image-cache/src/crypto/sha1.c                \
+			core/image-cache/src/murmur.c                     \
 			core/image_loader.c                               \
 			core/image_writer.c                               \
 			core/object_pool.c                                \
@@ -125,7 +125,7 @@ LOCAL_SRC_FILES :=  	js/js.cpp                             \
 			core/timestep/timestep_image_map.cpp              \
 			core/timestep/timestep_view.cpp                   \
 			gen/js_timestep_view_template.gen.cpp             \
-			js/js_string_cache.cpp                           \
+			js/js_string_cache.cpp                            \
 			gen/js_timestep_image_map_template.gen.cpp
 
 PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
