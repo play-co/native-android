@@ -44,6 +44,7 @@ public class EditTextView extends EditText {
 	private OnGlobalLayoutListener onGlobalLayoutListener;
 	private boolean isOpened = false;
 	private boolean closeOnDone = false;
+	private boolean autoClose = true;
 	private static EditText offscreenEditText;
 	private static View editTextFullLayout;
 	private static View editTextLayout;
@@ -328,6 +329,8 @@ public class EditTextView extends EditText {
 							editTextFullLayout.setVisibility(View.INVISIBLE);
 							instance.setVisibility(View.GONE);
 							instance.isOpened = false;
+							// restore the autoClose property to the default
+							instance.autoClose = true;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
 						}
 					} else {
@@ -346,6 +349,7 @@ public class EditTextView extends EditText {
 			public JSONObject call(final JSONObject obj) {
 				activity.runOnUiThread(new Runnable() {
 					public void run() {
+						instance.autoClose = obj.optBoolean("autoClose", true);
 						editTextFullLayout.setVisibility(View.VISIBLE);
 						offscreenEditText.setVisibility(View.VISIBLE);
 						offscreenEditText.requestFocus();
@@ -382,13 +386,17 @@ public class EditTextView extends EditText {
 		instance.setVisibility(View.GONE);
 		offscreenEditText.setVisibility(View.GONE);
 		editTextFullLayout.setVisibility(View.INVISIBLE);
+		// restore the autoClose property to the default
+		instance.autoClose = true;
 	}
 
 	private static OnTouchListener getScreenCaptureListener() {
 		return new OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				instance.hideKeyboard();
+				if (instance.autoClose) {
+					instance.hideKeyboard();
+				}
 				return TeaLeaf.get().glView.getOnTouchListener().onTouch(TeaLeaf.get().glView, event);
 			}
 		};	
