@@ -318,12 +318,7 @@ public class TeaLeaf extends FragmentActivity {
 				Rect r = new Rect();
 				group.getWindowVisibleDisplayFrame(r);
 				
-				// get display height
-				Display display = getWindow().getWindowManager().getDefaultDisplay();
-				int height = display.getHeight();
-				
-				// if our visible height is less than 75% normal, assume keyboard on screen
-				int visibleHeight = r.bottom - r.top;
+				int visibleHeight = r.bottom;
 
 				// TODO
 				// maybe this should be renamed
