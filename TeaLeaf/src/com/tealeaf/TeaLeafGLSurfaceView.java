@@ -36,6 +36,7 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import com.tealeaf.plugin.PluginManager;
 
 import com.tealeaf.event.ImageLoadedEvent;
 import com.tealeaf.event.OrientationEvent;
@@ -159,6 +160,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		if (started) {
 			saveTextures = true;
 			this.queuePause = true;
+			logger.log("{js} Pausing next queue cycle");
 		}
 	}
 
@@ -371,16 +373,22 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		}
 
 		public void onPause() {
+			logger.log("{js} Renderer onPause");
 			if (nativeShim != null && state == READY) {
+				logger.log("{js} Calling native shim onPause");
 				nativeShim.onPause();
 			}
+			PluginManager.callAll("onRenderPause");
 		}
 
 		public void onResume() {
+			logger.log("{gl} onResume");
+			shouldReloadTextures = true;
 			if (nativeShim != null && state == READY) {
-				shouldReloadTextures = true;
 				nativeShim.onResume();
 			}
+
+			PluginManager.callAll("onRenderResume");
 		}
 
 		// FIXME the renderer probably doesn't also need to be the onTouch
@@ -530,6 +538,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			}
 
 			if (view.queuePause) {
+				logger.log("{js} Queue pause requested");
 				view.queuePause = false;
 				//save textures
 				if (view.saveTextures) {

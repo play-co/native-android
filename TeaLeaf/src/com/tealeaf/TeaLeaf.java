@@ -349,14 +349,18 @@ public class TeaLeaf extends FragmentActivity {
 	}
 
 	public void pauseGL() {
+		logger.log("{tealeaf} pauseGL called");
 		if (glView != null && !glViewPaused) {
+			logger.log("{tealeaf} Pausing glView");
 			glView.onPause();
 			glViewPaused = true;
 		}
 	}
 
 	public void resumeGL() {
+		logger.log("{tealeaf} resumeGL called");
 		if (glView != null) {
+			logger.log("{tealeaf} Resuming glView");
 			glView.onResume();
 			glViewPaused = false;
 		}
@@ -450,6 +454,7 @@ public class TeaLeaf extends FragmentActivity {
 
 	@Override
 	protected void onPause() {
+		logger.log("{tealeaf} Activity got onPause");
 		super.onPause();
 
 		ActivityState.onPause();
@@ -503,7 +508,9 @@ public class TeaLeaf extends FragmentActivity {
 		}
 
 		if (ActivityState.hasResumed(true)) {
+			logger.log("{tealeaf} Activty has resumed");
 			if (glView != null) {
+				logger.log("{tealeaf} Resuming GL");
 				glView.queueResumeEvent();
 				resumeGL();
 				soundQueue.onResume();
