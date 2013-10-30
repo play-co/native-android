@@ -199,8 +199,10 @@ public class TeaLeaf extends FragmentActivity {
 		}
 	}
 	public void restartGLView() {
+		logger.log("{tealeaf} Restarting GL View");
 		if(glView != null) {
 			glView.restart();
+			glViewPaused = false;
 		}
 	}
 
@@ -283,6 +285,7 @@ public class TeaLeaf extends FragmentActivity {
 		PushBroadcastReceiver.scheduleNext(this, 10);
 
 		glView = new TeaLeafGLSurfaceView(this);
+		glViewPaused = false;
 
 		int orientation = getRequestedOrientation();
 		Display display = getWindow().getWindowManager().getDefaultDisplay();
@@ -361,6 +364,7 @@ public class TeaLeaf extends FragmentActivity {
 		logger.log("{tealeaf} resumeGL called");
 		if (glView != null) {
 			logger.log("{tealeaf} Resuming glView");
+			glView.queueResumeEvent();
 			glView.onResume();
 			glViewPaused = false;
 		}
@@ -421,6 +425,18 @@ public class TeaLeaf extends FragmentActivity {
 		EventQueue.pushEvent(event);
 	}
 
+	// This is called when focus and onResume have both been achieved
+	private void onRealResume() {
+		logger.log("{tealeaf} Activity has resumed");
+		if (glView != null) {
+			logger.log("{tealeaf} Resuming GL");
+			resumeGL();
+			soundQueue.onResume();
+			soundQueue.playSound(SoundQueue.LOADING_SOUND);
+			PluginManager.callAll("onResume");
+		}
+	}
+
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
@@ -428,12 +444,7 @@ public class TeaLeaf extends FragmentActivity {
 			logger.log("{focus} Gained focus");
 			ActivityState.onWindowFocusAcquired();
 			if (ActivityState.hasResumed(true)) {
-				if (glView != null) {
-					glView.queueResumeEvent();
-					soundQueue.onResume();
-					soundQueue.playSound(SoundQueue.LOADING_SOUND);
-					PluginManager.callAll("onResume");
-				}
+				onRealResume();
 			}
 			registerScreenOffReceiver();
 			//always send acquired focus event
@@ -508,15 +519,7 @@ public class TeaLeaf extends FragmentActivity {
 		}
 
 		if (ActivityState.hasResumed(true)) {
-			logger.log("{tealeaf} Activty has resumed");
-			if (glView != null) {
-				logger.log("{tealeaf} Resuming GL");
-				glView.queueResumeEvent();
-				resumeGL();
-				soundQueue.onResume();
-				soundQueue.playSound(SoundQueue.LOADING_SOUND);
-				PluginManager.callAll("onResume");
-			}
+			onRealResume();
 		}
 
 		getLaunchType(getIntent());
@@ -617,6 +620,7 @@ public class TeaLeaf extends FragmentActivity {
 
 	protected void reset() {
 		group.removeView(glView);
+		glViewPaused = false;
 		glView.destroy();
 		NativeShim.reset();
 		Intent intent = getIntent();
