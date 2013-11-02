@@ -147,7 +147,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	}
 
 	@Override
-	protected void onDetachedFromWindow() {
+	public void onDetachedFromWindow() {
 		if (started) {
 			super.onDetachedFromWindow();
 		}
