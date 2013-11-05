@@ -11,6 +11,7 @@ public class EventQueue {
 	private static Object lock = new Object();
 
 	public static void pushEvent(Event e) {
+		System.out.println("JARED PUSH EVENT: " + e.getName());
 		synchronized (lock) {
 			events.add(e.pack());
 		}

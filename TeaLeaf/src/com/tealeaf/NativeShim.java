@@ -523,8 +523,15 @@ public class NativeShim {
 	}
 
 	//call
-	public String call(String method, String args) {
+	public String call(String method, byte[] byteArgs) {
+		String args = "{}";
+		try {
+			args = new String(byteArgs, "UTF-8");
+		} catch (Exception e) {
+			logger.log(e);
+		}
 		JSONObject jsonArgs = null;
+		logger.log("jared jared call", args);
 		try {
 			jsonArgs = new JSONObject(args);
 		} catch (Exception e) {
@@ -548,10 +555,20 @@ public class NativeShim {
 	}
 
 	// plugins
-	public String pluginsCall(final String className,final String methodName, final Object[] params) {
+	public String pluginsCall(final String className, final String methodName, final Object[] params) {
 //		there may be issues not running this on the ui thread however
 //		it is required for now and there doesn't seem to be any immediate
 //		concerns with it running on any thread
+		
+		for (int i = 0; i < params.length; i++) {
+			if (params[i].getClass() == byte[].class) {
+				try {
+					params[i] = new String((byte[])params[i], "UTF-8");
+				} catch(Exception e) {
+					logger.log(e);
+				}
+			}
+		}
         return PluginManager.call(className, methodName, params);
 	}
 
