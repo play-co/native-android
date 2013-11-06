@@ -66,9 +66,11 @@ int text_manager_measure_text(const char *font_name, int size, const char *text)
 	JNIEnv *env = shim->env;
 	jstring jfont = env->NewStringUTF(font_name);
 	jint jsize = (jint) size;
-	jstring jtext = env->NewStringUTF(text);
+	size_t text_len = strlen(text);
+	jbyteArray jtext = env->NewByteArray(text_len);
+	env->SetByteArrayRegion(jtext, 0, text_len, (jbyte*) text);
 
-	const char *signature = "(Ljava/lang/String;ILjava/lang/String;)I";
+	const char *signature = "(Ljava/lang/String;I[B)I";
 	jmethodID id = env->GetMethodID(shim->type, "measureText", signature);
 	jint width = env->CallIntMethod(shim->instance, id, jfont, jsize, jtext);
 	env->DeleteLocalRef(jfont);

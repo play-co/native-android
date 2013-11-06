@@ -204,11 +204,13 @@ extern "C" {
 	void Java_com_tealeaf_NativeShim_dispatchEvents(JNIEnv* env, jobject thiz, jobjectArray events) {
 		jsize len = env->GetArrayLength(events);
 		for (int i = 0; i < len; i++) {
-			jstring event = (jstring)env->GetObjectArrayElement(events, i);
-			char *event_str = NULL;
-			GET_STR(env, event, event_str);
+			jbyteArray event = (jbyteArray)env->GetObjectArrayElement(events, i);
+			int len = env->GetArrayLength(event);
+			char *event_str = new char[len + 1];
+			event_str[len] = 0;
+			env->GetByteArrayRegion(event, 0, len, (jbyte*) event_str);
 			core_dispatch_event(event_str);
-			free(event_str);
+			delete[] event_str;
 		}
 	}
 

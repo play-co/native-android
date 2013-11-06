@@ -353,13 +353,24 @@ public class NativeShim {
 	}
 
 	//Textures
-	public int measureText(String font, int size, String text) {
-		int textSize = textManager.measureText(font, size, text);
+	public int measureText(String font, int size, byte[] textBytes) {
+		int textSize = 0;
+		try {
+			String text = new String(textBytes, "UTF-8");
+			textSize = textManager.measureText(font, size, text);
+		} catch (Exception e) {
+			logger.log(e);
+		}
 		return textSize;
 	}
 
-	public void loadTexture(String url) {
-		textureLoader.loadTexture(url);
+	public void loadTexture(byte[] urlBytes) {
+		try {
+			String url = new String(urlBytes, "UTF-8");
+			textureLoader.loadTexture(url);
+		} catch (Exception e) {
+			logger.log(e);
+		}
 	}
 
     public int cameraGetPhoto(int width, int height) {
@@ -780,7 +791,19 @@ public class NativeShim {
 	public static native void onTextureFailedToLoad(String url);
 
 	//Input stuff
-	public static native void dispatchEvents(String[] event);
+	public static void dispatchEvents(String[] event) {
+		byte[][] event_bytes = new byte[event.length][];
+		for (int i = 0; i < event.length; i++) {
+			try {
+				event_bytes[i] = event[i].getBytes("UTF-8");
+			} catch (Exception e) {
+				event_bytes[i] = new byte[1];
+			}
+		}
+		dispatchEvents(event_bytes);
+	}
+
+	public static native void dispatchEvents(byte[][] event);
 	public static native void dispatchInputEvents(int[] ids, int[] types, int[] xs, int[] ys, int count);
 
 	public static native void saveTextures();

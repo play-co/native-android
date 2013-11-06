@@ -113,12 +113,13 @@ CEXPORT void launch_remote_texture_load(const char *url) {
 	JNIEnv *env = NULL;
 	native_shim *shim = get_native_thread_shim(&env);
 
-	jstring s = env->NewStringUTF(url);
+	size_t url_len = strlen(url);
+	jbyteArray jbuff = env->NewByteArray(url_len); 
+	env->SetByteArrayRegion(jbuff, 0, url_len, (jbyte*) url);
+	jmethodID load_texture_id = env->GetMethodID(shim->type, "loadTexture", "([B)V");
+	env->CallVoidMethod(shim->instance, load_texture_id, jbuff);
 
-	jmethodID load_texture_id = env->GetMethodID(shim->type, "loadTexture", "(Ljava/lang/String;)V");
-	env->CallVoidMethod(shim->instance, load_texture_id, s);
-
-	env->DeleteLocalRef(s);
+	env->DeleteLocalRef(jbuff);
 }
 
 CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
