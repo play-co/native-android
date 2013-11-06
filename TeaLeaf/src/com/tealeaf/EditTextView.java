@@ -134,7 +134,6 @@ public class EditTextView extends EditText {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						System.out.println("JARED EDITTEXTVIEW SUBMIT: " + instance.getText().toString());
 						EventQueue.pushEvent(new InputKeyboardSubmitEvent(0, instance.getText().toString(), instance.closeOnDone));
 						return true;
 						//instance.hideKeyboard();
@@ -335,7 +334,6 @@ public class EditTextView extends EditText {
 							// restore the autoClose property to the default
 							instance.autoClose = true;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
-							System.out.println("JARED ONFINISHEDITING JAVA: " + instance.getText().toString());
 						}
 					} else {
 						instance.isOpened = true;

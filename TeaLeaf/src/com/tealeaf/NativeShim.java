@@ -531,7 +531,6 @@ public class NativeShim {
 			logger.log(e);
 		}
 		JSONObject jsonArgs = null;
-		logger.log("jared jared call", args);
 		try {
 			jsonArgs = new JSONObject(args);
 		} catch (Exception e) {
@@ -554,6 +553,17 @@ public class NativeShim {
 		callables.put(method, callable);
 	}
 
+	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	public static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		int v;
+		for ( int j = 0; j < bytes.length; j++ ) {
+			v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
 	// plugins
 	public String pluginsCall(final String className, final String methodName, final Object[] params) {
 //		there may be issues not running this on the ui thread however

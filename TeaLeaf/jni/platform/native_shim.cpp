@@ -208,7 +208,6 @@ extern "C" {
 			char *event_str = NULL;
 			GET_STR(env, event, event_str);
 			core_dispatch_event(event_str);
-			LOG("%s %s", "JARED DE=>", event_str);
 			free(event_str);
 		}
 	}

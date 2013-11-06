@@ -121,7 +121,6 @@ public class ResourceDownloaderTask extends AsyncTask<Activity, Float, Boolean>
 
 		JSONObject serverHashes = null;
 		try {
-			logger.log("JARED BODY", body);
 			// loop through all resources and download any
 			// that we don't have cached locally
 			serverHashes = new JSONObject(body);

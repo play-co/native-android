@@ -20,6 +20,7 @@
 
 char *plugins_send_event(const char *pluginClass, const char *pluginClassMethod, const char *data) {
 
+
 	native_shim* shim = get_native_shim();
 	jmethodID method = shim->env->GetMethodID(shim->type, "pluginsCall", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
 	jbyteArray jbuff = shim->env->NewByteArray(strlen(data));
