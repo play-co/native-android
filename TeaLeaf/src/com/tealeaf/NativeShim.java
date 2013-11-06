@@ -791,7 +791,7 @@ public class NativeShim {
 			try {
 				onTextureLoaded(url.getBytes("UTF-8"), name, width, height, originalWidth, originalHeight, numChannels);
 			} catch (Exception e) {
-
+				logger.log(e);
 			}
 	}
 	public static native void onTextureLoaded(byte[] urlBytes, int name, int width, int height, int originalWidth, int originalHeight, int numChannels);
