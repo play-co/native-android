@@ -101,6 +101,7 @@ public class TeaLeaf extends FragmentActivity {
 
 	private Uri launchURI;
 
+	private int lastVisibleHeight = -1;
 	private ContactList contactList;
 	private SoundQueue soundQueue;
 	protected LocalStorage localStorage;
@@ -325,7 +326,10 @@ public class TeaLeaf extends FragmentActivity {
 
 				// TODO
 				// maybe this should be renamed
-				EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
+				if (visibleHeight != lastVisibleHeight) {
+					lastVisibleHeight = visibleHeight;
+					EventQueue.pushEvent(new KeyboardScreenResizeEvent(visibleHeight));
+				}
 			}
 		});
 	}

@@ -270,8 +270,7 @@ public class EditTextView extends EditText {
 								int paddingRight = obj.optInt("paddingRight", 0);
 
 								instance.setPadding(paddingLeft, 0, paddingRight, 0);
-
-								showKeyboard(instance);
+	
 
 							} catch (Exception e) {
 								logger.log(e.getMessage());
@@ -368,8 +367,10 @@ public class EditTextView extends EditText {
 	}
 
 	private static void showKeyboard(EditText editTextFocus) {
-		InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(editTextFocus, 0);	
+		if (!instance.isOpened) {
+			InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(editTextFocus, 0);	
+		}
 	}
 
 	public void setListenerToRootView() {
