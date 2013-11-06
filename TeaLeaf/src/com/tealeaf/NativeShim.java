@@ -787,7 +787,14 @@ public class NativeShim {
 	public static native void reloadTextures();
 	public static native void reloadCanvases();
 	public static native void clearTextures();
-	public static native void onTextureLoaded(String url, int name, int width, int height, int originalWidth, int originalHeight, int numChannels);
+	public static void onTextureLoaded(String url, int name, int width, int height, int originalWidth, int originalHeight, int numChannels) {
+			try {
+				onTextureLoaded(url.getBytes("UTF-8"), name, width, height, originalWidth, originalHeight, numChannels);
+			} catch (Exception e) {
+
+			}
+	}
+	public static native void onTextureLoaded(byte[] urlBytes, int name, int width, int height, int originalWidth, int originalHeight, int numChannels);
 	public static native void onTextureFailedToLoad(String url);
 
 	//Input stuff

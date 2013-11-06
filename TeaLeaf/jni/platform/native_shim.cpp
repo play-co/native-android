@@ -251,13 +251,16 @@ extern "C" {
 		texture_manager_clear_textures(texture_manager_get(), true);
 	}
 
-	void Java_com_tealeaf_NativeShim_onTextureLoaded(JNIEnv *env, jobject thiz, jstring url, jint name, jint width, jint height, jint original_width, jint original_height, jint num_channels) {
-		char *url_str = NULL;
-		GET_STR(env, url, url_str);
+	void Java_com_tealeaf_NativeShim_onTextureLoaded(JNIEnv *env, jobject thiz, jbyteArray url, jint name, jint width, jint height, jint original_width, jint original_height, jint num_channels) {
+		
+		int len = env->GetArrayLength(url);
+		char *url_str = new char[len + 1];
+		url_str[len] = 0;
+		env->GetByteArrayRegion(url, 0, len, (jbyte*) url_str);
 		//scale is defaulted to 1 currently. i.e. No scaling.
 		int scale = 1;
 		texture_manager_on_texture_loaded(texture_manager_get(), url_str,  name, width, height, original_width, original_height, num_channels, scale, false);
-		free(url_str);
+		delete[] url_str;
 	}
 
 	void Java_com_tealeaf_NativeShim_onTextureFailedToLoad(JNIEnv *env, jobject thiz, jstring url) {
