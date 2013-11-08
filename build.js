@@ -697,6 +697,7 @@ function copyIcons(builder, project, destDir) {
 	copyIcon(builder, project, destDir, "h", "72");
 	copyIcon(builder, project, destDir, "xh", "96");
 	copyIcon(builder, project, destDir, "xxh", "144");
+	copyIcon(builder, project, destDir, "xxxh", "192");
 	copyNotifyIcon(builder, project, destDir, "l", "low");
 	copyNotifyIcon(builder, project, destDir, "m", "med");
 	copyNotifyIcon(builder, project, destDir, "h", "high");
