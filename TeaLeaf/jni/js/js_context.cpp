@@ -119,6 +119,22 @@ Handle<Value> defTranslate(const Arguments& args) {
 	return Undefined();
 }
 
+Handle<Value> defTransform(const Arguments& args) {
+	LOGFN("transform");
+	HandleScope handleScope;
+	double a = args[0]->NumberValue();
+	double b = args[1]->NumberValue();
+	double c = args[2]->NumberValue();
+	double d = args[3]->NumberValue();
+	double dx = args[4]->NumberValue();
+	double dy = args[5]->NumberValue();
+
+	context_2d_transform(GET_CONTEXT2D(), a, b, c, d, dx, dy);
+
+	LOGFN("endtransform");
+	return Undefined();
+}
+
 Handle<Value> defScale(const Arguments& args) {
 	LOGFN("scale");
 	HandleScope handleScope;
@@ -802,6 +818,7 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 	context_2d_class_template->SetInternalFieldCount(1);
 
 	context_2d_class_template->Set(STRING_CACHE_loadIdentity, FunctionTemplate::New(defLoadIdentity));
+	context_2d_class_template->Set(STRING_CACHE_transform, FunctionTemplate::New(defTransform));
 	context_2d_class_template->Set(STRING_CACHE_drawImage, FunctionTemplate::New(defDrawImage));
 	context_2d_class_template->Set(STRING_CACHE_flushDrawImage, FunctionTemplate::New(defFlushImages));
 	context_2d_class_template->Set(STRING_CACHE_newTexture, FunctionTemplate::New(defNewTexture));

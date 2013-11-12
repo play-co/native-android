@@ -49,6 +49,7 @@ Persistent<String> STRING_CACHE_name;
 Persistent<String> STRING_CACHE_h;
 Persistent<String> STRING_CACHE_fillTextBitmap;
 Persistent<String> STRING_CACHE_loadIdentity;
+Persistent<String> STRING_CACHE_transform;
 Persistent<String> STRING_CACHE_reload;
 Persistent<String> STRING_CACHE_simulateID;
 Persistent<String> STRING_CACHE_x;
@@ -267,6 +268,7 @@ void js_string_cache_init() {
 	STRING_CACHE_h = Persistent<String>::New(String::New("h"));
 	STRING_CACHE_fillTextBitmap = Persistent<String>::New(String::New("fillTextBitmap"));
 	STRING_CACHE_loadIdentity = Persistent<String>::New(String::New("loadIdentity"));
+	STRING_CACHE_transform = Persistent<String>::New(String::New("transform"));
 	STRING_CACHE_reload = Persistent<String>::New(String::New("reload"));
 	STRING_CACHE_simulateID = Persistent<String>::New(String::New("simulateID"));
 	STRING_CACHE_x = Persistent<String>::New(String::New("x"));
