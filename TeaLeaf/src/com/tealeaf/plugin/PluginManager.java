@@ -25,8 +25,23 @@ import java.util.Map.Entry;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import com.tealeaf.logger;
+import com.tealeaf.EventQueue;
+import com.tealeaf.event.Event;
 
 import dalvik.system.DexFile;
+
+class ResponseWrapper extends Event{
+	String error;
+	Event response;	
+	int _requestId;
+
+	public ResponseWrapper(Event response, String error, int requestId) {
+		super("plugins");
+		this.error = error;
+		this.response = response;
+		this._requestId = requestId;
+	}
+}
 
 public class PluginManager {
 	private static String PACKAGE_NAME = "com.tealeaf";
@@ -106,6 +121,7 @@ public class PluginManager {
 			return retStr;
 		}
 
+
 		boolean found = false;
 
 		for (Method method : targetObject.getClass().getMethods()) {
@@ -175,6 +191,18 @@ public class PluginManager {
 	public static String call(String className, String methodName,
 			Object... params) {
 		return invokeMethod(classMap.get("com.tealeaf.plugin.plugins." + className), params, methodName, className);
+	}
+
+	public static void request(String className, String methodName, Object[] params, int requestId) {
+		//add the requestId the the parameters being passed to the plugin method	
+		Object[] parametersWithRequestId = new Object[params.length + 1];	
+		System.arraycopy(params, 0, parametersWithRequestId, 0, params.length);
+		parametersWithRequestId[parametersWithRequestId.length-1] = requestId;
+		call(className, methodName, parametersWithRequestId);
+	}
+
+	public static void sendResponse(Event event, String error, int requestId) {
+		EventQueue.pushEvent(new ResponseWrapper(event, error, requestId));
 	}
 }
 

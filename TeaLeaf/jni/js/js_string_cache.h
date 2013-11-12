@@ -111,6 +111,7 @@ extern Persistent<String> STRING_CACHE_load;
 extern Persistent<String> STRING_CACHE_eval;
 extern Persistent<String> STRING_CACHE_render;
 extern Persistent<String> STRING_CACHE_sendEvent;
+extern Persistent<String> STRING_CACHE_sendRequest;
 extern Persistent<String> STRING_CACHE__loadImage;
 extern Persistent<String> STRING_CACHE_timestep;
 extern Persistent<String> STRING_CACHE_loadBackgroundMusic;
