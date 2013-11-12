@@ -38,6 +38,7 @@ public class Device {
 				"\"device\": \"" + Build.DEVICE + "\"," +
 				"\"display\": \"" + Build.DISPLAY + "\"," +
 				"\"version\": \"" + Build.VERSION.SDK_INT + "\"," +
+				"\"versionRelease\": \"" + Build.VERSION.RELEASE + "\"," +
 				"\"fingerprint\": \"" + Build.FINGERPRINT + "\"," +
 				"\"hardware\": \"" + Build.HARDWARE + "\"," +
 				"\"id\": \"" + Build.ID + "\"," +
