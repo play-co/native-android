@@ -30,6 +30,20 @@ import com.tealeaf.event.Event;
 
 import dalvik.system.DexFile;
 
+class PluginEvent extends Event {
+	String eventName;
+	String pluginName;
+	Event event;
+
+
+	public PluginEvent(String eventName, String pluginName, Event event) {
+		super("pluginEvent");
+		this.eventName = eventName;
+		this.pluginName = pluginName;
+		this.event = event;
+	}
+}
+
 class ResponseWrapper extends Event{
 	String error;
 	Event response;	
@@ -203,6 +217,10 @@ public class PluginManager {
 
 	public static void sendResponse(Event event, String error, int requestId) {
 		EventQueue.pushEvent(new ResponseWrapper(event, error, requestId));
+	}
+
+	public static void sendEvent(String eventName, String pluginName, Event event) {
+		EventQueue.pushEvent(new PluginEvent(eventName, pluginName, event));
 	}
 }
 
