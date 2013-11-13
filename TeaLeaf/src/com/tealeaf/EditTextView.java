@@ -270,7 +270,7 @@ public class EditTextView extends EditText {
 								int paddingRight = obj.optInt("paddingRight", 0);
 
 								instance.setPadding(paddingLeft, 0, paddingRight, 0);
-	
+								showKeyboard(instance);
 
 							} catch (Exception e) {
 								logger.log(e.getMessage());
