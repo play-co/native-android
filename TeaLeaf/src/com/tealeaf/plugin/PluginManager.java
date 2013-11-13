@@ -33,23 +33,23 @@ import dalvik.system.DexFile;
 class PluginEvent extends Event {
 	String eventName;
 	String pluginName;
-	Event event;
+	Object data;
 
 
-	public PluginEvent(String eventName, String pluginName, Event event) {
+	public PluginEvent(String eventName, String pluginName, Object data) {
 		super("pluginEvent");
 		this.eventName = eventName;
 		this.pluginName = pluginName;
-		this.event = event;
+		this.data = data;
 	}
 }
 
 class ResponseWrapper extends Event{
 	String error;
-	Event response;	
+	Object response;	
 	int _requestId;
 
-	public ResponseWrapper(Event response, String error, int requestId) {
+	public ResponseWrapper(Object response, String error, int requestId) {
 		super("plugins");
 		this.error = error;
 		this.response = response;
@@ -215,12 +215,12 @@ public class PluginManager {
 		call(className, methodName, parametersWithRequestId);
 	}
 
-	public static void sendResponse(Event event, String error, int requestId) {
-		EventQueue.pushEvent(new ResponseWrapper(event, error, requestId));
+	public static void sendResponse(Object response, String error, int requestId) {
+		EventQueue.pushEvent(new ResponseWrapper(response, error, requestId));
 	}
 
-	public static void sendEvent(String eventName, String pluginName, Event event) {
-		EventQueue.pushEvent(new PluginEvent(eventName, pluginName, event));
+	public static void sendEvent(String eventName, String pluginName, Object data) {
+		EventQueue.pushEvent(new PluginEvent(eventName, pluginName, data));
 	}
 }
 
