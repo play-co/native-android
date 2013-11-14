@@ -42,3 +42,21 @@ char *plugins_send_event(const char *pluginClass, const char *pluginClassMethod,
     return ret_data;
 }
 
+void plugins_send_request(const char *pluginClass, const char *pluginClassMethod, const char *data, int request_id) {
+	native_shim* shim = get_native_shim();
+	jmethodID method = shim->env->GetMethodID(shim->type, "pluginsRequest", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;I)V");
+	jstring str = shim->env->NewStringUTF(data);
+	jstring className = shim->env->NewStringUTF(pluginClass);
+	jstring methodName = shim->env->NewStringUTF(pluginClassMethod);
+
+	jobjectArray params = NULL;
+	params = (jobjectArray) shim->env->NewObjectArray(1, shim->env->FindClass("java/lang/Object"), NULL);
+	shim->env->SetObjectArrayElement(params, 0, str);
+
+	shim->env->CallVoidMethod(shim->instance, method, className, methodName, params, (jint)request_id);
+	shim->env->DeleteLocalRef(str);
+	shim->env->DeleteLocalRef(className);
+	shim->env->DeleteLocalRef(methodName);
+	shim->env->DeleteLocalRef(params);
+}
+
