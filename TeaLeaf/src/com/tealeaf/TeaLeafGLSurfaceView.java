@@ -213,7 +213,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		return super.onKeyUp(keyCode, event);
 	}
 
-	@Override
+	//@Override not really needed and complains on older API levels
     public boolean onGenericMotionEvent(final MotionEvent event) {
 		for (PluginKeyHook hook : _pluginHooks) {
 			if (hook.onGenericMotionEvent(event)) {
