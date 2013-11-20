@@ -11,12 +11,12 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := crypto-prebuilt
-LOCAL_SRC_FILES := lib/libcrypto.so
+LOCAL_SRC_FILES := lib/libgcypto.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ssl-prebuilt
-LOCAL_SRC_FILES := lib/libssl.so
+LOCAL_SRC_FILES := lib/libgcl.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
