@@ -47,10 +47,29 @@ Handle<Value> js_plugins_send_event(const Arguments& args) {
     return retVal;
 }
 
+Handle<Value> js_plugins_send_request(const Arguments& args) {
+	LOGFN("plugins send request");
+	if (args[0]->IsString() && args[1]->IsString() && args[2]->IsString()) {
+		String::Utf8Value str_plugin_class(args[0]->ToString());
+		String::Utf8Value str_plugin_method(args[1]->ToString());
+		String::Utf8Value str_data(args[2]->ToString());
+
+		const char* plugin_class = ToCString(str_plugin_class);
+		const char* plugin_method = ToCString(str_plugin_method);
+		const char* data = ToCString(str_data);
+		int request_id = args[3]->Int32Value();
+		plugins_send_request(plugin_class, plugin_method, data, request_id);
+	} else {
+		LOG("{plugins} WARNING: send request should be called with 3 string arguments");
+	}
+	return Undefined();
+}
+
 
 Handle<ObjectTemplate> js_plugins_get_template() {
 	Handle<ObjectTemplate> actions = ObjectTemplate::New();
 	actions->Set(STRING_CACHE_sendEvent, FunctionTemplate::New(js_plugins_send_event));
+	actions->Set(STRING_CACHE_sendRequest, FunctionTemplate::New(js_plugins_send_request));
 	return actions;
 }
 

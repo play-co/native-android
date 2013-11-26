@@ -108,6 +108,7 @@ Persistent<String> STRING_CACHE_load;
 Persistent<String> STRING_CACHE_eval;
 Persistent<String> STRING_CACHE_render;
 Persistent<String> STRING_CACHE_sendEvent;
+Persistent<String> STRING_CACHE_sendRequest;
 Persistent<String> STRING_CACHE__loadImage;
 Persistent<String> STRING_CACHE_timestep;
 Persistent<String> STRING_CACHE_loadBackgroundMusic;
@@ -326,6 +327,7 @@ void js_string_cache_init() {
 	STRING_CACHE_eval = Persistent<String>::New(String::New("eval"));
 	STRING_CACHE_render = Persistent<String>::New(String::New("render"));
 	STRING_CACHE_sendEvent = Persistent<String>::New(String::New("sendEvent"));
+	STRING_CACHE_sendRequest = Persistent<String>::New(String::New("_sendRequest"));
 	STRING_CACHE__loadImage = Persistent<String>::New(String::New("_loadImage"));
 	STRING_CACHE_timestep = Persistent<String>::New(String::New("timestep"));
 	STRING_CACHE_loadBackgroundMusic = Persistent<String>::New(String::New("loadBackgroundMusic"));

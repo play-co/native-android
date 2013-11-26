@@ -593,6 +593,9 @@ public class NativeShim {
         return PluginManager.call(className, methodName, params);
 	}
 
+	public void pluginsRequest(final String className, final String methodName, final Object[] params, final int requestId) {
+		PluginManager.request(className, methodName, params, requestId);
+	}
 	// native
 	public String getMarketUrl() {
 		return "market://details?id=" + context.getPackageName();
@@ -617,6 +620,7 @@ public class NativeShim {
 			}
 		}
 	}
+
 	public boolean sendActivityToBack() {
 		boolean success = context.moveTaskToBack(true);
 

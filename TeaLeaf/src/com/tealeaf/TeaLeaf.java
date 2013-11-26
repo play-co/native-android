@@ -930,7 +930,8 @@ public class TeaLeaf extends FragmentActivity {
 	}
 
 	static {
-
+		System.loadLibrary("gcypto");
+		System.loadLibrary("gcl");
 		System.loadLibrary("tealeaf");
 	}
 

@@ -26,6 +26,7 @@ public class Event implements Comparable<Event> {
 	protected int priority = 0;
 	protected static Gson gson = new Gson();
 	public Event(String name) { this.name = name;}
+	public Event() {}
 	
 	public String pack() {
 		String packedValue = gson.toJson(this);

@@ -345,8 +345,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void setRenderer(Renderer renderer) {
         checkRenderThreadState();
-        if (mEGLConfigChooser == null) {
-            mEGLConfigChooser = new SimpleEGLConfigChooser(true);
+        if (mEGLConfigChooser565 == null) {
+            mEGLConfigChooser565 = new Simple565EGLConfigChooser(true);
+        }
+        if (mEGLConfigChooser888 == null) {
+            mEGLConfigChooser888 = new Simple888EGLConfigChooser(true);
         }
         if (mEGLContextFactory == null) {
             mEGLContextFactory = new DefaultContextFactory();
@@ -400,10 +403,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * at least 16 bits.
      * @param configChooser
      */
-    public void setEGLConfigChooser(EGLConfigChooser configChooser) {
-        checkRenderThreadState();
-        mEGLConfigChooser = configChooser;
-    }
+    //public void setEGLConfigChooser(EGLConfigChooser configChooser) {
+    //    checkRenderThreadState();
+    //    mEGLConfigChooser = configChooser;
+    //}
 
     /**
      * Install a config chooser which will choose a config
@@ -419,9 +422,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      *
      * @param needDepth
      */
-    public void setEGLConfigChooser(boolean needDepth) {
-        setEGLConfigChooser(new SimpleEGLConfigChooser(needDepth));
-    }
+    //public void setEGLConfigChooser(boolean needDepth) {
+    //    setEGLConfigChooser(new SimpleEGLConfigChooser(needDepth));
+    //}
 
     /**
      * Install a config chooser which will choose a config
@@ -436,11 +439,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * at least 16 bits.
      *
      */
-    public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
-            int alphaSize, int depthSize, int stencilSize) {
-        setEGLConfigChooser(new ComponentSizeChooser(redSize, greenSize,
-                blueSize, alphaSize, depthSize, stencilSize));
-    }
+    //public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
+    //        int alphaSize, int depthSize, int stencilSize) {
+    //    setEGLConfigChooser(new ComponentSizeChooser(redSize, greenSize,
+    //            blueSize, alphaSize, depthSize, stencilSize));
+    //}
 
     /**
      * Inform the default EGLContextFactory and default EGLConfigChooser
@@ -972,8 +975,14 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * or without a depth buffer.
      *
      */
-    private class SimpleEGLConfigChooser extends ComponentSizeChooser {
-        public SimpleEGLConfigChooser(boolean withDepthBuffer) {
+    private class Simple888EGLConfigChooser extends ComponentSizeChooser {
+        public Simple888EGLConfigChooser(boolean withDepthBuffer) {
+            super(8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0);
+        }
+    }
+
+    private class Simple565EGLConfigChooser extends ComponentSizeChooser {
+        public Simple565EGLConfigChooser(boolean withDepthBuffer) {
             super(5, 6, 5, 0, withDepthBuffer ? 16 : 0, 0);
         }
     }
@@ -1021,13 +1030,35 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mEglConfig = null;
                 mEglContext = null;
             } else {
-                mEglConfig = view.mEGLConfigChooser.chooseConfig(mEgl, mEglDisplay);
+				mEglContext = null;
+				try {
+	                mEglConfig = view.mEGLConfigChooser565.chooseConfig(mEgl, mEglDisplay);
+				} catch (Exception e) {
+				}
 
-                /*
-                * Create an EGL context. We want to do this as rarely as we can, because an
-                * EGL context is a somewhat heavy object.
-                */
-                mEglContext = view.mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
+				if (mEglConfig != null) {
+					/*
+					 * Create an EGL context. We want to do this as rarely as we can, because an
+					 * EGL context is a somewhat heavy object.
+					 */
+					mEglContext = view.mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
+				}
+
+				if (mEglContext == null) {
+					// Added for compatibility with AVD -cat
+					try {
+	                	mEglConfig = view.mEGLConfigChooser888.chooseConfig(mEgl, mEglDisplay);
+					} catch (Exception e) {
+					}
+
+					if (mEglConfig != null) {
+						/*
+						 * Create an EGL context. We want to do this as rarely as we can, because an
+						 * EGL context is a somewhat heavy object.
+						 */
+						mEglContext = view.mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
+					}
+				}
             }
             if (mEglContext == null || mEglContext == EGL10.EGL_NO_CONTEXT) {
                 mEglContext = null;
@@ -1932,7 +1963,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private GLThread mGLThread;
     private Renderer mRenderer;
     private boolean mDetached;
-    private EGLConfigChooser mEGLConfigChooser;
+    private EGLConfigChooser mEGLConfigChooser565;
+    private EGLConfigChooser mEGLConfigChooser888;
     private EGLContextFactory mEGLContextFactory;
     private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
     private GLWrapper mGLWrapper;
