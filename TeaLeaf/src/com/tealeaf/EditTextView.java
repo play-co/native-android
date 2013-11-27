@@ -7,6 +7,7 @@ import android.widget.RelativeLayout;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -45,6 +46,7 @@ public class EditTextView extends EditText {
 	private boolean isOpened = false;
 	private boolean closeOnDone = false;
 	private boolean autoClose = true;
+	private int previousHeight = Integer.MAX_VALUE;
 	private static EditText offscreenEditText;
 	private static View editTextFullLayout;
 	private static View editTextLayout;
@@ -159,9 +161,6 @@ public class EditTextView extends EditText {
 
 								editTextFullLayout.setVisibility(View.VISIBLE);
 								instance.setVisibility(View.VISIBLE);
-								if (!instance.hasFocus()) {
-									instance.requestFocus();
-								}
 
 								//TeaLeaf.get().glView.setOnTouchListener(EditTextView.getScreenCaptureListener());
 
@@ -176,6 +175,10 @@ public class EditTextView extends EditText {
 
 								AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(width, height, x, y);
 								instance.setLayoutParams(layoutParams);
+
+								if (!instance.hasFocus()) {
+									instance.requestFocus();
+								}
 
 								//font size
 								int fontSize = (int)(obj.optInt("fontSize", 16) * .9f);
@@ -311,7 +314,6 @@ public class EditTextView extends EditText {
 			instance.onGlobalLayoutListener = new OnGlobalLayoutListener() {
 				@Override
 				public void onGlobalLayout() {
-
 					View group = (View)TeaLeaf.get().getGroup();
 					// get visible area of the view
 					Rect r = new Rect();
@@ -323,6 +325,23 @@ public class EditTextView extends EditText {
 
 					// if our visible height is less than 75% normal, assume keyboard on screen
 					int visibleHeight = r.bottom - r.top;
+				
+					// This is a hack to prevent the view from panning up when the keyboard covers the onscreen textview
+					// By focusing the offscreen text view and then focusing the onscreen textview on the next
+					// ui update, the view pan can be prevented.
+					if (visibleHeight < instance.previousHeight) {
+						if (instance.hasFocus()) {
+							new Handler().post(new Runnable() {
+								public void run() {
+									instance.requestFocus();
+								}
+							});
+							offscreenEditText.setVisibility(View.VISIBLE);
+							offscreenEditText.requestFocus();
+						}
+					}
+					instance.previousHeight = height;
+
 
 					if (visibleHeight == height) {
 						if (instance.isOpened) {
