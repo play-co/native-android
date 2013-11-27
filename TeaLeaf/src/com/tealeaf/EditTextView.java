@@ -101,7 +101,7 @@ public class EditTextView extends EditText {
 
 			offscreenEditText = (EditText) editTextFullLayout.findViewById(R.id.offscreen_edit_text);
 			offscreenEditText.setVisibility(View.INVISIBLE);
-			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(100, 10, 0, 0);
+			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(0, 0, 0, -10);
 			offscreenEditText.setLayoutParams(layoutParams);
 
 			instance.activity = activity;
@@ -290,7 +290,6 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
-							instance.removeListenerToRootView();
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 							instance.hideKeyboard();
 						}
@@ -331,11 +330,11 @@ public class EditTextView extends EditText {
 					// ui update, the view pan can be prevented.
 					if (visibleHeight < instance.previousHeight) {
 						if (instance.hasFocus()) {
-							new Handler().post(new Runnable() {
+							new Handler().postDelayed(new Runnable() {
 								public void run() {
 									instance.requestFocus();
 								}
-							});
+							}, 300);
 							offscreenEditText.setVisibility(View.VISIBLE);
 							offscreenEditText.requestFocus();
 						}
@@ -349,6 +348,7 @@ public class EditTextView extends EditText {
 							editTextFullLayout.setVisibility(View.INVISIBLE);
 							instance.setVisibility(View.GONE);
 							instance.isOpened = false;
+							instance.removeListenerToRootView();
 							// restore the autoClose property to the default
 							instance.autoClose = true;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
@@ -375,6 +375,8 @@ public class EditTextView extends EditText {
 						offscreenEditText.requestFocus();
 						editTextFullLayout.setVisibility(View.INVISIBLE);
 						offscreenEditText.setVisibility(View.GONE);
+						// set isOpened to false to the keyboard will show
+						instance.isOpened = false;
 						showKeyboard(offscreenEditText);
 					}
 				});
