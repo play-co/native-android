@@ -11,12 +11,12 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := crypto-prebuilt
-LOCAL_SRC_FILES := lib/libcrypto.so
+LOCAL_SRC_FILES := lib/libgcypto.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ssl-prebuilt
-LOCAL_SRC_FILES := lib/libssl.so
+LOCAL_SRC_FILES := lib/libgcl.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -35,8 +35,8 @@ LOCAL_SRC_FILES := lib/libpng.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := libjpeg
-LOCAL_SRC_FILES := lib/libjpeg.a
+LOCAL_MODULE := libturbojpeg
+LOCAL_SRC_FILES := lib/libturbojpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -134,8 +134,8 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 			lib/v8-profiler/node_buffer.cpp		              \
 			lib/v8-profiler/profiler.cpp
 
-LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libjpeg libpng libjansson
-LOCAL_LDLIBS :=-llog -lGLESv2 -lz #-fuse-ld=gold REQUIRES: android-ndk-r8b
+LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
+LOCAL_LDLIBS :=-llog -lGLESv2 -lz
 LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
 
 ifeq ($(APP_ABI),armeabi-v7a)

@@ -1262,46 +1262,56 @@ exports.build = function(builder, project, opts, next) {
 			repackAPK(builder, destDir, apkBuildName, f());
 		}
 	}, function () {
-		if (!debug || repack) {
-			signAPK(builder, shortName, destDir, debug, f());
+		if (!argv.noapk) {
+			if (!debug || repack) {
+				signAPK(builder, shortName, destDir, debug, f());
+			}
 		}
 	}, function () {
-		apkPath = path.join(apkDir, shortName + ".apk"); 
-		if (fs.existsSync(apkPath)) {
-			fs.unlinkSync(apkPath);
-		}
-		var destApkPath = path.join(destDir, "bin", apkBuildName); 
-		if (fs.existsSync(destApkPath)) {
-			wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
-			builder.common.copyFileSync(destApkPath, apkPath);
-			logger.log("built", clc.yellowBright(packageName));
-			logger.log("saved to " + clc.blueBright(apkPath));
-		} else {
-			logger.error("No file at " + destApkPath);
-			next(2);
-		}
-	}, function() {
-		if (argv.install || argv.open) {
-			var keepStorage = argv.clearstorage ? "" : "-k";
-			var cmd = 'adb uninstall ' + keepStorage + ' "' + packageName + '"';
-			logger.log('Install: Running ' + cmd + '...');
-			var argz = ['shell', 'pm', 'uninstall'];
-			keepStorage && argz.push(keepStorage);
-			argz.push(packageName);
-			builder.common.child('adb', argz, {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+		if (!argv.noapk) {
+			apkPath = path.join(apkDir, shortName + ".apk"); 
+			if (fs.existsSync(apkPath)) {
+				fs.unlinkSync(apkPath);
+			}
+			var destApkPath = path.join(destDir, "bin", apkBuildName); 
+			if (fs.existsSync(destApkPath)) {
+				wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
+				builder.common.copyFileSync(destApkPath, apkPath);
+				logger.log("built", clc.yellowBright(packageName));
+				logger.log("saved to " + clc.blueBright(apkPath));
+			} else {
+				logger.error("No file at " + destApkPath);
+				next(2);
+			}
 		}
 	}, function() {
-		if (argv.install || argv.open) {
-			var cmd = 'adb install -r "' + apkPath + '"';
-			logger.log('Install: Running ' + cmd + '...');
-			builder.common.child('adb', ['install', '-r', apkPath], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+		if (!argv.noapk) {
+			if (argv.install || argv.open) {
+				var keepStorage = argv.clearstorage ? "" : "-k";
+				var cmd = 'adb uninstall ' + keepStorage + ' "' + packageName + '"';
+				logger.log('Install: Running ' + cmd + '...');
+				var argz = ['shell', 'pm', 'uninstall'];
+				keepStorage && argz.push(keepStorage);
+				argz.push(packageName);
+				builder.common.child('adb', argz, {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+			}
+		}
+	}, function() {
+		if (!argv.noapk) {
+			if (argv.install || argv.open) {
+				var cmd = 'adb install -r "' + apkPath + '"';
+				logger.log('Install: Running ' + cmd + '...');
+				builder.common.child('adb', ['install', '-r', apkPath], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+			}
 		}
 	}, function () {
-		if (argv.open) {
-			var startCmd = packageName + '/' + packageName + '.' + shortName + 'Activity';
-			var cmd = 'adb shell am start -n ' + startCmd;
-			logger.log('Install: Running ' + cmd + '...');
-			builder.common.child('adb', ['shell', 'am', 'start', '-n', startCmd], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+		if (!argv.noapk) {
+			if (argv.open) {
+				var startCmd = packageName + '/' + packageName + '.' + shortName + 'Activity';
+				var cmd = 'adb shell am start -n ' + startCmd;
+				logger.log('Install: Running ' + cmd + '...');
+				builder.common.child('adb', ['shell', 'am', 'start', '-n', startCmd], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
+			}
 		}
 
 		f(destDir);
