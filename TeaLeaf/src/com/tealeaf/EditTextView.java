@@ -156,7 +156,6 @@ public class EditTextView extends EditText {
 						public void run() {
 							instance.setListenerToRootView();
 							try {
-								instance.registerTextChange = false;
 								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
 
 								editTextFullLayout.setVisibility(View.VISIBLE);
@@ -188,6 +187,7 @@ public class EditTextView extends EditText {
 								if (shouldSetText) {
 									//text
 									String text = obj.optString("text", "");
+									instance.registerTextChange = false;
 									instance.setText(text);
 								}
 
@@ -318,6 +318,7 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
+							instance.registerTextChange = false;
 							instance.setText(obj.optString("text", ""));
 
 							//cursor pos
