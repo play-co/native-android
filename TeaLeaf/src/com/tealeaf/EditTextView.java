@@ -160,10 +160,14 @@ public class EditTextView extends EditText {
 								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
 
 								editTextFullLayout.setVisibility(View.VISIBLE);
-								instance.setVisibility(View.VISIBLE);
 
 								//TeaLeaf.get().glView.setOnTouchListener(EditTextView.getScreenCaptureListener());
 
+								boolean shouldSetText = false;
+								if (instance.getVisibility() != View.VISIBLE) {
+									instance.setVisibility(View.VISIBLE);
+									shouldSetText = true;
+								}
 
 								instance.closeOnDone = obj.optBoolean("closeOnDone", true);
 
@@ -178,15 +182,20 @@ public class EditTextView extends EditText {
 
 								if (!instance.hasFocus()) {
 									instance.requestFocus();
+									shouldSetText = true;
 								}
+
+								if (shouldSetText) {
+									//text
+									String text = obj.optString("text", "");
+									instance.setText(text);
+								}
+
 
 								//font size
 								int fontSize = (int)(obj.optInt("fontSize", 16) * .9f);
 								instance.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
 
-								//text
-								String text = obj.optString("text", "");
-								instance.setText(text);
 								
 								//font color
 								String fontColor = obj.optString("fontColor", "#000000");
@@ -265,8 +274,14 @@ public class EditTextView extends EditText {
 										break;
 								}
 
+								type |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+								int previousInputType = instance.getInputType();
+
 								//for auto correct use this flag ->  InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+								if (previousInputType != type) {
+									instance.setInputType(type);
+								}
+
 
 								//padding
 								int paddingLeft = obj.optInt("paddingLeft", 0);
@@ -304,6 +319,10 @@ public class EditTextView extends EditText {
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
 							instance.setText(obj.optString("text", ""));
+
+							//cursor pos
+							int cursorPos = obj.optInt("cursorPos", instance.length());
+							instance.setSelection(cursorPos < 0 || cursorPos > instance.length() ? instance.getText().length() : cursorPos);
 						}
 					});
 					return obj;
@@ -326,17 +345,15 @@ public class EditTextView extends EditText {
 					int visibleHeight = r.bottom - r.top;
 				
 					// This is a hack to prevent the view from panning up when the keyboard covers the onscreen textview
-					// By focusing the offscreen text view and then focusing the onscreen textview on the next
-					// ui update, the view pan can be prevented.
+					// By moving the textview upwards the view pan can be prevented.
 					if (visibleHeight < instance.previousHeight) {
 						if (instance.hasFocus()) {
-							new Handler().postDelayed(new Runnable() {
-								public void run() {
-									instance.requestFocus();
-								}
-							}, 300);
-							offscreenEditText.setVisibility(View.VISIBLE);
-							offscreenEditText.requestFocus();
+							AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) instance.getLayoutParams();
+							// if the textview is beyond the visible height move it to the top of the screen
+							int dy = visibleHeight - (params.y + params.height);
+							if (dy <= 0) {
+								params.y = 0;
+							}
 						}
 					}
 					instance.previousHeight = height;
