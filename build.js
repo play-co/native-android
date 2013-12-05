@@ -649,12 +649,11 @@ var DEFAULT_ICON_PATH = {
 
 function copyIcon(builder, project, destDir, tag, size) {
 	var destPath = path.join(destDir, "res/drawable-" + tag + "dpi/icon.png");
-	wrench.mkdirSyncRecursive(path.dirname(destPath));
-
 	var android = project.manifest.android;
 	var iconPath = android && android.icons && android.icons[size];
 
 	if (iconPath && fs.existsSync(iconPath)) {
+		wrench.mkdirSyncRecursive(path.dirname(destPath));
 		builder.common.copyFileSync(iconPath, destPath);
 	} else {
 		logger.warn("No icon specified in the manifest for '", size, "'. Using the default icon for this size. This is probably not what you want");
@@ -697,6 +696,7 @@ function copyIcons(builder, project, destDir) {
 	copyIcon(builder, project, destDir, "h", "72");
 	copyIcon(builder, project, destDir, "xh", "96");
 	copyIcon(builder, project, destDir, "xxh", "144");
+	copyIcon(builder, project, destDir, "xxxh", "192");
 	copyNotifyIcon(builder, project, destDir, "l", "low");
 	copyNotifyIcon(builder, project, destDir, "m", "med");
 	copyNotifyIcon(builder, project, destDir, "h", "high");
