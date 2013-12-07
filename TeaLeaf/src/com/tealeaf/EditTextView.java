@@ -7,6 +7,7 @@ import android.widget.RelativeLayout;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -45,6 +46,7 @@ public class EditTextView extends EditText {
 	private boolean isOpened = false;
 	private boolean closeOnDone = false;
 	private boolean autoClose = true;
+	private int previousHeight = Integer.MAX_VALUE;
 	private static EditText offscreenEditText;
 	private static View editTextFullLayout;
 	private static View editTextLayout;
@@ -99,7 +101,7 @@ public class EditTextView extends EditText {
 
 			offscreenEditText = (EditText) editTextFullLayout.findViewById(R.id.offscreen_edit_text);
 			offscreenEditText.setVisibility(View.INVISIBLE);
-			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(100, 10, 0, 0);
+			AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(0, 0, 0, -10);
 			offscreenEditText.setLayoutParams(layoutParams);
 
 			instance.activity = activity;
@@ -154,15 +156,17 @@ public class EditTextView extends EditText {
 						public void run() {
 							instance.setListenerToRootView();
 							try {
-								instance.registerTextChange = false;
 								instance.currentTouchListener = TeaLeaf.get().glView.getOnTouchListener();
 
 								editTextFullLayout.setVisibility(View.VISIBLE);
-								instance.setVisibility(View.VISIBLE);
-								instance.requestFocus();
 
 								//TeaLeaf.get().glView.setOnTouchListener(EditTextView.getScreenCaptureListener());
 
+								boolean shouldSetText = false;
+								if (instance.getVisibility() != View.VISIBLE) {
+									instance.setVisibility(View.VISIBLE);
+									shouldSetText = true;
+								}
 
 								instance.closeOnDone = obj.optBoolean("closeOnDone", true);
 
@@ -175,13 +179,23 @@ public class EditTextView extends EditText {
 								AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(width, height, x, y);
 								instance.setLayoutParams(layoutParams);
 
+								if (!instance.hasFocus()) {
+									instance.requestFocus();
+									shouldSetText = true;
+								}
+
+								if (shouldSetText) {
+									//text
+									String text = obj.optString("text", "");
+									instance.registerTextChange = false;
+									instance.setText(text);
+								}
+
+
 								//font size
 								int fontSize = (int)(obj.optInt("fontSize", 16) * .9f);
 								instance.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
 
-								//text
-								String text = obj.optString("text", "");
-								instance.setText(text);
 								
 								//font color
 								String fontColor = obj.optString("fontColor", "#000000");
@@ -260,15 +274,20 @@ public class EditTextView extends EditText {
 										break;
 								}
 
+								type |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+								int previousInputType = instance.getInputType();
+
 								//for auto correct use this flag ->  InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-								instance.setInputType(type | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+								if (previousInputType != type) {
+									instance.setInputType(type);
+								}
+
 
 								//padding
 								int paddingLeft = obj.optInt("paddingLeft", 0);
 								int paddingRight = obj.optInt("paddingRight", 0);
 
 								instance.setPadding(paddingLeft, 0, paddingRight, 0);
-
 								showKeyboard(instance);
 
 							} catch (Exception e) {
@@ -286,7 +305,6 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
-							instance.removeListenerToRootView();
 							TeaLeaf.get().glView.setOnTouchListener(instance.currentTouchListener);
 							instance.hideKeyboard();
 						}
@@ -300,7 +318,12 @@ public class EditTextView extends EditText {
 
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
+							instance.registerTextChange = false;
 							instance.setText(obj.optString("text", ""));
+
+							//cursor pos
+							int cursorPos = obj.optInt("cursorPos", instance.length());
+							instance.setSelection(cursorPos < 0 || cursorPos > instance.length() ? instance.getText().length() : cursorPos);
 						}
 					});
 					return obj;
@@ -310,7 +333,6 @@ public class EditTextView extends EditText {
 			instance.onGlobalLayoutListener = new OnGlobalLayoutListener() {
 				@Override
 				public void onGlobalLayout() {
-
 					View group = (View)TeaLeaf.get().getGroup();
 					// get visible area of the view
 					Rect r = new Rect();
@@ -322,6 +344,21 @@ public class EditTextView extends EditText {
 
 					// if our visible height is less than 75% normal, assume keyboard on screen
 					int visibleHeight = r.bottom - r.top;
+				
+					// This is a hack to prevent the view from panning up when the keyboard covers the onscreen textview
+					// By moving the textview upwards the view pan can be prevented.
+					if (visibleHeight < instance.previousHeight) {
+						if (instance.hasFocus()) {
+							AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) instance.getLayoutParams();
+							// if the textview is beyond the visible height move it to the top of the screen
+							int dy = visibleHeight - (params.y + params.height);
+							if (dy <= 0) {
+								params.y = 0;
+							}
+						}
+					}
+					instance.previousHeight = height;
+
 
 					if (visibleHeight == height) {
 						if (instance.isOpened) {
@@ -329,6 +366,7 @@ public class EditTextView extends EditText {
 							editTextFullLayout.setVisibility(View.INVISIBLE);
 							instance.setVisibility(View.GONE);
 							instance.isOpened = false;
+							instance.removeListenerToRootView();
 							// restore the autoClose property to the default
 							instance.autoClose = true;
 							EventQueue.pushEvent(new Event("editText.onFinishEditing"));
@@ -355,6 +393,8 @@ public class EditTextView extends EditText {
 						offscreenEditText.requestFocus();
 						editTextFullLayout.setVisibility(View.INVISIBLE);
 						offscreenEditText.setVisibility(View.GONE);
+						// set isOpened to false to the keyboard will show
+						instance.isOpened = false;
 						showKeyboard(offscreenEditText);
 					}
 				});
@@ -366,8 +406,10 @@ public class EditTextView extends EditText {
 	}
 
 	private static void showKeyboard(EditText editTextFocus) {
-		InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(editTextFocus, 0);	
+		if (!instance.isOpened) {
+			InputMethodManager imm = (InputMethodManager) instance.activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(editTextFocus, 0);	
+		}
 	}
 
 	public void setListenerToRootView() {

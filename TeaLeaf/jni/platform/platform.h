@@ -45,6 +45,16 @@ native_shim *get_native_thread_shim(JNIEnv **env);
 	} \
 } while(0)
 
+#define UTF8_BYTES_TO_STR(env, byte_array, result) do { \
+	if((byte_array) == NULL) { result = NULL; } else { \
+		int len = (env)->GetArrayLength(byte_array); \
+		(result) = (char*) malloc(sizeof(char) * (len+1)); \
+		(result)[len] = 0; \
+		(env)->GetByteArrayRegion(byte_array, 0, len, (jbyte*) (result)); \
+	} \
+} while(0)
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

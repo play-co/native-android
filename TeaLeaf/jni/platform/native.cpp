@@ -141,17 +141,18 @@ void native_reload() {
 char *native_call(const char *method, const char *args) {
 
 	native_shim* shim = get_native_shim();
-	jmethodID jmethod = shim->env->GetMethodID(shim->type, "call", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+	jmethodID jmethod = shim->env->GetMethodID(shim->type, "call", "(Ljava/lang/String;[B)Ljava/lang/String;");
 
 	jstring methodStr = shim->env->NewStringUTF(method);
-	jstring argsStr = shim->env->NewStringUTF(args);
 
-	jstring jdata = (jstring) shim->env->CallObjectMethod(shim->instance, jmethod, methodStr, argsStr);
+	jbyteArray jbuff = shim->env->NewByteArray(strlen(args));
+	shim->env->SetByteArrayRegion(jbuff, 0, strlen(args), (jbyte*) args);
+	jstring jdata = (jstring) shim->env->CallObjectMethod(shim->instance, jmethod, methodStr, jbuff);
     char *ret_data = NULL;
 	GET_STR(shim->env, jdata, ret_data);
 	shim->env->DeleteLocalRef(jdata);
 	shim->env->DeleteLocalRef(methodStr);
-	shim->env->DeleteLocalRef(argsStr);
+	shim->env->DeleteLocalRef(jbuff);
     return ret_data;
 
 }

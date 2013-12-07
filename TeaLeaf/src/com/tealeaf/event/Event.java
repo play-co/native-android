@@ -32,6 +32,10 @@ public class Event implements Comparable<Event> {
 		String packedValue = gson.toJson(this);
 		return packedValue;
 	}
+
+	public String getName() {
+		return name;
+	}
 	
 	public int priority() { return priority; }
 

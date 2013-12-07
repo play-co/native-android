@@ -353,13 +353,24 @@ public class NativeShim {
 	}
 
 	//Textures
-	public int measureText(String font, int size, String text) {
-		int textSize = textManager.measureText(font, size, text);
+	public int measureText(String font, int size, byte[] textBytes) {
+		int textSize = 0;
+		try {
+			String text = new String(textBytes, "UTF-8");
+			textSize = textManager.measureText(font, size, text);
+		} catch (Exception e) {
+			logger.log(e);
+		}
 		return textSize;
 	}
 
-	public void loadTexture(String url) {
-		textureLoader.loadTexture(url);
+	public void loadTexture(byte[] urlBytes) {
+		try {
+			String url = new String(urlBytes, "UTF-8");
+			textureLoader.loadTexture(url);
+		} catch (Exception e) {
+			logger.log(e);
+		}
 	}
 
     public int cameraGetPhoto(int width, int height) {
@@ -523,7 +534,13 @@ public class NativeShim {
 	}
 
 	//call
-	public String call(String method, String args) {
+	public String call(String method, byte[] byteArgs) {
+		String args = "{}";
+		try {
+			args = new String(byteArgs, "UTF-8");
+		} catch (Exception e) {
+			logger.log(e);
+		}
 		JSONObject jsonArgs = null;
 		try {
 			jsonArgs = new JSONObject(args);
@@ -547,11 +564,32 @@ public class NativeShim {
 		callables.put(method, callable);
 	}
 
+	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	public static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		int v;
+		for ( int j = 0; j < bytes.length; j++ ) {
+			v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
 	// plugins
-	public String pluginsCall(final String className,final String methodName, final Object[] params) {
+	public String pluginsCall(final String className, final String methodName, final Object[] params) {
 //		there may be issues not running this on the ui thread however
 //		it is required for now and there doesn't seem to be any immediate
 //		concerns with it running on any thread
+		
+		for (int i = 0; i < params.length; i++) {
+			if (params[i].getClass() == byte[].class) {
+				try {
+					params[i] = new String((byte[])params[i], "UTF-8");
+				} catch(Exception e) {
+					logger.log(e);
+				}
+			}
+		}
         return PluginManager.call(className, methodName, params);
 	}
 
@@ -753,11 +791,30 @@ public class NativeShim {
 	public static native void reloadTextures();
 	public static native void reloadCanvases();
 	public static native void clearTextures();
-	public static native void onTextureLoaded(String url, int name, int width, int height, int originalWidth, int originalHeight, int numChannels);
+	public static void onTextureLoaded(String url, int name, int width, int height, int originalWidth, int originalHeight, int numChannels) {
+			try {
+				onTextureLoaded(url.getBytes("UTF-8"), name, width, height, originalWidth, originalHeight, numChannels);
+			} catch (Exception e) {
+				logger.log(e);
+			}
+	}
+	public static native void onTextureLoaded(byte[] urlBytes, int name, int width, int height, int originalWidth, int originalHeight, int numChannels);
 	public static native void onTextureFailedToLoad(String url);
 
 	//Input stuff
-	public static native void dispatchEvents(String[] event);
+	public static void dispatchEvents(String[] event) {
+		byte[][] event_bytes = new byte[event.length][];
+		for (int i = 0; i < event.length; i++) {
+			try {
+				event_bytes[i] = event[i].getBytes("UTF-8");
+			} catch (Exception e) {
+				event_bytes[i] = new byte[1];
+			}
+		}
+		dispatchEvents(event_bytes);
+	}
+
+	public static native void dispatchEvents(byte[][] event);
 	public static native void dispatchInputEvents(int[] ids, int[] types, int[] xs, int[] ys, int count);
 
 	public static native void saveTextures();

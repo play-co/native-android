@@ -18,24 +18,25 @@
 #include "platform/platform.h"
 #include "platform/native.h"
 
-
 char *plugins_send_event(const char *pluginClass, const char *pluginClassMethod, const char *data) {
+
 
 	native_shim* shim = get_native_shim();
 	jmethodID method = shim->env->GetMethodID(shim->type, "pluginsCall", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
-	jstring str = shim->env->NewStringUTF(data);
+	jbyteArray jbuff = shim->env->NewByteArray(strlen(data));
+	shim->env->SetByteArrayRegion(jbuff, 0, strlen(data), (jbyte*) data);
 	jstring className = shim->env->NewStringUTF(pluginClass);
 	jstring methodName = shim->env->NewStringUTF(pluginClassMethod);
 
 	jobjectArray params = NULL;
 	params = (jobjectArray) shim->env->NewObjectArray(1, shim->env->FindClass("java/lang/Object"), NULL);
-	shim->env->SetObjectArrayElement(params, 0, str);
+	shim->env->SetObjectArrayElement(params, 0, jbuff);
 
 	jstring jdata = (jstring) shim->env->CallObjectMethod(shim->instance, method, className, methodName, params);
     char *ret_data = NULL;
 	GET_STR(shim->env, jdata, ret_data);
 	shim->env->DeleteLocalRef(jdata);
-	shim->env->DeleteLocalRef(str);
+	shim->env->DeleteLocalRef(jbuff);
 	shim->env->DeleteLocalRef(className);
 	shim->env->DeleteLocalRef(methodName);
 	shim->env->DeleteLocalRef(params);
