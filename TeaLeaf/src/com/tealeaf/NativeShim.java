@@ -515,6 +515,22 @@ public class NativeShim {
 	public String getData(String key) {
 		return localStorage.getData(key);
 	}
+	public void setData(String key, byte[] data) {
+		try {
+			String dataString = new String(data, "UTF-8");
+			localStorage.setData(key, dataString);
+		} catch (Exception e) {
+			logger.log(e);
+		}
+	}
+	public byte[] getDataAsBytes(String key) {
+		try {
+			return localStorage.getData(key).getBytes("UTF-8");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public void removeData(String key) {
 		localStorage.removeData(key);
 	}

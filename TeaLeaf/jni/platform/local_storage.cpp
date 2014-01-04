@@ -23,12 +23,16 @@ void local_storage_set_data(const char *key, const char *data) {
 	JNIEnv *env = shim->env;
 	jobject manager = shim->instance;
 	jclass type = shim->type;
-	jmethodID method = env->GetMethodID(type, "setData", "(Ljava/lang/String;Ljava/lang/String;)V");
+	jmethodID method = env->GetMethodID(type, "setData", "(Ljava/lang/String;[B)V");
+
+	int len = strlen(data);
+	jbyteArray data_str = env->NewByteArray(len);
+	env->SetByteArrayRegion(data_str, 0, len, (jbyte*) data);
+
 	jstring k = env->NewStringUTF(key);
-	jstring d = env->NewStringUTF(data);
-	env->CallVoidMethod(manager, method, k, d);
+	env->CallVoidMethod(manager, method, k, data_str);
 	env->DeleteLocalRef(k);
-	env->DeleteLocalRef(d);
+	env->DeleteLocalRef(data_str);
 }
 
 const char *local_storage_get_data(const char *key) {
@@ -36,14 +40,21 @@ const char *local_storage_get_data(const char *key) {
 	JNIEnv *env = shim->env;
 	jobject manager = shim->instance;
 	jclass type = shim->type;
-	jmethodID method = env->GetMethodID(type, "getData", "(Ljava/lang/String;)Ljava/lang/String;");
+	jmethodID method = env->GetMethodID(type, "getDataAsBytes", "(Ljava/lang/String;)[B");
 	jstring k = env->NewStringUTF(key);
-	jstring data = (jstring) env->CallObjectMethod(manager, method, k);
+	jbyteArray data = (jbyteArray) env->CallObjectMethod(manager, method, k);
 	env->DeleteLocalRef(k);
-	const char *ret_data = NULL;
-	GET_STR(env, data, ret_data);
+
+	char *data_str = NULL;
+	if (data) {
+		int len = env->GetArrayLength(data);
+		data_str = (char *) malloc(len + 1);
+		data_str[len] = 0;
+		env->GetByteArrayRegion(data, 0, len, (jbyte*) data_str);
+	}
+
 	env->DeleteLocalRef(data);
-	return ret_data;
+	return data_str;
 }
 
 void local_storage_remove_data(const char *key) {
