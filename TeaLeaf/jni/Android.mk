@@ -140,106 +140,6 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 			lib/v8-profiler/profiler.cpp
 
 QR_SRC_FILES := \
-	core/qr/zxing/BarcodeFormat.cpp \
-	core/qr/zxing/Binarizer.cpp \
-	core/qr/zxing/BinaryBitmap.cpp \
-	core/qr/zxing/ChecksumException.cpp \
-	core/qr/zxing/DecodeHints.cpp \
-	core/qr/zxing/Exception.cpp \
-	core/qr/zxing/FormatException.cpp \
-	core/qr/zxing/InvertedLuminanceSource.cpp \
-	core/qr/zxing/LuminanceSource.cpp \
-	core/qr/zxing/MultiFormatReader.cpp \
-	core/qr/zxing/Reader.cpp \
-	core/qr/zxing/Result.cpp \
-	core/qr/zxing/ResultIO.cpp \
-	core/qr/zxing/ResultPoint.cpp \
-	core/qr/zxing/ResultPointCallback.cpp \
-	core/qr/zxing/aztec/AztecDetectorResult.cpp \
-	core/qr/zxing/aztec/AztecReader.cpp \
-	core/qr/zxing/common/BitArray.cpp \
-	core/qr/zxing/common/BitArrayIO.cpp \
-	core/qr/zxing/common/BitMatrix.cpp \
-	core/qr/zxing/common/BitSource.cpp \
-	core/qr/zxing/common/CharacterSetECI.cpp \
-	core/qr/zxing/common/DecoderResult.cpp \
-	core/qr/zxing/common/DetectorResult.cpp \
-	core/qr/zxing/common/GlobalHistogramBinarizer.cpp \
-	core/qr/zxing/common/GreyscaleLuminanceSource.cpp \
-	core/qr/zxing/common/GreyscaleRotatedLuminanceSource.cpp \
-	core/qr/zxing/common/GridSampler.cpp \
-	core/qr/zxing/common/HybridBinarizer.cpp \
-	core/qr/zxing/common/IllegalArgumentException.cpp \
-	core/qr/zxing/common/PerspectiveTransform.cpp \
-	core/qr/zxing/common/Str.cpp \
-	core/qr/zxing/common/StringUtils.cpp \
-	core/qr/zxing/datamatrix/DataMatrixReader.cpp \
-	core/qr/zxing/datamatrix/Version.cpp \
-	core/qr/zxing/multi/ByQuadrantReader.cpp \
-	core/qr/zxing/multi/GenericMultipleBarcodeReader.cpp \
-	core/qr/zxing/multi/MultipleBarcodeReader.cpp \
-	core/qr/zxing/oned/CodaBarReader.cpp \
-	core/qr/zxing/oned/Code128Reader.cpp \
-	core/qr/zxing/oned/Code39Reader.cpp \
-	core/qr/zxing/oned/Code93Reader.cpp \
-	core/qr/zxing/oned/EAN13Reader.cpp \
-	core/qr/zxing/oned/EAN8Reader.cpp \
-	core/qr/zxing/oned/ITFReader.cpp \
-	core/qr/zxing/oned/MultiFormatOneDReader.cpp \
-	core/qr/zxing/oned/MultiFormatUPCEANReader.cpp \
-	core/qr/zxing/oned/OneDReader.cpp \
-	core/qr/zxing/oned/OneDResultPoint.cpp \
-	core/qr/zxing/oned/UPCAReader.cpp \
-	core/qr/zxing/oned/UPCEANReader.cpp \
-	core/qr/zxing/oned/UPCEReader.cpp \
-	core/qr/zxing/pdf417/PDF417Reader.cpp \
-	core/qr/zxing/qrcode/ErrorCorrectionLevel.cpp \
-	core/qr/zxing/qrcode/FormatInformation.cpp \
-	core/qr/zxing/qrcode/QRCodeReader.cpp \
-	core/qr/zxing/qrcode/Version.cpp \
-	core/qr/zxing/aztec/decoder/Decoder.cpp \
-	core/qr/zxing/aztec/detector/Detector.cpp \
-	core/qr/zxing/common/detector/MonochromeRectangleDetector.cpp \
-	core/qr/zxing/common/detector/WhiteRectangleDetector.cpp \
-	core/qr/zxing/common/reedsolomon/GenericGF.cpp \
-	core/qr/zxing/common/reedsolomon/GenericGFPoly.cpp \
-	core/qr/zxing/common/reedsolomon/ReedSolomonDecoder.cpp \
-	core/qr/zxing/common/reedsolomon/ReedSolomonException.cpp \
-	core/qr/zxing/datamatrix/decoder/BitMatrixParser.cpp \
-	core/qr/zxing/datamatrix/decoder/DataBlock.cpp \
-	core/qr/zxing/datamatrix/decoder/DecodedBitStreamParser.cpp \
-	core/qr/zxing/datamatrix/decoder/Decoder.cpp \
-	core/qr/zxing/datamatrix/detector/CornerPoint.cpp \
-	core/qr/zxing/datamatrix/detector/Detector.cpp \
-	core/qr/zxing/datamatrix/detector/DetectorException.cpp \
-	core/qr/zxing/multi/qrcode/QRCodeMultiReader.cpp \
-	core/qr/zxing/pdf417/decoder/BitMatrixParser.cpp \
-	core/qr/zxing/pdf417/decoder/DecodedBitStreamParser.cpp \
-	core/qr/zxing/pdf417/decoder/Decoder.cpp \
-	core/qr/zxing/pdf417/detector/Detector.cpp \
-	core/qr/zxing/pdf417/detector/LinesSampler.cpp \
-	core/qr/zxing/qrcode/decoder/BitMatrixParser.cpp \
-	core/qr/zxing/qrcode/decoder/DataBlock.cpp \
-	core/qr/zxing/qrcode/decoder/DataMask.cpp \
-	core/qr/zxing/qrcode/decoder/DecodedBitStreamParser.cpp \
-	core/qr/zxing/qrcode/decoder/Decoder.cpp \
-	core/qr/zxing/qrcode/decoder/Mode.cpp \
-	core/qr/zxing/qrcode/detector/AlignmentPattern.cpp \
-	core/qr/zxing/qrcode/detector/AlignmentPatternFinder.cpp \
-	core/qr/zxing/qrcode/detector/Detector.cpp \
-	core/qr/zxing/qrcode/detector/FinderPattern.cpp \
-	core/qr/zxing/qrcode/detector/FinderPatternFinder.cpp \
-	core/qr/zxing/qrcode/detector/FinderPatternInfo.cpp \
-	core/qr/zxing/multi/qrcode/detector/MultiDetector.cpp \
-	core/qr/zxing/multi/qrcode/detector/MultiFinderPatternFinder.cpp \
-	core/qr/zxing/pdf417/decoder/ec/ErrorCorrection.cpp \
-	core/qr/zxing/pdf417/decoder/ec/ModulusGF.cpp \
-	core/qr/zxing/pdf417/decoder/ec/ModulusPoly.cpp \
-	core/qr/bigint/BigInteger.cc \
-	core/qr/bigint/BigIntegerAlgorithms.cc \
-	core/qr/bigint/BigIntegerUtils.cc \
-	core/qr/bigint/BigUnsigned.cc \
-	core/qr/bigint/BigUnsignedInABase.cc \
 	core/qr/libqrencode/bitstream.c \
 	core/qr/libqrencode/mask.c \
 	core/qr/libqrencode/mmask.c \
@@ -249,17 +149,14 @@ QR_SRC_FILES := \
 	core/qr/libqrencode/qrspec.c \
 	core/qr/libqrencode/rsecc.c \
 	core/qr/libqrencode/split.c \
-	core/qr/adapter/QRCodeProcessor.cpp \
-	core/qr/adapter/BufferBitmapSource.cpp
-
-# QR codes
-LOCAL_SRC_FILES += $(QR_SRC_FILES)
-LOCAL_CFLAGS += -Ijni/core/qr
-LOCAL_CPPFLAGS += -fexceptions
-LOCAL_SHARED_LIBRARIES += libiconv
+	core/qr/quirc/decode.c \
+	core/qr/quirc/identify.c \
+	core/qr/quirc/quirc.c \
+	core/qr/quirc/version_db.c \
+	core/qr/adapter/qrprocess.c
 
 LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
-LOCAL_LDLIBS :=-llog -lGLESv2 -lz
+LOCAL_LDLIBS := -llog -lGLESv2 -lz
 LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
 
 ifeq ($(APP_ABI),armeabi-v7a)
@@ -274,6 +171,10 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include
 LOCAL_SHARED_LIBRARIES += ssl-prebuilt
 LOCAL_SHARED_LIBRARIES += crypto-prebuilt
+
+# QR codes
+LOCAL_SRC_FILES += $(QR_SRC_FILES)
+LOCAL_CFLAGS += -Ijni/core/qr
 
 #RELEASE will stub out the LOG function
 ifeq (${RELEASE}, 1)
