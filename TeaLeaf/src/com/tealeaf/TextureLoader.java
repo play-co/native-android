@@ -207,7 +207,7 @@ public class TextureLoader implements Runnable {
 					bmp.recycle();
 				}
 				return bScaled;
-			} els e{
+			} else {
 				return bmp;
 			}
 		} else {
@@ -249,7 +249,7 @@ public class TextureLoader implements Runnable {
 					bmp.recycle();
 				}
 				return bScaled;
-			} els e{
+			} else {
 				return bmp;
 			}
 		} else {
@@ -575,7 +575,7 @@ public class TextureLoader implements Runnable {
 				return;
 			}
 		} else if (url.startsWith("@GALLERYPHOTO")) {
-			bmp = loadGalleryPicture(url.substring(13), 256, 256);
+			bmp = loadGalleryPicture(url.substring(13), 256, 256, 1);
 			if (bmp == null) {
 				return;
 			}

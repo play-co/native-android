@@ -20,6 +20,11 @@ LOCAL_SRC_FILES := lib/libgcl.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libiconv
+LOCAL_SRC_FILES := lib/libiconv.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libv8a
 LOCAL_SRC_FILES := lib/libv8.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -247,8 +252,11 @@ QR_SRC_FILES := \
 	core/qr/adapter/QRCodeProcessor.cpp \
 	core/qr/adapter/BufferBitmapSource.cpp
 
+# QR codes
 LOCAL_SRC_FILES += $(QR_SRC_FILES)
 LOCAL_CFLAGS += -Ijni/core/qr
+LOCAL_CPPFLAGS += -fexceptions
+LOCAL_SHARED_LIBRARIES += libiconv
 
 LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
 LOCAL_LDLIBS :=-llog -lGLESv2 -lz
