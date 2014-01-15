@@ -16,7 +16,7 @@
  */
 #include "js_photo.h"
 #include "platform/photo.h"
-#include "core/adapter/QRCodeProcessor.h"
+#include "qr/adapter/QRCodeProcessor.h"
 
 using namespace v8;
 
