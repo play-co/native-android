@@ -373,15 +373,15 @@ public class NativeShim {
 		}
 	}
 
-    public int cameraGetPhoto(int width, int height) {
+    public int cameraGetPhoto(int width, int height, int crop) {
         int id = textureLoader.getNextCameraId();
-        textureLoader.loadCameraPicture("" + id, width, height);
+        textureLoader.loadCameraPicture("" + id, width, height, crop);
         return id;
     }
 
-    public int galleryGetPhoto(int width, int height) {
+    public int galleryGetPhoto(int width, int height, int crop) {
         int id = textureLoader.getNextGalleryId();
-        textureLoader.loadGalleryPicture("" + id, width, height);
+        textureLoader.loadGalleryPicture("" + id, width, height, crop);
         return id;
     }
 

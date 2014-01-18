@@ -189,7 +189,7 @@ public class TextureLoader implements Runnable {
 		contactPicturesLoader.addPicturesToLoad(url);
 	}
 
-	public Bitmap loadGalleryPicture(String id, int width, int height) {
+	public Bitmap loadGalleryPicture(String id, int width, int height, int crop) {
 		if (galleryPictureLoaderThread == null) {
 			galleryPictureLoader = new PhotoLoader("GALLERYPHOTO");
 			galleryPictureLoaderThread = new Thread(galleryPictureLoader);
@@ -201,10 +201,18 @@ public class TextureLoader implements Runnable {
 		Bitmap bmp = photoPicker.getResult("galleryphoto", intid);
 
 		if(bmp != null) {
-			return scaleTo(width, height, bmp);
+			if (crop != 0) {
+				Bitmap bScaled = scaleTo(width, height, bmp);
+				if (bScaled != bmp) {
+					bmp.recycle();
+				}
+				return bScaled;
+			} else {
+				return bmp;
+			}
 		} else {
             photoId = Integer.parseInt(id);
-			galleryPictureLoader.addPictureAndSize(intid, width, height);
+			galleryPictureLoader.addPictureAndSize(intid, width, height, crop);
 			photoPicker.choose(intid);
 		}
 		return null;
@@ -224,7 +232,7 @@ public class TextureLoader implements Runnable {
 		loadingError("@GALLERYPHOTO" + photoId);
 	}
 
-	public Bitmap loadCameraPicture(String id, int width, int height) {
+	public Bitmap loadCameraPicture(String id, int width, int height, int crop) {
 		if (cameraPictureLoaderThread == null) {
 			cameraPictureLoader = new PhotoLoader("CAMERA");
 			cameraPictureLoaderThread = new Thread(cameraPictureLoader);
@@ -235,14 +243,18 @@ public class TextureLoader implements Runnable {
 		Bitmap bmp = photoPicker.getResult("camera", intid);
 
 		if (bmp != null) {
-            Bitmap bScaled = scaleTo(width, height, bmp);
-            if (bScaled != bmp) {
-                bmp.recycle();
-            }
-			return bScaled;
+			if (crop != 0) {
+				Bitmap bScaled = scaleTo(width, height, bmp);
+				if (bScaled != bmp) {
+					bmp.recycle();
+				}
+				return bScaled;
+			} else {
+				return bmp;
+			}
 		} else {
             photoId = Integer.parseInt(id);
-			cameraPictureLoader.addPictureAndSize(intid, width, height);
+			cameraPictureLoader.addPictureAndSize(intid, width, height, crop);
 			photoPicker.take(intid);
 		}
 		return null;
@@ -324,6 +336,7 @@ public class TextureLoader implements Runnable {
 		private HashMap<Integer, Pair<Integer, Integer>> ids = new HashMap<Integer, Pair<Integer, Integer>>();
 		private ArrayList<Pair<Integer, Pair<Integer, Integer>>> finished = new ArrayList<Pair<Integer, Pair<Integer, Integer>>>();
 		private String tag;
+		private int doCrop;
 
 		public PhotoLoader(String tag) {
 			this.tag = tag;
@@ -335,7 +348,7 @@ public class TextureLoader implements Runnable {
 				try {
 					synchronized (monitor) {
 						monitor.wait();
-						logger.log("{texture} Camera finished. Loading the picture");
+						logger.log("{texture} Camera finished. Loading the picture with crop=", this.doCrop);
 					}
 
 					ArrayList<Pair<Integer, Pair<Integer, Integer>>> ids = getLoadedIds();
@@ -344,10 +357,16 @@ public class TextureLoader implements Runnable {
 						Pair<Integer, Integer> sizePair = pair.second;
 						Bitmap bmp = photoPicker.getResult(tag.toLowerCase(), id);
 						if (bmp != null) {
-                            Bitmap bScaled = scaleTo(sizePair.first, sizePair.second, bmp);
-                            if (!bScaled.isRecycled()) {
-                                bmp.recycle();
-                            }
+							Bitmap bScaled = null;
+							if (this.doCrop != 0) {
+								bScaled = scaleTo(sizePair.first, sizePair.second, bmp);
+								if (!bScaled.isRecycled()) {
+									bmp.recycle();
+								}
+							} else {
+								bScaled = bmp;
+							}
+
                             loadTexture("@" + tag.toUpperCase() + id + "-" + sizePair.first + "x" + sizePair.second, bScaled, false);
                             sendPhotoLoadedEvent(bScaled);
                         } else {
@@ -360,7 +379,9 @@ public class TextureLoader implements Runnable {
 			}
 		}
 
-		private void addPictureAndSize(int id, int width, int height) {
+		private void addPictureAndSize(int id, int width, int height, int crop) {
+			this.doCrop = crop;
+
 			ids.put(id, new Pair<Integer, Integer>(width, height));
 		}
 
@@ -548,13 +569,13 @@ public class TextureLoader implements Runnable {
 			loadContactPictures(url);
 			return;
 		} else if (url.startsWith("@CAMERA")) {
-			bmp = loadCameraPicture(url.substring(7), 256, 256);
+			bmp = loadCameraPicture(url.substring(7), 256, 256, 1);
 			if (bmp == null) {
 				// we need to wait for the picture to be taken
 				return;
 			}
 		} else if (url.startsWith("@GALLERYPHOTO")) {
-			bmp = loadGalleryPicture(url.substring(13), 256, 256);
+			bmp = loadGalleryPicture(url.substring(13), 256, 256, 1);
 			if (bmp == null) {
 				return;
 			}

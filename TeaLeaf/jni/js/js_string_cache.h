@@ -140,6 +140,8 @@ extern Persistent<String> STRING_CACHE_localStorage;
 extern Persistent<String> STRING_CACHE_onRead;
 extern Persistent<String> STRING_CACHE_getNextId;
 extern Persistent<String> STRING_CACHE_getPhoto;
+extern Persistent<String> STRING_CACHE_processQR;
+extern Persistent<String> STRING_CACHE_encodeQR;
 extern Persistent<String> STRING_CACHE_onAnimationFinish;
 extern Persistent<String> STRING_CACHE_type;
 extern Persistent<String> STRING_CACHE_milliseconds;

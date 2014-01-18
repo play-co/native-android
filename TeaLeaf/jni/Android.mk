@@ -20,6 +20,11 @@ LOCAL_SRC_FILES := lib/libgcl.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libiconv
+LOCAL_SRC_FILES := lib/libiconv.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libv8a
 LOCAL_SRC_FILES := lib/libv8.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -134,8 +139,24 @@ PROFILE_SRC_FILES := 	lib/v8-profiler/cpu_profiler.cpp	  \
 			lib/v8-profiler/node_buffer.cpp		              \
 			lib/v8-profiler/profiler.cpp
 
+QR_SRC_FILES := \
+	core/qr/libqrencode/bitstream.c \
+	core/qr/libqrencode/mask.c \
+	core/qr/libqrencode/mmask.c \
+	core/qr/libqrencode/mqrspec.c \
+	core/qr/libqrencode/qrencode.c \
+	core/qr/libqrencode/qrinput.c \
+	core/qr/libqrencode/qrspec.c \
+	core/qr/libqrencode/rsecc.c \
+	core/qr/libqrencode/split.c \
+	core/qr/quirc/decode.c \
+	core/qr/quirc/identify.c \
+	core/qr/quirc/quirc.c \
+	core/qr/quirc/version_db.c \
+	core/qr/adapter/qrprocess.c
+
 LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
-LOCAL_LDLIBS :=-llog -lGLESv2 -lz
+LOCAL_LDLIBS := -llog -lGLESv2 -lz
 LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
 
 ifeq ($(APP_ABI),armeabi-v7a)
@@ -150,6 +171,10 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include
 LOCAL_SHARED_LIBRARIES += ssl-prebuilt
 LOCAL_SHARED_LIBRARIES += crypto-prebuilt
+
+# QR codes
+LOCAL_SRC_FILES += $(QR_SRC_FILES)
+LOCAL_CFLAGS += -Ijni/core/qr
 
 #RELEASE will stub out the LOG function
 ifeq (${RELEASE}, 1)
