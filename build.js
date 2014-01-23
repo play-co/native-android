@@ -340,7 +340,7 @@ var installAddonCode = function(builder, opts, next) {
 						}
 
 						fs.writeFile(outFile, data, 'utf-8', f.wait());
-					} if (path.extname(filePath) === ".so") {
+					} else if (path.extname(filePath) === ".so") {
 						var outFile = path.join(destDir, "libs/armeabi", path.basename(filePath));
 
 						logger.log("Writing shared object", filePath, "to", outFile);
