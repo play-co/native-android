@@ -100,6 +100,8 @@ public class SoundManager implements Runnable {
 	}
 
 	public void run() {
+		AssetManager am = context.getAssets();
+
 		while (true) {
 			SoundSpec spec;
 			try {
@@ -113,7 +115,7 @@ public class SoundManager implements Runnable {
 				if (sound == null || !sound.exists()) {
 					try {
 						// not on the file system, try loading from assets
-						AssetFileDescriptor afd = context.getAssets().openFd("resources/" + spec.url);
+						AssetFileDescriptor afd = am.openFd("resources/" + spec.url);
 						synchronized (this) {
 							spec.id = soundPool.load(afd, 1);
 							id2spec.put(spec.id, spec);
