@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 
 import com.tealeaf.event.SoundDurationEvent;
 import com.tealeaf.event.SoundErrorEvent;
