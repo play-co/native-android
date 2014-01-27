@@ -19,6 +19,10 @@
 
 using namespace v8;
 
+#define MAX_BUFFERED_EVENTS 256
+static char *m_buffer[MAX_BUFFERED_EVENTS] = { 0 };
+static int m_buffer_len = 0;
+
 CEXPORT void js_dispatch_event(const char *event_str) {
 	Locker l(getIsolate());
 	HandleScope handle_scope;
@@ -40,6 +44,28 @@ CEXPORT void js_dispatch_event(const char *event_str) {
 						Handle<Function> dispatch_event = Handle<Function>::Cast(function_object);
 
 						if (dispatch_event->IsFunction()) {
+							// If buffered events exist,
+							if (m_buffer_len > 0) {
+								// Dispatch old events first:
+								LOG("{js} Dispatching queued events");
+
+								// For each buffered event,
+								for (int ii = 0; ii < m_buffer_len; ++ii) {
+									char *buffered_event_str = m_buffer[ii];
+
+									// Call handler
+									Handle<Value> args[] = { String::New(buffered_event_str) };
+									Handle<Value> result = dispatch_event->Call(global, 1, args);
+									if (result.IsEmpty()) {
+										ReportException(&try_catch);
+									}
+
+									free(buffered_event_str);
+								}
+
+								m_buffer_len = 0;
+							}
+
 							Handle<Value> args[] = { String::New(event_str) };
 							Handle<Value> result = dispatch_event->Call(global, 1, args);
 							if (result.IsEmpty()) {
@@ -54,7 +80,13 @@ CEXPORT void js_dispatch_event(const char *event_str) {
 			}
 		}
 
-		LOG("{js} ERROR: Dropped an event because the JavaScript code does not hook events");
+		// Insert buffered event
+		if (m_buffer_len < MAX_BUFFERED_EVENTS) {
+			m_buffer[m_buffer_len++] = strdup(event_str);
+			LOG("{js} WARNING: Queued an event because the JavaScript code does not hook events");
+		} else {
+			LOG("{js} ERROR: Dropped an event because the JavaScript code does not hook events");
+		}
 	} else {
 		LOG("{js} ERROR: Dropped an event because the JavaScript engine is not running");
 	}
