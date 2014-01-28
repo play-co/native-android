@@ -52,7 +52,7 @@ public class CrashRecover extends Activity {
 					finish();
 				}
 			}
-		}, 10000);
+		}, 2000);
 	}
 }
 
