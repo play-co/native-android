@@ -31,26 +31,13 @@ public class CrashRecover extends Activity {
 		setContentView(new View(this));
 		final AsyncTask<Void,Void,Void> task = new ReadLogcatTask(this).execute();
 		new AlertDialog.Builder(this)
-				.setMessage("Oops! Something went wrong. Would you like to restart the game?")
+				.setMessage("Sorry!  The game needs to restart to run better on your device.")
 				.setCancelable(false)
-				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				.setPositiveButton("Restart", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						android.util.Log.d("CrashRecover", "Starting game again...");
 						startActivity(getPackageManager().getLaunchIntentForPackage(getPackageName()));
-						finish();
-					}
-				})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						android.util.Log.d("CrashRecover", "Just exiting...");
-						moveTaskToBack(true);
-						try {
-							task.get();
-						} catch(Exception e) {
-							// this must mean the task is already finished or failed, so ignore it
-						}
 						finish();
 					}
 				}).create().show();
