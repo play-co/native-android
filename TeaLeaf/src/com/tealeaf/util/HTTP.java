@@ -29,6 +29,10 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.CookieStore;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -38,6 +42,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HttpContext;
 
 import com.tealeaf.logger;
 
@@ -49,6 +54,13 @@ public class HTTP {
 	public static final String userAgent = "Android tealeaf/1.0";
 	private static boolean caughtIOException = false;
 
+	private static CookieStore cookieStore = new BasicCookieStore();
+	private static HttpContext localContext = new BasicHttpContext();
+	
+	static {
+		localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+	}
+
 	public Pair<String, Integer> getPush(URI uri) {
 		AndroidHttpClient client = AndroidHttpClient.newInstance(userAgent);
 
@@ -56,7 +68,7 @@ public class HTTP {
 		request.setURI(uri);
 		HttpResponse response = null;
 		try {
-			response = client.execute(request);
+			response = client.execute(request, localContext);
 		} catch (SocketTimeoutException e) {
 			// forget it--we don't care that the user couldn't connect
 			// TODO log this to JS
@@ -168,7 +180,7 @@ public class HTTP {
 		Response retVal = new Response();
 		retVal.headers = new HashMap<String, String>();
 		try {
-			response = client.execute(request);
+			response = client.execute(request, localContext);
 		} catch (SocketTimeoutException e) {
 			// forget it--we don't care that the user couldn't connect
 			// TODO hand this back as an error to JS
@@ -251,7 +263,7 @@ public class HTTP {
 			}
 
 			request.setURI(uri);
-			HttpResponse response = client.execute(request);
+			HttpResponse response = client.execute(request, localContext);
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode != 200) {
 				client.close();
@@ -309,7 +321,7 @@ public class HTTP {
 			}
 
 			request.setURI(uri);
-			response = client.execute(request);
+			response = client.execute(request, localContext);
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode != 200) {
 				client.close();

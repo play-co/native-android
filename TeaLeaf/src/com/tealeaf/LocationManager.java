@@ -27,6 +27,10 @@ public class LocationManager {
 	public void setLocation(String uri) {
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setData(Uri.parse(uri));
-		tealeaf.startActivity(i);
+		try {
+			tealeaf.startActivity(i);
+		} catch (Exception e) {
+
+		}
 	}
 }
