@@ -87,11 +87,12 @@ public class PluginManager {
 				if (className.length() < pluginsPackageStrLen)
 					continue;
 
-				if (className.subSequence(0, pluginsPackageStrLen).equals(
-						PLUGINS_PACKAGE_NAME)) {
-					classNames.add(className);
+				if (!className.contains("$")) {
+					if (className.subSequence(0, pluginsPackageStrLen).equals(
+								PLUGINS_PACKAGE_NAME)) {
+						classNames.add(className);
+					}
 				}
-
 			}
 		} catch (IOException e) {
 			logger.log(e);
@@ -103,15 +104,19 @@ public class PluginManager {
 
 			for (String name : classNamesArr) {
 				try {
-					if (name.contains("$")) continue;
+					Class objcls = Class.forName(name);
 
-					Object instance = Class.forName(name).newInstance();
+					if (IPlugin.class.isAssignableFrom(objcls)) {
+						Object instance = objcls.newInstance();
 
-					if (instance != null) {
-						logger.log("{plugins} Instantiated:", name);
-						classMap.put(name, instance);
+						if (instance != null) {
+							logger.log("{plugins} Instantiated:", name);
+							classMap.put(name, instance);
+						} else {
+							logger.log("{plugins} WARNING: Class not found:", name);
+						}
 					} else {
-						logger.log("{plugins} WARNING: Class not found:", name);
+						logger.log("{plugins} Ignoring class that does not derive from IPlugin:", name);
 					}
 				} catch (ClassNotFoundException e) {
 					logger.log("{plugins} WARNING: Class not found:", name);
