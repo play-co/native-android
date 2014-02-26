@@ -341,13 +341,13 @@ var installAddonCode = function(builder, opts, next) {
 
 						fs.writeFile(outFile, data, 'utf-8', f.wait());
 					} else if (path.extname(filePath) === ".so") {
-						var outFile = path.join(destDir, "libs/armeabi", path.basename(filePath));
-
-						logger.log("Writing shared object", filePath, "to", outFile);
-
-						wrench.mkdirSyncRecursive(path.dirname(outFile));
-
-						fs.writeFile(outFile, data, 'binary', f.wait());
+						var armeabi_out = ["libs/armeabi", "libs/armeabi-v7a"];
+						for(var ii = 0; ii!= armeabi_out.length; ii++) {
+							var outFile = path.join(destDir, armeabi_out[ii], path.basename(filePath));
+							logger.log("Writing shared object", filePath, "to", outFile);
+							wrench.mkdirSyncRecursive(path.dirname(outFile));
+							fs.writeFile(outFile, data, 'binary', f.wait());
+						}
 					} else {
 						var outFile = path.join(destDir, filePath);
 
