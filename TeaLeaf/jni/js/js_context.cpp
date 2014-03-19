@@ -88,10 +88,12 @@ Handle<Value> defDestroyImage(const Arguments& args) {
     HandleScope handleScope;
     String::Utf8Value str(args[0]);
     const char *url = ToCString(str);
-    texture_2d *tex = texture_manager_get_texture(texture_manager_get(), url);
+    //call acquire here because we need to lock the mutex
+    texture_2d *tex = texture_manager_get_texture(texture_manager_acquire(), url);
     if (tex && tex->loaded) {
         texture_manager_free_texture(texture_manager_get(), tex);
     }
+    texture_manager_release();
 	LOGFN("endDestroyImage");
     return Undefined();
 }
