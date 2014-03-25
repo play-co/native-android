@@ -435,6 +435,9 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 			}
 		}
 
+    console.log('123abc');
+    console.log(params);
+
 		builder.jvmtools.exec('xslt', [
 			"--in", inFile,
 			"--out", outFileTemp,
@@ -949,6 +952,22 @@ function updateManifest(builder, opts, next) {
 			}
 		}
 
+    function copyAndFlatten(target, src, prefix) {
+      prefix = prefix || '';
+
+      for (var key in src) {
+        var val = src[key];
+        var newPrefix = prefix.length === 0 ? key : prefix + '.' + key;
+        if(typeof val === "object") {
+          copyAndFlatten(target, val, newPrefix);
+        } else {
+          // Push to final object
+          target[newPrefix] = val;
+        }
+      }
+
+    }
+
 		function rename(target, oldKey, newKey) {
 			if ('oldKey' in target) {
 				target[newKey] = target[oldKey];
@@ -972,6 +991,7 @@ function updateManifest(builder, opts, next) {
 			f(params);
 			copy(params, defaults);
 			copy(params, opts.project.manifest.android);
+			copyAndFlatten(params, opts.project.manifest.addons);
 			copy(params, {
 				"package": opts.namespace,
 				title: "@string/title",
