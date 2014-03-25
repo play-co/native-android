@@ -613,31 +613,6 @@ void timestep_view_set_filterType(v8::Local<v8::String> property, v8::Local<v8::
 
 
 
-v8::Handle<v8::Value> timestep_view_get_compositeOperation(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
-	//LOG("in timestep_view get compositeOperation");
-	v8::Local<v8::Object> thiz = info.Holder();
-	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
-	
-	int prop = obj->composite_operation;
-	//LOG("done in timestep_view get compositeOperation");
-	return v8::Integer::New(prop);
-	
-}
-
-
-
-void timestep_view_set_compositeOperation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
-	//LOG("in timestep_view set compositeOperation");
-	v8::Local<v8::Object> thiz = info.Holder();
-	timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
-	
-	obj->composite_operation = value->ToInteger()->Value();
-	
-	//LOG("done in timestep_view set compositeOperation");
-}
-
-
-
 
 v8::Handle<v8::FunctionTemplate> js_timestep_view_get_template() {
 	v8::Handle<v8::FunctionTemplate> templ = v8::FunctionTemplate::New();
@@ -675,6 +650,11 @@ v8::Handle<v8::Value> timestep_view_get_height(v8::Local<v8::String> property, c
 void timestep_view_set_height(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
 
 timestep_view->SetAccessor(v8::String::New("height"), timestep_view_get_height, timestep_view_set_height);
+v8::Handle<v8::Value> timestep_view_get_compositeOperation(v8::Local<v8::String> property, const v8::AccessorInfo &info);
+
+void timestep_view_set_compositeOperation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+
+timestep_view->SetAccessor(v8::String::New("compositeOperation"), timestep_view_get_compositeOperation, timestep_view_set_compositeOperation);
 v8::Handle<v8::Value> timestep_view_get_x(v8::Local<v8::String> property, const v8::AccessorInfo &info);
 
 void timestep_view_set_x(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
@@ -800,11 +780,6 @@ v8::Handle<v8::Value> timestep_view_get_filterType(v8::Local<v8::String> propert
 void timestep_view_set_filterType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
 
 timestep_view->SetAccessor(v8::String::New("filterType"), timestep_view_get_filterType, timestep_view_set_filterType);
-v8::Handle<v8::Value> timestep_view_get_compositeOperation(v8::Local<v8::String> property, const v8::AccessorInfo &info);
-
-void timestep_view_set_compositeOperation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
-
-timestep_view->SetAccessor(v8::String::New("compositeOperation"), timestep_view_get_compositeOperation, timestep_view_set_compositeOperation);
 
 	
 
