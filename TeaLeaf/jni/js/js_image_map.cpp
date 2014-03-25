@@ -63,7 +63,6 @@ Handle<Value> image_map_constructor(const Arguments &args) {
 		map->margin_left = args[8]->NumberValue();
 	}
 
-
 	// WARNING: must not forget to free this at some point
 	String::Utf8Value str(url_val);
 	map->url = strdup(ToCString(str));
