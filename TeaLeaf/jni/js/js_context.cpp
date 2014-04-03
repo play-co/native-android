@@ -132,6 +132,22 @@ Handle<Value> defScale(const Arguments& args) {
 
 }
 
+Handle<Value> defTransform(const Arguments& args) {
+	LOGFN("transform");
+	HandleScope handleScope;
+	double a = args[0]->NumberValue();
+	double b = args[1]->NumberValue();
+	double c = args[2]->NumberValue();
+	double d = args[3]->NumberValue();
+	double e = args[4]->NumberValue();
+	double f = args[5]->NumberValue();
+
+	context_2d_transform(GET_CONTEXT2D(), a, b, c, d, e, f);
+
+	LOGFN("endtransform");
+	return Undefined();
+}
+
 Handle<Value> defSave(const Arguments& args) {
 	LOGFN("save");
 	HandleScope handleScope;
@@ -808,6 +824,7 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
 	context_2d_class_template->Set(STRING_CACHE_rotate, FunctionTemplate::New(defRotate));
 	context_2d_class_template->Set(STRING_CACHE_scale, FunctionTemplate::New(defScale));
 	context_2d_class_template->Set(STRING_CACHE_translate, FunctionTemplate::New(defTranslate));
+	context_2d_class_template->Set(STRING_CACHE_transform, FunctionTemplate::New(defTransform));
 	context_2d_class_template->Set(STRING_CACHE_save, FunctionTemplate::New(defSave));
 	context_2d_class_template->Set(STRING_CACHE_restore, FunctionTemplate::New(defRestore));
 	context_2d_class_template->Set(STRING_CACHE_clear, FunctionTemplate::New(defClear));
