@@ -184,6 +184,7 @@ Persistent<String> STRING_CACHE_tick;
 Persistent<String> STRING_CACHE_versionCode;
 Persistent<String> STRING_CACHE_baseline;
 Persistent<String> STRING_CACHE_translate;
+Persistent<String> STRING_CACHE_transform;
 Persistent<String> STRING_CACHE_getHeight;
 Persistent<String> STRING_CACHE_setOpacity;
 Persistent<String> STRING_CACHE_strokeText;
@@ -405,6 +406,7 @@ void js_string_cache_init() {
 	STRING_CACHE_versionCode = Persistent<String>::New(String::New("versionCode"));
 	STRING_CACHE_baseline = Persistent<String>::New(String::New("baseline"));
 	STRING_CACHE_translate = Persistent<String>::New(String::New("translate"));
+	STRING_CACHE_transform = Persistent<String>::New(String::New("transform"));
 	STRING_CACHE_getHeight = Persistent<String>::New(String::New("getHeight"));
 	STRING_CACHE_setOpacity = Persistent<String>::New(String::New("setOpacity"));
 	STRING_CACHE_strokeText = Persistent<String>::New(String::New("strokeText"));

@@ -187,6 +187,7 @@ extern Persistent<String> STRING_CACHE_tick;
 extern Persistent<String> STRING_CACHE_versionCode;
 extern Persistent<String> STRING_CACHE_baseline;
 extern Persistent<String> STRING_CACHE_translate;
+extern Persistent<String> STRING_CACHE_transform;
 extern Persistent<String> STRING_CACHE_getHeight;
 extern Persistent<String> STRING_CACHE_setOpacity;
 extern Persistent<String> STRING_CACHE_strokeText;
