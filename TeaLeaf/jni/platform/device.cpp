@@ -58,3 +58,11 @@ CEXPORT float device_get_text_scale() {
 CEXPORT void device_set_text_scale(float scale) {
 	text_scale = scale;
 }
+
+CEXPORT bool device_is_simulator() {
+	native_shim *shim = get_native_shim();
+	jmethodID method = shim->env->GetMethodID(shim->type, "isSimulator", "()Z");
+	jboolean result = shim->env->CallIntMethod(shim->instance, method);
+	return result;
+
+}

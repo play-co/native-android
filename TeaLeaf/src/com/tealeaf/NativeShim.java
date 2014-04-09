@@ -46,6 +46,7 @@ import android.view.Window;
 
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.os.Build;
 
 public class NativeShim {
 	private static HashMap<String, TeaLeafCallable> callables = new HashMap<String, TeaLeafCallable>();
@@ -792,6 +793,10 @@ public class NativeShim {
 	public String getLocaleLanguage() {
 		return LocaleInfo.getLanguage(context);
 	}
+
+    public boolean isSimulator() {
+        return Build.HARDWARE.contains("goldfish");
+    }
 
 	//Initialization and Running JS
 	public static native boolean initIsolate();

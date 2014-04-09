@@ -187,6 +187,12 @@ Handle<Value> js_native_call(const Arguments& args) {
 	return retStr;
 }
 
+CEXPORT bool device_is_simulator();
+Handle<Value> js_is_simulator(const Arguments& args) {
+	bool is_simulator = device_is_simulator();
+	return Boolean::New(is_simulator);
+}
+
 
 Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* native_hash) {
 	Handle<ObjectTemplate> NATIVE = ObjectTemplate::New();
@@ -204,6 +210,7 @@ Handle<ObjectTemplate> js_native_get_template(const char* uri, const char* nativ
 	NATIVE->Set(STRING_CACHE_uploadDeviceInfo, FunctionTemplate::New(js_native_upload_device_info));
 	NATIVE->Set(STRING_CACHE_getCurrentTimeMicroseconds, FunctionTemplate::New(js_native_get_microseconds));
 	NATIVE->Set(STRING_CACHE_reload, FunctionTemplate::New(js_native_reload));
+	NATIVE->Set(STRING_CACHE_isSimulator, FunctionTemplate::New(js_is_simulator));
 
 	// templates
 	NATIVE->Set(STRING_CACHE_console, js_console_get_template());
