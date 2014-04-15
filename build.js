@@ -401,8 +401,12 @@ var installAddonCode = function(builder, opts, next) {
 			for (var ii = 0; ii < jars.length; ++ii) {
 				var jarPath = jars[ii];
 				var jarDestPath = path.join(destDir, "libs", path.basename(jarPath));
-				logger.log("Installing JAR file:", jarDestPath);
-				fs.symlinkSync(jarPath, jarDestPath, 'junction');
+				if (!fs.existsSync(jarDestPath)) {
+					logger.log("Installing JAR file:", jarDestPath);
+					fs.symlinkSync(jarPath, jarDestPath, 'junction');
+				} else {
+					logger.warn("JAR file:", jarDestPath, 'already installed by other addon.');
+				}
 			}
 		} else {
 			logger.log("No JAR file data to install");
