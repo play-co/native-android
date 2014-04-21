@@ -135,7 +135,7 @@ CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
 		unsigned long sz;
 		unsigned char *data = resource_loader_read_file(texture->url, &sz);
 
-		texture->pixel_data = texture_2d_load_texture_raw(texture->url, data, sz, &texture->num_channels, &texture->width, &texture->height, &texture->originalWidth, &texture->originalHeight, &texture->scale);
+		texture->pixel_data = texture_2d_load_texture_raw(texture->url, data, sz, &texture->num_channels, &texture->width, &texture->height, &texture->originalWidth, &texture->originalHeight, &texture->scale, &texture->used_texture_bytes, &texture->compression_type);
 
 		free(data);
 	}
