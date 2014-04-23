@@ -135,7 +135,7 @@ CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
 		unsigned long sz;
 		unsigned char *data = resource_loader_read_file(texture->url, &sz);
 
-		texture->pixel_data = texture_2d_load_texture_raw(texture->url, data, sz, &texture->num_channels, &texture->width, &texture->height, &texture->originalWidth, &texture->originalHeight, &texture->scale);
+		texture->pixel_data = texture_2d_load_texture_raw(texture->url, data, sz, &texture->num_channels, &texture->width, &texture->height, &texture->originalWidth, &texture->originalHeight, &texture->scale, &texture->used_texture_bytes, &texture->compression_type);
 
 		free(data);
 	}
@@ -216,12 +216,12 @@ CEXPORT unsigned char *resource_loader_read_file(const char * url, unsigned long
 		struct zip_stat stats;
 		zip_stat(APKArchive, filename, 4, &stats);
 		// + 1 for the null termination
-		*sz = file->bytes_left + 1;
+		*sz = file->bytes_left;
 		//read file to buffer
-		data = (unsigned char*)malloc(*sz);
+		data = (unsigned char*)malloc(*sz + 1);
 		memset(data, 0, *sz);
 		// only read up to size - 1 so as not to read the null termination
-		zip_fread(file, data, *sz - 1);
+		zip_fread(file, data, *sz);
 
 		zip_fclose(file);
 		pthread_mutex_unlock(&m_mutex);
