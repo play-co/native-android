@@ -172,6 +172,72 @@ Handle<Value> def_timestep_view_constructor(const Arguments& args) {
 	return Undefined();
 }
 
+void timestep_view_set_compositeOperation (Local<String> property, Local<Value> value, const AccessorInfo& info) {
+	Local<Object> thiz = info.Holder();
+	timestep_view *view = GET_TIMESTEP_VIEW(thiz);
+
+	if (!value->IsString()) {
+		view->composite_operation = 0;
+	} else {
+		String::Utf8Value str(value);
+		const char *code = ToCString(str);
+
+		int op = 0;
+		if (code[0] == 'l') {
+			op = 1345;
+		} else if (code[0] == 'x') {
+			op = 1346;
+		} else if (code[0] == 'c') {
+			op = 1347;
+		} else if (code[0] == 's') {
+			if (0 == strcmp(code, "source-atop")) {
+				op = 1337;
+			} else if (0 == strcmp(code, "source-in")) {
+				op = 1338;
+			} else if (0 == strcmp(code, "source-out")) {
+				op = 1339;
+			} else if (0 == strcmp(code, "source-over")) {
+				op = 1340;
+			}
+		} else if (code[0] == 'd') {
+			if (0 == strcmp(code, "destination-atop")) {
+				op = 1341;
+			} else if (0 == strcmp(code, "destination-in")) {
+				op = 1342;
+			} else if (0 == strcmp(code, "destination-out")) {
+				op = 1343;
+			} else if (0 == strcmp(code, "destination-over")) {
+				op = 1344;
+			}
+		}
+		if (0 == op) {
+			LOG("{view} WARNING: View given invalid composite operation %s", code);
+		}
+
+		view->composite_operation = op;
+	}
+}
+
+Handle<Value> timestep_view_get_compositeOperation(Local<String> property, const AccessorInfo& info) {
+	Local<Object> thiz = info.Holder();
+	timestep_view *view = GET_TIMESTEP_VIEW(thiz);
+
+	switch (view->composite_operation) {
+		case 1337:	return String::New("source-atop");
+		case 1338:	return String::New("source-in");
+		case 1339:	return String::New("source-out");
+		case 1340:	return String::New("source-over");
+		case 1341:	return String::New("destination-atop");
+		case 1342:	return String::New("destination-in");
+		case 1343:	return String::New("destination-out");
+		case 1344:	return String::New("destination-over");
+		case 1345:	return String::New("lighter");
+		case 1346:	return String::New("xor");
+		case 1347:	return String::New("copy");
+		default:	return Undefined();
+	}
+}
+
 void timestep_view_set_width (Local<String> property, Local<Value> value, const AccessorInfo& info) {
 	Local<Object> thiz = info.Holder();
 	timestep_view *view = GET_TIMESTEP_VIEW(thiz);

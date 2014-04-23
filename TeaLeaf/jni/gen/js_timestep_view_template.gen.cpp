@@ -650,6 +650,11 @@ v8::Handle<v8::Value> timestep_view_get_height(v8::Local<v8::String> property, c
 void timestep_view_set_height(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
 
 timestep_view->SetAccessor(v8::String::New("height"), timestep_view_get_height, timestep_view_set_height);
+v8::Handle<v8::Value> timestep_view_get_compositeOperation(v8::Local<v8::String> property, const v8::AccessorInfo &info);
+
+void timestep_view_set_compositeOperation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+
+timestep_view->SetAccessor(v8::String::New("compositeOperation"), timestep_view_get_compositeOperation, timestep_view_set_compositeOperation);
 v8::Handle<v8::Value> timestep_view_get_x(v8::Local<v8::String> property, const v8::AccessorInfo &info);
 
 void timestep_view_set_x(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
