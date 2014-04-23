@@ -435,9 +435,6 @@ function transformXSL(builder, inFile, outFile, xslFile, params, next) {
 			}
 		}
 
-    console.log('123abc');
-    console.log(params);
-
 		builder.jvmtools.exec('xslt', [
 			"--in", inFile,
 			"--out", outFileTemp,
