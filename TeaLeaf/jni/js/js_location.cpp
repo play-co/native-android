@@ -23,39 +23,39 @@ static Persistent<String> m_location;
 
 Handle<Value> jsGetLocation(Local<String> name, const AccessorInfo &info) {
 
-	LOG("{location} Returning location of %s", ToCString(String::Utf8Value(m_location)));
+    LOG("{location} Returning location of %s", ToCString(String::Utf8Value(m_location)));
 
-	return m_location;
+    return m_location;
 }
 
 static void set_location(Handle<String> location) {
-	m_location.Dispose();
-	m_location = Persistent<String>::New(location);
+    m_location.Dispose();
+    m_location = Persistent<String>::New(location);
 
-	String::Utf8Value str(m_location);
-	const char *utf8_location = ToCString(str);
+    String::Utf8Value str(m_location);
+    const char *utf8_location = ToCString(str);
 
-	location_manager_set_location(utf8_location);
+    location_manager_set_location(utf8_location);
 
-	LOG("{location} Set to %s", utf8_location);
+    LOG("{location} Set to %s", utf8_location);
 }
 
 void jsSetLocation(Local<String> name, Local<Value> value, const AccessorInfo &info) {
-	set_location(value->ToString());
+    set_location(value->ToString());
 }
 
 Handle<Value> native_set_location(const Arguments &args) {
-	LOGFN("in native set location");
+    LOGFN("in native set location");
 
-	if (args.Length() >= 1 && args[0]->IsString()) {
-		set_location(args[0]->ToString());
-	}
+    if (args.Length() >= 1 && args[0]->IsString()) {
+        set_location(args[0]->ToString());
+    }
 
-	LOGFN("end native set location");
-	return Undefined();
+    LOGFN("end native set location");
+    return Undefined();
 }
 
 void native_initialize_location(const char *uri) {
-	m_location = Persistent<String>::New(String::New(uri));
+    m_location = Persistent<String>::New(String::New(uri));
 }
 
