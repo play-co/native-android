@@ -3,12 +3,12 @@
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
  * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.
- 
+
  * The Game Closure SDK is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * Mozilla Public License v. 2.0 for more details.
- 
+
  * You should have received a copy of the Mozilla Public License v. 2.0
  * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
@@ -120,7 +120,7 @@ var getTextBetween = function(text, startToken, endToken) {
 	var offset = text.substring(start).indexOf("\n") + 1;
 	var afterStart = start + offset;
 	return text.substring(afterStart, end);
-	
+
 }
 
 var replaceTextBetween = function(text, startToken, endToken, replaceText) {
@@ -506,7 +506,7 @@ function buildSupportProjects(builder, opts, next) {
 		if (opts.arch) {
 			args.push('APP_ABI=' + opts.arch);
 		}
-		builder.common.child('ndk-build', args , { cwd: tealeafDir }, f.wait()); 
+		builder.common.child('ndk-build', args , { cwd: tealeafDir }, f.wait());
 	}).failure(function(e) {
 		logger.error("Could not build support projects:", e, e.stack);
 		process.exit(2);
@@ -909,7 +909,7 @@ function updateManifest(builder, opts, next) {
 	var defaults = {
 		// Empty defaults
 		installShortcut: "false",
-		
+
 		// Filled defaults
 		entryPoint: "gc.native.launchClient",
 		codeHost: "s.wee.cat",
@@ -919,7 +919,7 @@ function updateManifest(builder, opts, next) {
 		activePollTimeInSeconds: "10",
 		passivePollTimeInSeconds: "20",
 		syncPolling: "false",
-		disableLogs: String(opts.disableLogs), 
+		disableLogs: String(opts.disableLogs),
 		develop: String(opts.debug),
 		servicesUrl: opts.servicesURL,
 		pushUrl: opts.servicesURL + "push/%s/?key=%s&version=%s",
@@ -927,7 +927,7 @@ function updateManifest(builder, opts, next) {
 		userdataUrl: "",
 		studioName: opts.studioName,
 	};
-	
+
 	var f = ff(function() {
 		builder.packager.getGameHash(opts.project, f.slotPlain());
 		builder.packager.getSDKHash(f.slotPlain());
@@ -939,7 +939,7 @@ function updateManifest(builder, opts, next) {
 
 		if (orientations.indexOf("portrait") != -1 && orientations.indexOf("landscape") != -1) {
 			orientation = "unspecified";
-		} else if (orientations.indexOf("landscape") != -1) { 
+		} else if (orientations.indexOf("landscape") != -1) {
 			orientation = "landscape";
 		}
 
@@ -1293,11 +1293,11 @@ exports.build = function(builder, project, opts, next) {
 		}
 	}, function () {
 		if (!argv.noapk) {
-			apkPath = path.join(apkDir, shortName + ".apk"); 
+			apkPath = path.join(apkDir, shortName + ".apk");
 			if (fs.existsSync(apkPath)) {
 				fs.unlinkSync(apkPath);
 			}
-			var destApkPath = path.join(destDir, "bin", apkBuildName); 
+			var destApkPath = path.join(destDir, "bin", apkBuildName);
 			if (fs.existsSync(destApkPath)) {
 				wrench.mkdirSyncRecursive(path.dirname(apkPath), 0777);
 				builder.common.copyFileSync(destApkPath, apkPath);
