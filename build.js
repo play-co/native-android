@@ -1336,6 +1336,10 @@ exports.build = function(builder, project, opts, next) {
 				logger.log('Install: Running ' + cmd + '...');
 				builder.common.child('adb', ['shell', 'am', 'start', '-n', startCmd], {}, f.waitPlain()); //this is waitPlain because it can fail and not break.
 			}
+
+			if (argv.reveal) {
+				require('child_process').exec('open --reveal "' + apkPath + '"');
+			}
 		}
 
 		f(destDir);
