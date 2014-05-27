@@ -232,6 +232,7 @@ public class TeaLeaf extends FragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        PluginManager.init(this);
 		instance = this;
 		configureActivity();
 		String appID = findAppID();
