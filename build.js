@@ -1176,7 +1176,7 @@ exports.build = function(builder, project, opts, next) {
 
 	appID = appID.replace(PUNCTUATION_REGEX, ""); // Strip punctuation.
 	// Destination directory is the android build directory.
-	var destDir = path.join(__dirname, "build/" + shortName);
+	var destDir = argv["android-project-path"] || path.join(__dirname, "build/" + shortName);
 
 	// Remove existing build directory.
 	if (!repack) {
@@ -1221,7 +1221,6 @@ exports.build = function(builder, project, opts, next) {
 	} else {
 		apkBuildName = shortName + "-debug.apk";
 	}
-
 	var f = ff(function () {
 		if (!repack) {
 			installAddons(builder, project, opts, addonConfig, f());
@@ -1265,13 +1264,13 @@ exports.build = function(builder, project, opts, next) {
 			}, f());
 		}
 	}, function() {
-		if (!repack) {
-			copyFonts(builder, project, destDir);
-			copyIcons(builder, project, destDir);
-			copyMusic(builder, project, destDir);
-			copyResDir(project, destDir);
-			copySplash(builder, project, destDir, f());
+		copyFonts(builder, project, destDir);
+		copyIcons(builder, project, destDir);
+		copyMusic(builder, project, destDir);
+		copyResDir(project, destDir);
+		copySplash(builder, project, destDir, f());
 
+		if (!repack) {
 			installAddonCode(builder, {
 				addonConfig: addonConfig,
 				destDir: destDir,
@@ -1282,7 +1281,7 @@ exports.build = function(builder, project, opts, next) {
 	}, function () {
 		if (!repack) {
 			buildAndroidProject(builder, destDir, debug, f());
-		} else {
+		} else if(!argv.noapk) {
 			repackAPK(builder, destDir, apkBuildName, f());
 		}
 	}, function () {
