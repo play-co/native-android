@@ -62,7 +62,12 @@ public class PluginManager {
 	private static String PLUGINS_PACKAGE_NAME = "com.tealeaf.plugin.plugins";
 	private static HashMap<String, Object> classMap = new HashMap<String, Object>();
 
+	private static boolean initialized = false;
 	public static void init(Context context) {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
 		ArrayList<String> classNames = new ArrayList<String>();
 
 		try {
