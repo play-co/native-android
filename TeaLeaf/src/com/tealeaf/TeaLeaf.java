@@ -459,13 +459,30 @@ public class TeaLeaf extends FragmentActivity {
 			ActivityState.onWindowFocusLost();
 			pause();
 			unregisterReceiver(screenOffReciever);
-			//always send lost focus event
-			String[] events = {new WindowFocusLostEvent().pack()};
+			if (jsRunning) {
+				//always send lost focus event
+				String[] events = {new WindowFocusLostEvent().pack()};
 
-			// DANGER: Calling dispatchEvents() is NOT thread-safe.
-			// Doing it here because the GLThread is paused.
-			NativeShim.dispatchEvents(events);
+				// DANGER: Calling dispatchEvents() is NOT thread-safe.
+				// Doing it here because the GLThread is paused.
+				NativeShim.dispatchEvents(events);
+			}
 		}
+	}
+
+	// Functions/variable used to indicate if javascript steps
+	// should execute and if events should be dispatched
+	private boolean jsRunning = true;
+	public void stopJS() {
+		jsRunning = false;
+	}
+
+	public void startJS() {
+		jsRunning = true;
+	}
+
+	public boolean isJSRunning() {
+		return jsRunning;
 	}
 
 	@Override
@@ -485,11 +502,13 @@ public class TeaLeaf extends FragmentActivity {
 			if (glView != null && glView.running()) {
 				if (!glView.isResumeEventQueued()) {
 					PluginManager.callAll("onPause");
-					String[] events = {new PauseEvent().pack()};
+					if (jsRunning) {
+						String[] events = {new PauseEvent().pack()};
 
-					// DANGER: Calling dispatchEvents() is NOT thread-safe.
-					// Doing it here because the GLThread is paused.
-					NativeShim.dispatchEvents(events);
+						// DANGER: Calling dispatchEvents() is NOT thread-safe.
+						// Doing it here because the GLThread is paused.
+						NativeShim.dispatchEvents(events);
+					}
 					glView.setRendererStateReloading();
 				}
 

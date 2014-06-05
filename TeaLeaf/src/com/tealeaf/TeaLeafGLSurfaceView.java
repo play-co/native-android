@@ -447,6 +447,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				} else {
 					if (NativeShim.initJS(view.context.getLaunchUri(),
 							view.context.getOptions().getAndroidHash())) {
+						NativeShim.run();
 						state = FIRST_LOAD;
 					} else {
 						state = FIRST_INIT_FAIL;
@@ -508,6 +509,9 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 					handleInitFail("Initialization error",
 							"Unable to initialize JavaScript VM");
 				}
+
+				PluginManager.callAll("onFirstRun");
+
 				break;
 			case FIRST_INIT_FAIL:
 				logger.log("{js} Retrying native.js download...");
@@ -518,7 +522,8 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			case WAIT_FOR_RETRY:
 				break;
 			case FIRST_LOAD:
-				runJS();
+				this.view.glThreadId = Thread.currentThread().getId();
+				NativeShim.resizeScreen(width, height);
 				state = READY;
 				break;
 			// fall-thru
@@ -533,7 +538,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				break;
 			}
 
-			if (state != FIRST_RUN) {
+			if (TeaLeaf.get().isJSRunning() && state != FIRST_RUN) {
 				step();
 			}
 
@@ -548,13 +553,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				//pause the renderer and glview
 				this.onPause();
 			}
-		}
-
-		private void runJS() {
-			this.view.glThreadId = Thread.currentThread().getId();
-			NativeShim.resizeScreen(width, height);
-			NativeShim.run();
-			state = READY;
 		}
 
 		static class InputEvents {
