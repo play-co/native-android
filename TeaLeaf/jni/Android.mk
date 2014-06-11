@@ -164,12 +164,12 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/qr
 LOCAL_SHARED_LIBRARIES += ssl-prebuilt
 LOCAL_SHARED_LIBRARIES += crypto-prebuilt
 
 # QR codes
 LOCAL_SRC_FILES += $(QR_SRC_FILES)
-LOCAL_CFLAGS += -Ijni/core/qr
 
 #RELEASE will stub out the LOG function
 ifeq (${RELEASE}, 1)
