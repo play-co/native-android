@@ -500,8 +500,8 @@ Handle<Value> def_timestep_view_localizePoint(const Arguments &args) {
     y -= v->y + v->anchor_y + v->offset_y;
 
     if (v->r) {
-        double cosr = cos(v->r);
-        double sinr = sin(v->r);
+        double cosr = cos(-(v->r));
+        double sinr = sin(-(v->r));
         double x2 = x;
         double y2 = y;
         x = x2 * cosr - y2 * sinr;
