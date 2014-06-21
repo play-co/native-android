@@ -210,9 +210,6 @@ void timestep_view_set_compositeOperation (Local<String> property, Local<Value> 
                 op = 1344;
             }
         }
-        if (0 == op) {
-            LOG("{view} WARNING: View given invalid composite operation %s", code);
-        }
 
         view->composite_operation = op;
     }

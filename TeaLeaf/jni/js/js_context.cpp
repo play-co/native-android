@@ -284,38 +284,39 @@ double measureText(Handle<Object> font_info, char **text) {
     if (custom_font.IsEmpty()) {
         return 0;
     }
+
     Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_dimensions));
     if (dimensions.IsEmpty()) {
         return 0;
     }
 
     Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_horizontal));
+
     float scale = font_info->Get(STRING_CACHE_scale)->NumberValue();
-
     float space_width = horizontal->Get(STRING_CACHE_width)->NumberValue() * scale;
-    float tracking = horizontal->Get(STRING_CACHE_tracking)->NumberValue() * scale;
-    float outline = horizontal->Get(STRING_CACHE_outline)->NumberValue() * scale;
-
-    Handle<String> sOW = STRING_CACHE_ow;
+    float tab_width = 4 * space_width;
+    Handle<Object> settings = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_settings));
+    float spacing = settings->Get(STRING_CACHE_spacing)->NumberValue() * scale;
 
     char c = '\0';
     for (int i = 0; (c = (*text)[i]) != 0; i++) {
         if (c == ' ') {
             width += space_width;
+        } else if (c == '\t') {
+            width += tab_width;
         } else {
             Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)c)));
             if (!dimension.IsEmpty() && dimension->IsObject()) {
-                int ow = dimension->Get(sOW)->Int32Value();
-
-                width += (ow - 2) * scale;
+                int xadvance = dimension->Get(STRING_CACHE_xadvance)->Int32Value();
+                width += xadvance * scale;
             } else {
                 return -1;
             }
         }
-        width += tracking - outline;
+        width += spacing;
     }
 
-    return width + 2 * scale;
+    return width;
 }
 
 Handle<Value> defMeasureTextBitmap(const Arguments &args) {
@@ -380,72 +381,79 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
     double x = args[1]->NumberValue();
     double y = args[2]->NumberValue();
     String::Utf8Value text_str(args[3]);
+    double max_width = args[4]->NumberValue();
     const char *text = ToCString(text_str);
-
-    Handle<Object> font_info = args[5]->ToObject();
+    // args[5] is color, done by the filter
+    Handle<Object> font_info = args[6]->ToObject();
     Handle<Object> custom_font = Handle<Object>::Cast(font_info->Get(STRING_CACHE_customFont));
-    Handle<Object> images1 = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_images));
-    int image_type = args[6]->Int32Value();
-    Handle<Object> images2 = Handle<Object>::Cast(images1->Get(Number::New(image_type)));
+    Handle<Object> images;
+    int is_stroke = args[7]->Int32Value();
+    if (is_stroke == 1) {
+        images = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_strokeImages));
+    } else {
+        images = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_images));
+    }
     Handle<Object> dimensions = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_dimensions));
     Handle<Object> horizontal = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_horizontal));
 
-    char ch;
-    for (int i = 0; (ch = text[i]) != 0; i++) {
-        if (ch != ' ') {
-            Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)ch)));
-            if (dimension.IsEmpty() || !dimension->IsObject()) {
-                return Boolean::New(false);
-            }
-        }
+    double width = measureText(font_info, (char**)&text);
+
+    float scale = 1;
+    Handle<Value> scale_value = font_info->Get(STRING_CACHE_scale);
+    if (!scale_value.IsEmpty()) {
+        scale = scale_value->NumberValue();
     }
 
-    // declare strings that are referenced for each character for performance
-    Handle<String> sI = STRING_CACHE_i;
-    Handle<String> sX = STRING_CACHE_x;
-    Handle<String> sY = STRING_CACHE_y;
-    Handle<String> sW = STRING_CACHE_w;
-    Handle<String> sH = STRING_CACHE_h;
-    Handle<String> sOW = STRING_CACHE_ow;
-    Handle<String> sOH = STRING_CACHE_oh;
-    Handle<String> sSRC = STRING_CACHE__src;
+    if (width > max_width) {
+        scale *= max_width / width;
+    }
 
-    float scale = font_info->Get(STRING_CACHE_scale)->NumberValue();
-    float space_width = horizontal->Get(STRING_CACHE_width)->NumberValue() * scale;
-    float tracking = horizontal->Get(STRING_CACHE_tracking)->NumberValue() * scale;
-    float outline = horizontal->Get(STRING_CACHE_outline)->NumberValue() * scale;
+    float space_width = 4;
+    Handle<Value> space_width_value = horizontal->Get(STRING_CACHE_width);
+    if (!space_width_value.IsEmpty()) {
+        space_width = space_width_value->NumberValue() * scale;
+    }
+    float tab_width = 4 * space_width;
+
+    float spacing = 0;
+    Handle<Object> settings = Handle<Object>::Cast(custom_font->Get(STRING_CACHE_settings));
+    Handle<Value> spacing_value = settings->Get(STRING_CACHE_spacing);
+    if (!spacing_value.IsEmpty()) {
+        spacing = spacing_value->NumberValue() * scale;
+    }
 
     y += textBaselineValue(ctx, custom_font, scale);
     x += textAlignValue(ctx, font_info, (char**)&text);
 
-    int current_image_index = -1;
-
+    int current_sheet_index = -1;
     Handle<Object> image;
     Handle<String> src_tex;
     char *url = NULL;
-
     char c = '\0';
     for (int i = 0; (c = text[i]) != 0; i++) {
         if (c == ' ') {
-            x += space_width + tracking - outline;
+            x += space_width + spacing;
+        } else if (c == '\t') {
+            x += tab_width + spacing;
         } else {
             Handle<Object> dimension = Handle<Object>::Cast(dimensions->Get(Number::New((int)c)));
             if (!dimension.IsEmpty() && dimension->IsObject()) {
-                int image_index = dimension->Get(sI)->Int32Value();
-                int sx = dimension->Get(sX)->Int32Value();
-                int sy = dimension->Get(sY)->Int32Value();
-                int sw = dimension->Get(sW)->Int32Value();
-                int sh = dimension->Get(sH)->Int32Value();
-                double ow = dimension->Get(sOW)->NumberValue();
-                double oh = dimension->Get(sOH)->NumberValue();
+                int sheet_index = dimension->Get(STRING_CACHE_sheetIndex)->Int32Value();
+                int sx = dimension->Get(STRING_CACHE_x)->Int32Value();
+                int sy = dimension->Get(STRING_CACHE_y)->Int32Value();
+                int sw = dimension->Get(STRING_CACHE_w)->Int32Value();
+                int sh = dimension->Get(STRING_CACHE_h)->Int32Value();
+                int ox = dimension->Get(STRING_CACHE_ox)->Int32Value();
+                int oy = dimension->Get(STRING_CACHE_oy)->Int32Value();
+                int xadvance = dimension->Get(STRING_CACHE_xadvance)->Int32Value();
 
                 rect_2d src_rect = {sx, sy, sw, sh};
-                rect_2d dest_rect = {x, y + (oh - 1) * scale, sw * scale, (sh - 2) * scale};
+                rect_2d dest_rect = {x + ox * scale, y + oy * scale, sw * scale, sh * scale};
 
-                if (current_image_index != image_index) {
-                    current_image_index = image_index;
-                    image = Handle<Object>::Cast(images2->Get(Number::New(image_index)));
-                    src_tex = image->Get(sSRC)->ToString();
+                if (current_sheet_index != sheet_index) {
+                    current_sheet_index = sheet_index;
+                    image = Handle<Object>::Cast(images->Get(Number::New(sheet_index)));
+                    src_tex = image->Get(STRING_CACHE__src)->ToString();
                     free(url);
                     String::Utf8Value src_tex_str(src_tex);
                     url = strdup(ToCString(src_tex_str));
@@ -453,9 +461,9 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
 
                 context_2d_drawImage(context, 0, url, &src_rect, &dest_rect);
 
-                x += (ow - 2) * scale + tracking - outline;
+                x += xadvance * scale + spacing;
             } else {
-                x += space_width + tracking - outline;
+                x += space_width + spacing;
             }
         }
     }
