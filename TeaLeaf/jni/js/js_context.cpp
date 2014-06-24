@@ -404,7 +404,7 @@ Handle<Value> defFillTextBitmap(const Arguments &args) {
         scale = scale_value->NumberValue();
     }
 
-    if (width > max_width) {
+    if (width > max_width && width > 0) {
         scale *= max_width / width;
     }
 
