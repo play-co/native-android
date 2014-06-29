@@ -247,117 +247,6 @@ Handle<Value> timestep_view_get_compositeOperation(Local<String> property, const
     }
 }
 
-void timestep_view_set_width (Local<String> property, Local<Value> value, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    double width = view->width;
-
-    if (value->IsUndefined() || value->IsNull()) {
-        view->width = UNDEFINED_DIMENSION;
-    } else {
-        view->width = value->NumberValue();
-    }
-
-    if (width != view->width) {
-        if (!view->js_view.IsEmpty()) {
-            def_timestep_view_needs_reflow(view->js_view, false);
-        }
-    }
-}
-
-Handle<Value> timestep_view_get_width(Local<String> property, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    if (view->width == UNDEFINED_DIMENSION) {
-        return Undefined();
-    } else {
-        return Number::New(view->width);
-    }
-}
-
-void timestep_view_set_height (Local<String> property, Local<Value> value, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    double height = view->height;
-
-    if (value->IsUndefined() || value->IsNull()) {
-        view->height = UNDEFINED_DIMENSION;
-    } else {
-        view->height = value->NumberValue();
-    }
-
-    if (height != view->height) {
-        if (!view->js_view.IsEmpty()) {
-            def_timestep_view_needs_reflow(view->js_view, false);
-        }
-    }
-}
-
-Handle<Value> timestep_view_get_height (Local<String> property, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    if (view->height == UNDEFINED_DIMENSION) {
-        return Undefined();
-    } else {
-        return Number::New(view->height);
-    }
-}
-void timestep_view_set_widthPercent(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    double width_percent = view->width_percent;
-
-    view->width_percent = value->NumberValue();
-
-    if (width_percent != view->width_percent) {
-        if (!view->js_view.IsEmpty()) {
-            def_timestep_view_needs_reflow(view->js_view, false);
-        }
-    }
-}
-
-Handle<Value> timestep_view_get_widthPercent(Local<String> property, const AccessorInfo &info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    if (view->width == UNDEFINED_DIMENSION) {
-        return Undefined();
-    } else {
-        return Number::New(view->width_percent);
-    }
-}
-
-void timestep_view_set_heightPercent (Local<String> property, Local<Value> value, const AccessorInfo& info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    double height_percent = view->height_percent;
-
-    view->height_percent = value->NumberValue();
-
-    if (height_percent != view->height_percent) {
-        if (!view->js_view.IsEmpty()) {
-            def_timestep_view_needs_reflow(view->js_view, false);
-        }
-    }
-}
-
-Handle<Value> timestep_view_get_heightPercent(Local<String> property, const AccessorInfo &info) {
-    Local<Object> thiz = info.Holder();
-    timestep_view *view = GET_TIMESTEP_VIEW(thiz);
-
-    if (view->height == UNDEFINED_DIMENSION) {
-        return Undefined();
-    } else {
-        return Number::New(view->height_percent);
-    }
-}
-
 void timestep_view_set_zIndex (Local<String> property, Local<Value> value, const AccessorInfo& info) {
     Local<Object> thiz = info.Holder();
     timestep_view *view = GET_TIMESTEP_VIEW(thiz);
@@ -379,6 +268,53 @@ void timestep_view_set_opacity (Local<String> property, Local<Value> value, cons
         }
     }
 }
+
+
+// -- the following setters/getters are copied from auto-gen templates for the
+// -- non-underscore variants, allowing JS to set width/height using either
+// -- .width/.height or ._width/._height.
+
+v8::Handle<v8::Value> timestep_view_get__width(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
+    //LOG("in timestep_view get _width");
+    v8::Local<v8::Object> thiz = info.Holder();
+    timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+
+    double prop = obj->width;
+    //LOG("done in timestep_view get _width");
+    return v8::Number::New(prop);
+}
+
+void timestep_view_set__width(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
+    //LOG("in timestep_view set _width");
+    v8::Local<v8::Object> thiz = info.Holder();
+    timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+
+    obj->width = value->ToNumber()->Value();
+
+    //LOG("done in timestep_view set _width");
+}
+
+v8::Handle<v8::Value> timestep_view_get__height(v8::Local<v8::String> property, const v8::AccessorInfo &info) {
+    //LOG("in timestep_view get _height");
+    v8::Local<v8::Object> thiz = info.Holder();
+    timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+
+    double prop = obj->height;
+    //LOG("done in timestep_view get _height");
+    return v8::Number::New(prop);
+}
+
+void timestep_view_set__height(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo &info) {
+    //LOG("in timestep_view set _height");
+    v8::Local<v8::Object> thiz = info.Holder();
+    timestep_view *obj = (timestep_view*) v8::Local<v8::External>::Cast(thiz->GetInternalField(0))->Value();
+
+    obj->height = value->ToNumber()->Value();
+
+    //LOG("done in timestep_view set _height");
+}
+
+// -- end copy
 
 void def_timestep_view_render(Handle<Object> js_view, Handle<Object> js_ctx, Handle<Object> js_opts) {
     Handle<Function> render = Handle<Function>::Cast(js_view->Get(STRING_CACHE_render));
