@@ -14,6 +14,7 @@ bin
 gen
 obj
 armeabi
+node_modules
 
 # application files
 *.apk
