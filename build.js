@@ -1135,7 +1135,7 @@ function updateActivity(opts, next) {
 	}
 }
 
-exports.build = function(builder, project, opts, next) {
+exports.build = function(builder, project, opts, cb) {
 	logger = new builder.common.Formatter('native-android');
 
 	var argv = opts.argv;
@@ -1145,7 +1145,7 @@ exports.build = function(builder, project, opts, next) {
 
 	var clean = argv.clean;
 
-	var repack = argv.repack;
+	var repack = argv.repack || argv['js-only'];
 
 	// Disable logs if --logging is not specified and in release mode.
 	var disableLogs = !argv.logging && !debug;
@@ -1347,5 +1347,5 @@ exports.build = function(builder, project, opts, next) {
 	}).error(function (err) {
 		logger.error("Build failure:", err, err.stack);
 		process.exit(2);
-	}).next(next);
+	}).cb(cb);
 };
