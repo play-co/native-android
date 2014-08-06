@@ -10,7 +10,8 @@
     "wrench": "~1.3.9"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preinstall": "./preinstall.sh",
+    "postinstall": "make setup && make clean"
   },
   "private": true,
   "repository": {

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+# npm preinstall hook for configuring submodules
+
 NDK_MESSAGE="\033[1;31mERROR\033[0m: You must install android and android-ndk. \n\
 Then, return to where you installed native-android, and run ./install.sh"
 
-if [[ `uname` == MINGW32* ]]; then	
+if [[ `uname` == MINGW32* ]]; then
 	command -v android.bat >/dev/null 2>&1 || { echo -e $NDK_MESSAGE; exit 1; }
 else
 	command -v android >/dev/null 2>&1 || { echo -e $NDK_MESSAGE; exit 1; }
@@ -29,8 +31,3 @@ git submodule update --init --recursive
 if $PRIV_SUBMODS; then
 	git checkout .gitmodules
 fi
-
-npm install
-git submodule update --init --recursive
-make setup
-make clean
