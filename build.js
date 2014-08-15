@@ -839,7 +839,7 @@ function updateManifest(api, app, opts, cb) {
       }
     }
 
-    var gameVersion = require(path.join(app.paths.root, 'package.json')).version;
+    var gameVersion = require(path.join(app.paths.root, 'manifest.json')).version;
 
     var params = {};
     f(params);
