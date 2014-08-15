@@ -19,7 +19,6 @@ var ff = require("ff");
 var clc = require("cli-color");
 var wrench = require('wrench');
 var util = require('util');
-var request = require('request');
 var crypto = require('crypto');
 var spawn = require('child_process').spawn;
 var read = require('read');
