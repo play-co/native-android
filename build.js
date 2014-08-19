@@ -21,7 +21,6 @@ var wrench = require('wrench');
 var util = require('util');
 var crypto = require('crypto');
 var spawn = require('child_process').spawn;
-var read = require('read');
 var mkdirp = require('mkdirp');
 
 var androidVersion = require('./package.json').version;
