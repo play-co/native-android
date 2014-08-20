@@ -531,16 +531,18 @@ function copyIcon(app, outputPath, tag, size) {
   var android = app.manifest.android;
   var iconPath = android && android.icons && android.icons[size];
 
-  if (iconPath && fs.existsSync(iconPath)) {
-    wrench.mkdirSyncRecursive(path.dirname(destPath));
-    copyFileSync(iconPath, destPath);
-  } else {
-    logger.warn("No icon specified in the manifest for '", size, "'. Using the default icon for this size. This is probably not what you want");
+  if (iconPath) {
+    iconPath = path.resolve(app.paths.root, iconPath);
 
-    // Do not copy a default icon to this location -- Android will fill in
-    // the blanks intelligently.
-    //copyFileSync(path.join(__dirname, "TeaLeaf/res", DEFAULT_ICON_PATH[size]), destPath);
+    if (fs.existsSync(iconPath)) {
+      wrench.mkdirSyncRecursive(path.dirname(destPath));
+      copyFileSync(iconPath, destPath);
+    }
+
+    return;
   }
+
+  logger.warn("No icon specified in the manifest for '", size, "'. Using the default icon for this size. This is probably not what you want");
 }
 
 var DEFAULT_NOTIFY_ICON_PATH = {
