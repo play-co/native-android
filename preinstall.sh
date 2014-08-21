@@ -2,8 +2,7 @@
 
 # npm preinstall hook for configuring submodules
 
-NDK_MESSAGE="\033[1;31mERROR\033[0m: You must install android and android-ndk. \n\
-Then, return to where you installed native-android, and run ./install.sh"
+NDK_MESSAGE="\033[1;31mERROR\033[0m: You must install android and android-ndk first"
 
 if [[ `uname` == MINGW32* ]]; then
 	command -v android.bat >/dev/null 2>&1 || { echo -e $NDK_MESSAGE; exit 1; }
@@ -20,6 +19,8 @@ if $PRIV_SUBMODS; then
 	echo "Using private submodules..."
 	cp .gitmodules.priv .gitmodules
 fi
+
+node scripts/submodules.js
 
 if ! git submodule sync; then
 	error "Unable to sync git submodules"
