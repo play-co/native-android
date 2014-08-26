@@ -43,3 +43,8 @@ plugins/config.json
 #manifest
 manifest.json
 
+#sym link
+TeaLeaf/jni/core
+
+#generated arm
+TeaLeaf/libs/armeabi-v7a/
