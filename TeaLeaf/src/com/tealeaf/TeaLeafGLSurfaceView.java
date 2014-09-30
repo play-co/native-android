@@ -43,6 +43,8 @@ import com.tealeaf.event.OrientationEvent;
 import com.tealeaf.event.ResumeEvent;
 import com.tealeaf.event.RedrawOffscreenBuffersEvent;
 
+import com.tealeaf.util.Device;
+
 public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private TeaLeaf context;
 	private Renderer renderer;
@@ -714,7 +716,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				Settings settings = view.context.getSettings();
 				boolean useHalfsizedTextures = settings.getBoolean(
 						"@__use_halfsized_textures__", false);
-				NativeShim.setHalfsizedTextures(useHalfsizedTextures);
+				NativeShim.setHalfsizedTextures(false);
 
 				initJS = false;
 			}
@@ -738,7 +740,17 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 						this.view.context.getLocalStorage(), contactList,
 						new LocationManager(view.context),
 						resourceManager, view.context);
+
+				// 100 MB of texture memory
+				int device_limit = Device.getDeviceMemory();
+				if (device_limit == -1) {
+					logger.log("Falling back to default device memory limit");
+					device_limit = 200000000; // assume 200MB
+				}
+				logger.log("Device Memory Limit", device_limit);
+				NativeShim.textureManagerSetMaxMemory(device_limit / 2);
 			}
+
 
 			if (shouldReloadTextures) {
 				NativeShim.initGL(0);

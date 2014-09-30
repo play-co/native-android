@@ -249,6 +249,10 @@ extern "C" {
         texture_manager_clear_textures(texture_manager_get(), true);
     }
 
+    void Java_com_tealeaf_NativeShim_textureManagerSetMaxMemory(JNIEnv *env, jobject thiz, jint bytes) {
+        texture_manager_set_max_memory(texture_manager_get(), bytes);
+    }
+
     void Java_com_tealeaf_NativeShim_onTextureLoaded(JNIEnv *env, jobject thiz, jbyteArray url, jint name, jint width, jint height, jint original_width, jint original_height, jint num_channels) {
 
         char *url_str;
