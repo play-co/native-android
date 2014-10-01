@@ -772,7 +772,7 @@ function updateManifest(api, app, opts, cb) {
     entryPoint: "devkit.native.launchClient",
     studioName: opts.studioName,
 
-    disableLogs: String(!opts.enableLogging),
+    disableLogs: String(!opts.debug),
 
     // Filled defaults
     // TODO: REMOVE ALL OF THESE FLAGS
