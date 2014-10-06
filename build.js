@@ -746,10 +746,9 @@ function copyMusic(app, outputDir, cb) {
       } else {
         logger.warn("No splash music specified in the manifest");
       }
-
-      cb && cb();
     });
   }
+  cb && cb();
 }
 
 function copyResDir(app, outputDir) {
