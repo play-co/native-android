@@ -226,6 +226,7 @@ Persistent<String> STRING_CACHE_show_status_bar;
 Persistent<String> STRING_CACHE_hide_status_bar;
 Persistent<String> STRING_CACHE_status_bar_height;
 Persistent<String> STRING_CACHE_isSimulator;
+Persistent<String> STRING_CACHE_resize;
 
 void js_string_cache_init() {
     STRING_CACHE_restore = Persistent<String>::New(String::New("restore"));
@@ -450,4 +451,5 @@ void js_string_cache_init() {
     STRING_CACHE_hide_status_bar = Persistent<String>::New(String::New("hideStatusBar"));
     STRING_CACHE_status_bar_height = Persistent<String>::New(String::New("statusBarHeight"));
     STRING_CACHE_isSimulator = Persistent<String>::New(String::New("isSimulator"));
+    STRING_CACHE_resize = Persistent<String>::New(String::New("resize"));
 }
