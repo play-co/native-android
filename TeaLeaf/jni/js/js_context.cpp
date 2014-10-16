@@ -801,6 +801,19 @@ Handle<Value> defToDataURL(const Arguments& args) {
     return str;
 }
 
+Handle<Value> defSetTransform(const Arguments& args) {
+    double m11 = args[0]->NumberValue();
+    double m21 = args[1]->NumberValue();
+    double m12 = args[2]->NumberValue();
+    double m22 = args[3]->NumberValue();
+    double dx = args[4]->NumberValue();
+    double dy = args[5]->NumberValue();
+
+    context_2d_setTransform(GET_CONTEXT2D(), m11, m21, m12, m22, dx, dy);
+
+    return Undefined();
+}
+
 
 void js_gl_init() {
 }
@@ -834,6 +847,7 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
     context_2d_class_template->Set(STRING_CACHE_drawPointSprites, FunctionTemplate::New(defDrawPointSprites));
     context_2d_class_template->Set(String::New("setGlobalCompositeOperation"), FunctionTemplate::New(defSetGlobalCompositeOperation));
     context_2d_class_template->Set(String::New("getGlobalCompositeOperation"), FunctionTemplate::New(defGetGlobalCompositeOperation));
+    context_2d_class_template->Set(String::New("setTransform"), FunctionTemplate::New(defSetTransform));
 
     // bitmap fonts
     context_2d_class_template->Set(STRING_CACHE_measureTextBitmap, FunctionTemplate::New(defMeasureTextBitmap));
