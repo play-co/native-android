@@ -1,12 +1,35 @@
 LOCAL_PATH:= $(call my-dir)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libpng
+LOCAL_SRC_FILES := \
+	libpng/png.c \
+	libpng/pngerror.c \
+	libpng/pngget.c \
+	libpng/pngmem.c \
+	libpng/pngpread.c \
+	libpng/pngread.c \
+	libpng/pngrio.c \
+	libpng/pngrtran.c \
+	libpng/pngrutil.c \
+	libpng/pngset.c \
+	libpng/pngtrans.c \
+	libpng/pngwio.c \
+	libpng/pngwrite.c \
+	libpng/pngwtran.c \
+	libpng/pngwutil.c \
+
+LOCAL_EXPORT_LDLIBS := -lz
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/libpng
+include $(BUILD_STATIC_LIBRARY)
+
 LOCAL_LDFLAGS := -Wl,-Map,tealeaf.map
 
 -include ${LOCAL_PATH}/profiler/android-ndk-profiler.mk
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := curl-prebuilt
-LOCAL_SRC_FILES := lib/libcurl.a 
+LOCAL_SRC_FILES := lib/libcurl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -30,11 +53,6 @@ LOCAL_SRC_FILES := lib/libzip.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := libpng
-LOCAL_SRC_FILES := lib/libpng.a
-include $(PREBUILT_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
 LOCAL_MODULE := libturbojpeg
 LOCAL_SRC_FILES := lib/libturbojpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -43,6 +61,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libjansson
 LOCAL_SRC_FILES := lib/libjansson.a
 include $(PREBUILT_STATIC_LIBRARY)
+
 
 include $(CLEAR_VARS)
 
@@ -150,15 +169,13 @@ QR_SRC_FILES := \
 	core/qr/quirc/version_db.c \
 	core/qr/adapter/qrprocess.c
 
-LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
+LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libjansson libpng libv8a
 LOCAL_LDLIBS := -llog -lGLESv2 -lz
-LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
+LOCAL_CFLAGS += -Wall -Werror -Wno-narrowing -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math -Wno-maybe-uninitialized
 
 ifeq ($(APP_ABI),armeabi-v7a)
 	LOCAL_CFLAGS += -march=armv7-a -mfloat-abi=softfp 
 endif
-
-LOCAL_STATIC_LIBRARIES += libv8a
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core
