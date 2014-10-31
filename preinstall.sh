@@ -13,13 +13,6 @@ NDK_MESSAGE="\033[1;31mERROR\033[0m: You must install android and android-ndk fi
 
 remoteurl=`git config --get remote.origin.url`
 
-PRIV_SUBMODS=false && [[ "$remoteurl" == *native-android-priv* ]] && PRIV_SUBMODS=true
-
-if $PRIV_SUBMODS; then
-	echo "Using private submodules..."
-	cp .gitmodules.priv .gitmodules
-fi
-
 node scripts/submodules.js
 
 if ! git submodule sync; then
@@ -29,6 +22,3 @@ fi
 
 git submodule update --init --recursive
 
-if $PRIV_SUBMODS; then
-	git checkout .gitmodules
-fi
