@@ -958,8 +958,8 @@ function updateActivity(opts, next) {
   if (fs.existsSync(activityFile)) {
     fs.readFile(activityFile, 'utf-8', function (err, contents) {
       contents = contents
-        .replace(/extends Activity/g, "extends com.tealeaf.TeaLeaf")
-        .replace(/setContentView\(R\.layout\.main\);/g, "startGame();");
+        .replace(/setContentView\(R\.layout\.main\);/g, "")
+        .replace(/extends Activity/g, "extends com.tealeaf.TeaLeafActivity");
       fs.writeFile(activityFile, contents, next);
     });
   }
