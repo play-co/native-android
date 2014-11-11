@@ -10,7 +10,7 @@
     "wrench": "~1.3.9"
   },
   "scripts": {
-    "preinstall": "./preinstall.sh",
+    "preinstall": "sh ./preinstall.sh",
     "postinstall": "make setup && make clean || true"
   },
   "private": true,
