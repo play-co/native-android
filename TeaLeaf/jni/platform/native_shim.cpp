@@ -177,7 +177,7 @@ extern "C" {
     }
 
     void Java_com_tealeaf_NativeShim_setHalfsizedTextures(JNIEnv *env, jobject thiz, jboolean on) {
-        use_halfsized_textures = on;
+        texture_manager_set_use_halfsized_textures(on);
     }
 
     JNIEXPORT jboolean JNICALL Java_com_tealeaf_NativeShim_initJS(JNIEnv* env, jobject thiz, jstring uri, jstring android_hash) {
