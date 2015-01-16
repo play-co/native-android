@@ -57,6 +57,7 @@ texture_2d *text_manager_get_text(const char *font_name, int size, const char *t
         tex->originalHeight /= scale;
         tex->width /= scale;
         tex->height /= scale;
+        tex->is_text = true;
     }
     return tex;
 }

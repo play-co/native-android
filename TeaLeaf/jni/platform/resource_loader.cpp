@@ -123,20 +123,14 @@ CEXPORT void launch_remote_texture_load(const char *url) {
 }
 
 CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
-    texture->pixel_data=NULL;
+    texture->pixel_data = NULL;
 
-    bool skip = false;
     // check if it is a special url (text, contacts, etc.), if it is then load in java
-    if (texture->url[0] == '@') {
-        skip = true;
-    }
-
-    if(!skip) {
+    bool skip = texture->url[0] == '@' || texture->is_canvas || texture->is_text;
+    if (!skip) {
         unsigned long sz;
         unsigned char *data = resource_loader_read_file(texture->url, &sz);
-
         texture->pixel_data = texture_2d_load_texture_raw(texture->url, data, sz, &texture->num_channels, &texture->width, &texture->height, &texture->originalWidth, &texture->originalHeight, &texture->scale, &texture->used_texture_bytes, &texture->compression_type);
-
         free(data);
     }
 
@@ -146,8 +140,7 @@ CEXPORT bool resource_loader_load_image_with_c(texture_2d * texture) {
         return true;
     } else {
         launch_remote_texture_load(texture->url);
-
-        // using java
+        // load using java
         return false;
     }
 }
