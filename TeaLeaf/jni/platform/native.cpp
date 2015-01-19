@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <stdio.h>
 #include "platform/native.h"
 #include "platform/platform.h"
 #include "core/texture_manager.h"

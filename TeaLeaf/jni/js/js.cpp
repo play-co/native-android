@@ -300,7 +300,7 @@ Handle<Function> get_on_resize() {
     return Handle<Function>();
 }
 
-CEXPORT void js_tick(int dt) {
+CEXPORT void js_tick(long dt) {
     Locker l(m_isolate);
 
     if (!js_ready) {
