@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <stdio.h>
 #include "platform/native.h"
 #include "platform/platform.h"
-
+#include "core/texture_manager.h"
 
 const char* get_market_url() {
     native_shim* shim = get_native_shim();
@@ -124,6 +126,7 @@ void set_halfsized_textures(bool on) {
     native_shim *shim = get_native_shim();
     jmethodID method = shim->env->GetMethodID(shim->type, "setHalfsizedTexturesSetting", "(Z)V");
     shim->env->CallVoidMethod(shim->instance, method, (jboolean)on);
+    texture_manager_set_use_halfsized_textures(on);
 }
 
 void native_stay_awake(bool on) {

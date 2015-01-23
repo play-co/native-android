@@ -508,6 +508,7 @@ public class NativeShim {
 	//Contacts stuff
 	public static native void dispatchContactCallback(int cb, long id, String name);
 
+	public native static void textureManagerSetMaxMemory(int bytes);
 
 	//LocalStorage
 	public void setData(String key, String data) {

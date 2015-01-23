@@ -43,6 +43,8 @@ import com.tealeaf.event.OrientationEvent;
 import com.tealeaf.event.ResumeEvent;
 import com.tealeaf.event.RedrawOffscreenBuffersEvent;
 
+import com.tealeaf.util.Device;
+
 public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	private TeaLeaf context;
 	private Renderer renderer;
@@ -738,6 +740,12 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 						this.view.context.getLocalStorage(), contactList,
 						new LocationManager(view.context),
 						resourceManager, view.context);
+
+				int device_limit = Device.getDeviceMemory();
+				if (device_limit != -1) {
+					NativeShim.textureManagerSetMaxMemory(device_limit / 2);
+				}
+				logger.log("Device Memory Limit", device_limit);
 			}
 
 			if (shouldReloadTextures) {
@@ -750,7 +758,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			}
 
 			EventQueue.pushEvent(new RedrawOffscreenBuffersEvent());
-
 		}
 
 		public Bitmap getScreenshot(GL10 gl) {

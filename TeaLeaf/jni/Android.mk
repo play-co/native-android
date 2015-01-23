@@ -1,37 +1,114 @@
 LOCAL_PATH:= $(call my-dir)
 
+# build libpng
+include $(CLEAR_VARS)
+LOCAL_MODULE := libpng
+LOCAL_SRC_FILES := \
+	libpng/png.c \
+	libpng/pngerror.c \
+	libpng/pngget.c \
+	libpng/pngmem.c \
+	libpng/pngpread.c \
+	libpng/pngread.c \
+	libpng/pngrio.c \
+	libpng/pngrtran.c \
+	libpng/pngrutil.c \
+	libpng/pngset.c \
+	libpng/pngtrans.c \
+	libpng/pngwio.c \
+	libpng/pngwrite.c \
+	libpng/pngwtran.c \
+	libpng/pngwutil.c \
+
+LOCAL_EXPORT_LDLIBS := -lz
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/libpng
+include $(BUILD_STATIC_LIBRARY)
+
+# build libzip
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libzip
+LOCAL_SRC_FILES :=\
+	libzip/zip_add.c \
+	libzip/zip_add_dir.c \
+	libzip/zip_close.c \
+	libzip/zip_delete.c \
+	libzip/zip_dirent.c \
+	libzip/zip_entry_free.c \
+	libzip/zip_entry_new.c \
+	libzip/zip_err_str.c \
+	libzip/zip_error.c \
+	libzip/zip_error_clear.c \
+	libzip/zip_error_get.c \
+	libzip/zip_error_get_sys_type.c \
+	libzip/zip_error_strerror.c \
+	libzip/zip_error_to_str.c \
+	libzip/zip_fclose.c \
+	libzip/zip_file_error_clear.c \
+	libzip/zip_file_error_get.c \
+	libzip/zip_file_get_offset.c \
+	libzip/zip_file_strerror.c \
+	libzip/zip_filerange_crc.c \
+	libzip/zip_fopen.c \
+	libzip/zip_fopen_index.c \
+	libzip/zip_fread.c \
+	libzip/zip_free.c \
+	libzip/zip_get_archive_comment.c \
+	libzip/zip_get_archive_flag.c \
+	libzip/zip_get_file_comment.c \
+	libzip/zip_get_num_files.c \
+	libzip/zip_get_name.c \
+	libzip/zip_memdup.c \
+	libzip/zip_name_locate.c \
+	libzip/zip_new.c \
+	libzip/zip_open.c \
+	libzip/zip_rename.c \
+	libzip/zip_replace.c \
+	libzip/zip_set_archive_comment.c \
+	libzip/zip_set_archive_flag.c \
+	libzip/zip_set_file_comment.c \
+	libzip/zip_source_buffer.c \
+	libzip/zip_source_file.c \
+	libzip/zip_source_filep.c \
+	libzip/zip_source_free.c \
+	libzip/zip_source_function.c \
+	libzip/zip_source_zip.c \
+	libzip/zip_set_name.c \
+	libzip/zip_stat.c \
+	libzip/zip_stat_index.c \
+	libzip/zip_stat_init.c \
+	libzip/zip_strerror.c \
+	libzip/zip_unchange.c \
+	libzip/zip_unchange_all.c \
+	libzip/zip_unchange_archive.c \
+	libzip/zip_unchange_data.c
+
+LOCAL_LDLIBS := -lz
+
+#include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
+
 LOCAL_LDFLAGS := -Wl,-Map,tealeaf.map
 
 -include ${LOCAL_PATH}/profiler/android-ndk-profiler.mk
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := curl-prebuilt
-LOCAL_SRC_FILES := lib/libcurl.a 
+LOCAL_SRC_FILES := lib/libcurl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := crypto-prebuilt
-LOCAL_SRC_FILES := lib/libgcypto.so
-include $(PREBUILT_SHARED_LIBRARY)
+LOCAL_SRC_FILES := lib/libcrypto.a
+include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ssl-prebuilt
-LOCAL_SRC_FILES := lib/libgcl.so
-include $(PREBUILT_SHARED_LIBRARY)
+LOCAL_SRC_FILES := lib/libssl.a
+include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libv8a
 LOCAL_SRC_FILES := lib/libv8.a
-include $(PREBUILT_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libzip
-LOCAL_SRC_FILES := lib/libzip.a
-include $(PREBUILT_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libpng
-LOCAL_SRC_FILES := lib/libpng.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -43,6 +120,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libjansson
 LOCAL_SRC_FILES := lib/libjansson.a
 include $(PREBUILT_STATIC_LIBRARY)
+
 
 include $(CLEAR_VARS)
 
@@ -150,17 +228,16 @@ QR_SRC_FILES := \
 	core/qr/quirc/version_db.c \
 	core/qr/adapter/qrprocess.c
 
-LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libpng libjansson
+LOCAL_STATIC_LIBRARIES := curl-prebuilt libzip cpufeatures libturbojpeg libjansson libpng libv8a
 LOCAL_LDLIBS := -llog -lGLESv2 -lz
-LOCAL_CFLAGS += -Wall -Werror -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math
+LOCAL_CFLAGS += -Wall -Werror -Wno-narrowing -Wno-psabi -Wno-unused-function -Wno-unused-but-set-variable -O3 -funroll-loops -ftree-vectorize -ffast-math -Wno-maybe-uninitialized
 
 ifeq ($(APP_ABI),armeabi-v7a)
 	LOCAL_CFLAGS += -march=armv7-a -mfloat-abi=softfp 
 endif
 
-LOCAL_STATIC_LIBRARIES += libv8a
-
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/deps
+LOCAL_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/deps
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/core/image-cache/include

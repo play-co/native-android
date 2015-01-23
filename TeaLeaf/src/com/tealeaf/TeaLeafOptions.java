@@ -51,7 +51,6 @@ public class TeaLeafOptions {
 	public TeaLeafOptions() {
 		// we want a blank options, so set meta to an empty bundle
 		meta = new Bundle();
-		meta.putBoolean("disableLogs", false);
 		displayName = "EMPTY!";
 		buildID = "NONE! FIXME!";
 	}

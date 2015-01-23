@@ -3,12 +3,12 @@
  *
  * The Game Closure SDK is free software: you can redistribute it and/or modify
  * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.
- 
+
  * The Game Closure SDK is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * Mozilla Public License v. 2.0 for more details.
- 
+
  * You should have received a copy of the Mozilla Public License v. 2.0
  * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.
  */
@@ -29,12 +29,6 @@ using v8::Persistent;
 using v8::String;
 
 void timestep_view_set_z_index(Local<String> property, Local<Value> value, const AccessorInfo &info);
-void timestep_view_set_width(Local<String> property, Local<Value> value, const AccessorInfo &info);
-Handle<Value> timestep_view_get_width(Local<String> property, const AccessorInfo &info);
-void timestep_view_set_height(Local<String> property, Local<Value> value, const AccessorInfo &info);
-Handle<Value> timestep_view_get_height(Local<String> property, const AccessorInfo &info);
-void timestep_view_set_width_percent(Local<String> property, Local<Value> value, const AccessorInfo &info);
-void timestep_view_set_height_percent(Local<String> property, Local<Value> value, const AccessorInfo &info);
 void timestep_view_set_opacity (Local<String> property, Local<Value> value, const AccessorInfo& info);
 
 Handle<Value> def_timestep_view_constructor(const Arguments &args);

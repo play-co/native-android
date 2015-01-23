@@ -229,5 +229,6 @@ extern Persistent<String> STRING_CACHE_show_status_bar;
 extern Persistent<String> STRING_CACHE_hide_status_bar;
 extern Persistent<String> STRING_CACHE_status_bar_height;
 extern Persistent<String> STRING_CACHE_isSimulator;
+extern Persistent<String> STRING_CACHE_resize;
 
 #endif

@@ -14,6 +14,8 @@ bin
 gen
 obj
 armeabi
+armeabi-v7a
+node_modules
 
 # application files
 *.apk
@@ -42,3 +44,5 @@ plugins/config.json
 #manifest
 manifest.json
 
+# generated symlinks (checkSymlinks)
+TeaLeaf/jni/core

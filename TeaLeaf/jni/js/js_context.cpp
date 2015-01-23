@@ -702,6 +702,20 @@ Handle<Value> js_gl_touch_texture(const Arguments& args) {
     return Undefined();
 }
 
+Handle<Value> defResize(const Arguments& args) {
+    int width = args[0]->Int32Value();
+    int height = args[1]->Int32Value();
+
+    context_2d *ctx = GET_CONTEXT2D();
+    context_2d_resize(ctx, width, height);
+    // texture may have changed, so return tex info to client js
+    texture_2d *tex = texture_manager_get_texture(texture_manager_get(), ctx->url);
+    Handle<Object> tex_data = Object::New();
+    tex_data->Set(STRING_CACHE___gl_name, Number::New(tex->name));
+    tex_data->Set(STRING_CACHE__src, String::New(tex->url));
+    return tex_data;
+}
+
 Handle<Value> defFillTextBitmapDeprecated(const Arguments &args) {
     String::Utf8Value str(args[0]);
     const char *text = ToCString(str);
@@ -801,6 +815,19 @@ Handle<Value> defToDataURL(const Arguments& args) {
     return str;
 }
 
+Handle<Value> defSetTransform(const Arguments& args) {
+    double m11 = args[0]->NumberValue();
+    double m21 = args[1]->NumberValue();
+    double m12 = args[2]->NumberValue();
+    double m22 = args[3]->NumberValue();
+    double dx = args[4]->NumberValue();
+    double dy = args[5]->NumberValue();
+
+    context_2d_setTransform(GET_CONTEXT2D(), m11, m21, m12, m22, dx, dy);
+
+    return Undefined();
+}
+
 
 void js_gl_init() {
 }
@@ -834,6 +861,8 @@ Handle<ObjectTemplate> get_context_2d_class_template() {
     context_2d_class_template->Set(STRING_CACHE_drawPointSprites, FunctionTemplate::New(defDrawPointSprites));
     context_2d_class_template->Set(String::New("setGlobalCompositeOperation"), FunctionTemplate::New(defSetGlobalCompositeOperation));
     context_2d_class_template->Set(String::New("getGlobalCompositeOperation"), FunctionTemplate::New(defGetGlobalCompositeOperation));
+    context_2d_class_template->Set(String::New("setTransform"), FunctionTemplate::New(defSetTransform));
+    context_2d_class_template->Set(STRING_CACHE_resize, FunctionTemplate::New(defResize));
 
     // bitmap fonts
     context_2d_class_template->Set(STRING_CACHE_measureTextBitmap, FunctionTemplate::New(defMeasureTextBitmap));

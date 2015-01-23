@@ -177,7 +177,7 @@ extern "C" {
     }
 
     void Java_com_tealeaf_NativeShim_setHalfsizedTextures(JNIEnv *env, jobject thiz, jboolean on) {
-        use_halfsized_textures = on;
+        texture_manager_set_use_halfsized_textures(on);
     }
 
     JNIEXPORT jboolean JNICALL Java_com_tealeaf_NativeShim_initJS(JNIEnv* env, jobject thiz, jstring uri, jstring android_hash) {
@@ -247,6 +247,10 @@ extern "C" {
 
     void Java_com_tealeaf_NativeShim_clearTextures(JNIEnv *env, jobject thiz) {
         texture_manager_clear_textures(texture_manager_get(), true);
+    }
+
+    void Java_com_tealeaf_NativeShim_textureManagerSetMaxMemory(JNIEnv *env, jobject thiz, jint bytes) {
+        texture_manager_set_max_memory(texture_manager_get(), bytes);
     }
 
     void Java_com_tealeaf_NativeShim_onTextureLoaded(JNIEnv *env, jobject thiz, jbyteArray url, jint name, jint width, jint height, jint original_width, jint original_height, jint num_channels) {

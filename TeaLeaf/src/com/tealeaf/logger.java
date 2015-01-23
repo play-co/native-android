@@ -28,7 +28,7 @@ public class logger {
 	public static void buildLogger(TeaLeaf tealeaf, ILogger remoteLogger) {
 		context = tealeaf;
 		// disable the log by default, allow for overriding in the manifest
-		DISABLE_LOG = tealeaf.getOptions().get("disableLogs", false);
+		DISABLE_LOG = tealeaf.getOptions().get("disableLogs", true);
 		logger.remoteLogger = remoteLogger;
 	}
 	public static void debug(Object... text) {
