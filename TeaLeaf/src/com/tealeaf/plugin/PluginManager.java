@@ -27,6 +27,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import com.tealeaf.logger;
 import com.tealeaf.EventQueue;
 import com.tealeaf.event.Event;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 import dalvik.system.DexFile;
 
@@ -42,11 +44,32 @@ class PluginEvent extends Event {
 		this.pluginName = pluginName;
 		this.data = data;
 	}
+
+	@Override
+	public String pack() {
+		// Handle case where data is a JSONObject and do smarter serialization
+		// Will this break old plugins who expect strings from Java?
+		if (this.data instanceof JSONObject) {
+			try {
+				JSONObject obj = new JSONObject();
+				obj.put("name", this.name);
+				obj.put("eventName", this.eventName);
+				obj.put("pluginName", this.pluginName);
+				obj.put("data", this.data);
+
+				return obj.toString();
+			} catch (JSONException e) {
+				return super.pack();
+			}
+		}
+
+		return super.pack();
+	}
 }
 
 class ResponseWrapper extends Event{
 	String error;
-	Object response;	
+	Object response;
 	int _requestId;
 
 	public ResponseWrapper(Object response, String error, int requestId) {
@@ -54,6 +77,24 @@ class ResponseWrapper extends Event{
 		this.error = error;
 		this.response = response;
 		this._requestId = requestId;
+	}
+
+	@Override
+	public String pack() {
+		if (this.response instanceof JSONObject) {
+			JSONObject res = new JSONObject();
+			try {
+				res.put("name", "plugins");
+				res.put("error", this.error);
+				res.put("response", this.response);
+				res.put("_requestId", this._requestId);
+				return res.toString();
+			} catch (JSONException e) {
+				// pass
+			}
+		}
+
+		return super.pack();
 	}
 }
 
