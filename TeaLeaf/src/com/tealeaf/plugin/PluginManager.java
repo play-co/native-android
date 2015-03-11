@@ -207,6 +207,21 @@ public class PluginManager {
 				}
 			}
 
+			if (!match && parameters.length != 0) {
+				try {
+					// try and coerce string argument in the first place to a JSONObject
+					if (parameters[0] instanceof String) {
+						JSONObject arg = new JSONObject((String)parameters[0]);
+						parameters[0] = arg;
+						if (parameterTypes[0].isAssignableFrom(parameters[0].getClass())) {
+							match = true;
+						}
+					}
+				} catch (JSONException e) {
+					// first param is not valid JSON. Pass.
+				}
+			}
+
 			if (match) {
 				try {
 					if (method.getReturnType().equals(Void.TYPE)) {
@@ -228,15 +243,14 @@ public class PluginManager {
 				}
 			}
 		}
-/*
+
 		if (!found) {
 			logger.log("{plugins} WARNING: Unknown event could not be delivered for plugin:",
 				className, ", method:", methodName);
 		}
-*/
-        if (retStr == null) {
-            retStr = "{}";
-        }
+		if (retStr == null) {
+			retStr = "{}";
+		}
 
 		return retStr;
 	}
