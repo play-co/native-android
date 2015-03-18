@@ -261,7 +261,7 @@ public class TeaLeaf extends FragmentActivity {
 		   }
 		}
 
-		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 		group = new FrameLayout(this);
 		setContentView(group);
@@ -289,11 +289,26 @@ public class TeaLeaf extends FragmentActivity {
 		glView = new TeaLeafGLSurfaceView(this);
 		glViewPaused = false;
 
-		int orientation = getRequestedOrientation();
+		// default screen dimensions
 		Display display = getWindow().getWindowManager().getDefaultDisplay();
 		int width = display.getWidth();
 		int height = display.getHeight();
-		if ((orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE &&  height > width) || (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && width > height)) {
+		int orientation = getRequestedOrientation();
+
+		// gets real screen dimensions without nav bars on recent API versions
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			Point screenSize = new Point();
+			try {
+				display.getRealSize(screenSize);
+				width = screenSize.x;
+				height = screenSize.y;
+			} catch (NoSuchMethodError e) {}
+		}
+
+		// flip width and height based on orientation
+		if ((orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE && height > width)
+			|| (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && width > height))
+		{
 			int tempWidth = width;
 			width = height;
 			height = tempWidth;
@@ -445,15 +460,31 @@ public class TeaLeaf extends FragmentActivity {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
-		if(hasFocus) {
+		if (hasFocus) {
 			logger.log("{focus} Gained focus");
 			ActivityState.onWindowFocusAcquired();
 			if (ActivityState.hasResumed(true)) {
 				onRealResume();
 			}
 			registerScreenOffReceiver();
-			//always send acquired focus event
+
+			// always send acquired focus event
 			EventQueue.pushEvent(new WindowFocusAcquiredEvent());
+
+			// games are inherently full screen and immersive, hide OS UI bars
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				int uiFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+					uiFlag |= View.SYSTEM_UI_FLAG_FULLSCREEN;
+					uiFlag |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+					uiFlag |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+					uiFlag |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+						uiFlag |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+					}
+				}
+				getWindow().getDecorView().setSystemUiVisibility(uiFlag);
+			}
 		} else {
 			logger.log("{focus} Lost focus");
 			ActivityState.onWindowFocusLost();
