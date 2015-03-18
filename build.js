@@ -1000,7 +1000,7 @@ exports.build = function(api, app, config, cb) {
 
   // Create Android Activity name.
   var activity = shortName + "Activity";
-  var androidTarget = "android-15";
+  var androidTarget = "android-19";
 
   var apkPath;
   var moduleConfig;
