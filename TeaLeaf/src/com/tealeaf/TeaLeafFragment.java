@@ -88,12 +88,14 @@ public class TeaLeafFragment extends Fragment {
 
       switch (eventType & MotionEvent.ACTION_MASK) {
         case MotionEvent.ACTION_DOWN:
+        case MotionEvent.ACTION_POINTER_DOWN:
           type = 1;
           break;
         case MotionEvent.ACTION_MOVE:
           type = 2;
           break;
         case MotionEvent.ACTION_UP:
+        case MotionEvent.ACTION_POINTER_UP:
         case MotionEvent.ACTION_CANCEL:
           type = 3;
           break;
