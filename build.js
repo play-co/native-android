@@ -379,6 +379,12 @@ function buildSupportProjects(api, opts, cb) {
     if (opts.clean || opts.arch) {
       spawnWithLogger(api, 'make', ['clean'], {cwd: __dirname}, f.slot());
     }
+  }, function() {
+    var args = ["-j", "8", (opts.debug ? "DEBUG=1" : "RELEASE=1")];
+    if (opts.arch) {
+      args.push('APP_ABI=' + opts.arch);
+    }
+    spawnWithLogger(api, 'ndk-build', args , { cwd: path.join(__dirname, "TeaLeaf") }, f.wait());
   }).cb(cb);
 }
 
@@ -994,7 +1000,7 @@ exports.build = function(api, app, config, cb) {
 
   // Create Android Activity name.
   var activity = shortName + "Activity";
-  var androidTarget = "android-15";
+  var androidTarget = "android-19";
 
   var apkPath;
   var moduleConfig;

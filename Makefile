@@ -5,4 +5,4 @@ clean:
 	ant -f TeaLeaf/build.xml clean
 
 setup:
-	android update project -p TeaLeaf --target android-15 --subprojects
+	android update project -p TeaLeaf --target android-19 --subprojects
