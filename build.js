@@ -191,6 +191,22 @@ var installModuleCode = function (api, app, opts, cb) {
         }
       }
 
+      if (config.copyGameFiles) {
+        for (var ii = 0; ii < config.copyGameFiles.length; ++ii) {
+          var filePath = path.join(app.paths.root, config.copyGameFiles[ii]);
+          replacers.push(config.injectionSource);
+
+          if (path.extname(filePath) === ".java" ||
+            path.extname(filePath) === ".aidl") {
+            filePaths.push(filePath);
+            fs.readFile(filePath, "utf-8", group.slot());
+          } else {
+            filePaths.push(config.copyGameFiles[ii]);
+            fs.readFile(filePath, "binary", group.slot());
+          }
+        }
+      }
+
       if (config.libraries) {
         for (var ii = 0; ii < config.libraries.length; ++ii) {
           var library = path.join(modulePath, 'android', config.libraries[ii]);
@@ -265,7 +281,7 @@ var installModuleCode = function (api, app, opts, cb) {
             }
           } else {
             var outFile = path.join(outputPath, filePath);
-
+            wrench.mkdirSyncRecursive(path.dirname(outFile));
             fs.writeFile(outFile, data, 'binary', f.wait());
           }
         } else {
