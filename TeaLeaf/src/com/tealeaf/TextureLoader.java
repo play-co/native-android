@@ -367,8 +367,9 @@ public class TextureLoader implements Runnable {
 								bScaled = bmp;
 							}
 
-                            loadTexture("@" + tag.toUpperCase() + id + "-" + sizePair.first + "x" + sizePair.second, bScaled, false);
-                            sendPhotoLoadedEvent(bScaled);
+                            String url = "@" + tag.toUpperCase() + id + "-" + sizePair.first + "x" + sizePair.second;
+                            loadTexture(url, bScaled, false);
+                            sendPhotoLoadedEvent(url, bScaled);
                         } else {
 							loadingError("@" + tag.toUpperCase() + id + "-" + sizePair.first + "x" + sizePair.second);
 						}
@@ -769,17 +770,17 @@ public class TextureLoader implements Runnable {
 		return null;
 	}
 
-    private void sendPhotoLoadedEvent(Bitmap bitmap) {
+    private void sendPhotoLoadedEvent(String url, Bitmap bitmap) {
         String base64Image = bitmapToBase64(bitmap);
-        PhotoLoadedEvent e = new PhotoLoadedEvent(this.photoUrl, base64Image);
+        PhotoLoadedEvent e = new PhotoLoadedEvent(url, base64Image);
         EventQueue.pushEvent(e);
     }
 
     private String bitmapToBase64(Bitmap bitmap) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos); //bm is the bitmap object   
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos); //bm is the bitmap object
         byte[] b = baos.toByteArray();
-        return Base64.encodeToString(b, Base64.NO_WRAP);
+        return "image/png;base64," + Base64.encodeToString(b, Base64.NO_WRAP);
     }
 
 	private Bitmap getImageFromBase64(String data) {
