@@ -272,7 +272,7 @@ var installModuleCode = function (api, app, opts, cb) {
 
             fs.writeFile(outFile, data, 'utf-8', f.wait());
           } else if (path.extname(filePath) === ".so") {
-            var armeabi_out = ["libs/armeabi", "libs/armeabi-v7a"];
+            var armeabi_out = ["libs/armeabi-v7a"];
             for(var jj = 0; jj != armeabi_out.length; jj++) {
               var outFile = path.join(outputPath, armeabi_out[jj], path.basename(filePath));
               logger.log("Writing shared object", filePath, "to", outFile);
@@ -1016,7 +1016,7 @@ exports.build = function(api, app, config, cb) {
 
   // Create Android Activity name.
   var activity = shortName + "Activity";
-  var androidTarget = "android-19";
+  var androidTarget = "android-21";
 
   var apkPath;
   var moduleConfig;
