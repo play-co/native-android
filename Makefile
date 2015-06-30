@@ -39,8 +39,8 @@ release: all
 # update the proper projects / subprojects, and update any plugin projects
 # this will also build the native code and TeaLeaf
 all:
-	android update project -p TeaLeaf --target android-19 --subprojects
-	android update project -p GCTestApp --target android-19 --subprojects
+	android update project -p TeaLeaf --target android-21 --subprojects
+	android update project -p GCTestApp --target android-21 --subprojects
 	ndk-build -C TeaLeaf -Bj8 RELEASE=$(RELEASE_FLAG) JSPROF=$(PROFILE_FLAG) GPROF=${GPROF_FLAG} V8SYMBOLS=${V8_SYMBOLS}
 	ant -f TeaLeaf/build.xml $(MODE)
 
@@ -71,6 +71,6 @@ test:
 
 #updates requried projects and plugins
 setup:
-	android update project -p TeaLeaf --target android-19 --subprojects
-	android update project -p GCTestApp --target android-19 --subprojects
+	android update project -p TeaLeaf --target android-21 --subprojects
+	android update project -p GCTestApp --target android-21 --subprojects
 	node checkSymlinks
