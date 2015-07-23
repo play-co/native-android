@@ -208,20 +208,10 @@ Handle<Value> js_animate_constructor(const Arguments &args) {
 
 void def_animate_finish(Handle<Object> js_anim) {
     LOGFN("js_animate_finish");
-    view_animation *anim = GET_TIMESTEP_ANIMATION(js_anim);
-    if (anim) {
-        Handle<Object> js_group = anim->js_group;
-        if (!js_group->IsNull() && !js_group->IsUndefined()) {
-            Handle<Value> finishValue = js_group->Get(STRING_CACHE_onAnimationFinish);
-            if (!finishValue->IsNull() && !finishValue->IsUndefined()) {
-                Handle<Object> finish = Handle<Object>::Cast(finishValue);
-                Handle<Value> args[] = {js_anim};
-                if (!finish.IsEmpty() && finish->IsFunction()) {
-                    Handle<Function> finishFn = Handle<Function>::Cast(finish);
-                    finishFn->Call(js_group, 1, args);
-                }
-            }
-        }
+    Handle<Function> finish = Handle<Function>::Cast(js_anim->Get(STRING_CACHE_onAnimationFinish));
+    if (!finish.IsEmpty() && finish->IsFunction()) {
+        Handle<Value> args[] = {js_anim};
+        finish->Call(js_anim, 1, args);
     }
     LOGFN("end js_animate_finish");
 }
