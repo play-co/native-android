@@ -200,9 +200,6 @@ Handle<Value> js_animate_constructor(const Arguments &args) {
     js_anim.MakeWeak(anim, js_animation_finalize);
     anim->js_anim = js_anim;
 
-    Persistent<Object> js_group = Persistent<Object>::New(Handle<Object>::Cast(args[1]));
-    anim->js_group = js_group;
-
     return thiz;
 }
 
