@@ -203,14 +203,24 @@ Handle<Value> js_animate_constructor(const Arguments &args) {
     return thiz;
 }
 
-void def_animate_finish(Handle<Object> js_anim) {
-    LOGFN("js_animate_finish");
-    Handle<Function> finish = Handle<Function>::Cast(js_anim->Get(STRING_CACHE_onAnimationFinish));
+void def_animate_add_to_group(Handle<Object> js_anim) {
+    LOGFN("def_animate_add_to_group");
+    Handle<Function> addToGroup = Handle<Function>::Cast(js_anim->Get(STRING_CACHE__addToGroup));
+    if (!addToGroup.IsEmpty() && addToGroup->IsFunction()) {
+        Handle<Value> args[] = {js_anim};
+        addToGroup->Call(js_anim, 1, args);
+    }
+    LOGFN("end def_animate_add_to_group");
+}
+
+void def_animate_remove_from_group(Handle<Object> js_anim) {
+    LOGFN("def_animate_remove_from_group");
+    Handle<Function> finish = Handle<Function>::Cast(js_anim->Get(STRING_CACHE__removeFromGroup));
     if (!finish.IsEmpty() && finish->IsFunction()) {
         Handle<Value> args[] = {js_anim};
         finish->Call(js_anim, 1, args);
     }
-    LOGFN("end js_animate_finish");
+    LOGFN("end def_animate_remove_from_group");
 }
 
 void def_animate_cb(Handle<Object> js_view, Handle<Object> cb, double tt, double t) {
