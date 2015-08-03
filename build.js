@@ -752,6 +752,12 @@ function copySplash(api, app, outputDir, next) {
   }).cb(next);
 }
 
+function copyAssetKey(builder, project, destDir) {
+ var destPath = path.join(destDir, "assets");
+ var assetsPath = project.manifest.assets || {};
+ copyFileSync(assetsPath[0], path.join(destPath, assetsPath[0]));
+}
+
 function copyMusic(app, outputDir, cb) {
   if (app.manifest.splash) {
     var destPath = path.join(outputDir, "res/raw");
@@ -1066,6 +1072,7 @@ exports.build = function(api, app, config, cb) {
     copyMusic(app, config.outputPath, f());
     copyResDir(app, config.outputPath);
     copySplash(api, app, config.outputPath, f());
+    copyAssetKey(api, app, config.outputPath);
 
     if (!config.repack) {
       installModuleCode(api, app, {
