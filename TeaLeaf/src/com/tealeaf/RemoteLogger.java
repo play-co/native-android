@@ -281,6 +281,6 @@ public class RemoteLogger implements ILogger {
 	}
 
 	private void send(String event) throws Exception {
-		http.post(url, event);
+		// http.post(url, event);
 	}
 }
