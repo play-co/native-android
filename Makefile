@@ -71,6 +71,6 @@ test:
 
 #updates requried projects and plugins
 setup:
+	node checkSymlinks
 	android update project -p TeaLeaf --target android-19 --subprojects
 	android update project -p GCTestApp --target android-19 --subprojects
-	node checkSymlinks

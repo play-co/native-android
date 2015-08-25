@@ -11,7 +11,7 @@
   },
   "scripts": {
     "preinstall": "sh ./preinstall.sh",
-    "postinstall": "make setup && make clean || true"
+    "postinstall": "node checkSymlinks && (make setup && make clean || true)"
   },
   "private": true,
   "repository": {
