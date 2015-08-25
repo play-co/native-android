@@ -920,33 +920,65 @@ function installAPK(api, config, apkPath, opts) {
   var packageName = config.packageName;
   var activityName = config.activityName;
 
-  return Promise.try(function tryUninstall() {
-      var args = ['shell', 'pm', 'uninstall'];
-      if (opts.clearstorage) {
-        args.push('-k');
-      }
-      args.push(packageName);
-
-      return spawnWithLogger(api, 'adb', args, {})
-        .catch (function () {
-          // ignore uninstall errors
-        });
-    })
-    .then(function tryInstall() {
-      var cmd = 'adb install -r "' + apkPath + '"';
-      logger.log('Install: Running ' + cmd + '...');
-      return spawnWithLogger(api, 'adb', ['install', '-r', apkPath])
-        .catch (function () {
-          // ignore install errors
-        });
-    })
-    .then(function tryOpen() {
-      if (opts.open) {
-        var startCmd = packageName + '/' + packageName + '.' + activityName;
-        spawnWithLogger(api, 'adb', ['shell', 'am', 'start', '-n', startCmd], {})
-          .catch (function () {
-            // ignore open errors
+  function getDevices() {
+    return spawnWithLogger(api, 'adb', ['devices'], {capture: true})
+      .then(function (res) {
+        return res.split('\n')
+          .map(function (line) {
+            return line.match(/^([0-9a-z]+)\s+(device|emulator)$/i);
+          })
+          .filter(function (match) { return match; })
+          .map(function (match) {
+            return match[1];
           });
+      });
+  }
+
+  function tryUninstall(device) {
+    var args = ['-s', device, 'shell', 'pm', 'uninstall'];
+    if (opts.clearstorage) {
+      args.push('-k');
+    }
+    args.push(packageName);
+
+    return spawnWithLogger(api, 'adb', args, {})
+      .catch (function () {
+        // ignore uninstall errors
+      });
+  }
+
+  function tryInstall(device) {
+    return spawnWithLogger(api, 'adb', ['-s', device, 'install', '-r', apkPath])
+      .catch (function () {
+        // ignore install errors
+      });
+  }
+
+  function tryOpen(device) {
+    var startCmd = packageName + '/' + packageName + '.' + activityName;
+    return spawnWithLogger(api, 'adb', ['-s', device, 'shell', 'am', 'start', '-n', startCmd], {})
+        .catch (function () {
+          // ignore open errors
+        });
+  }
+
+  return Promise.try(function () {
+      return getDevices();
+    })
+    .tap(function (devices) {
+      if (!devices.length) {
+        logger.error('tried to install to device, but no devices found');
       }
+    })
+    .map(function(device) {
+      return tryUninstall(device)
+        .then(function () {
+          return tryInstall(device);
+        })
+        .then(function () {
+          if (opts.open) {
+            return tryOpen(device);
+          }
+        });
     });
 }
