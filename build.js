@@ -478,7 +478,7 @@ function copyIcons(app, outputPath) {
 function copyIcon(app, outputPath, tag, size) {
   var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/icon.png");
   var android = app.manifest.android;
-  var iconPath = android && android.icons && android.icons[size];
+  var iconPath = android.icons && android.icons[size];
 
   if (iconPath) {
     iconPath = path.resolve(app.paths.root, iconPath);
@@ -491,7 +491,7 @@ function copyIcon(app, outputPath, tag, size) {
 function copyNotifyIcon(app, outputPath, tag, name) {
   var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/notifyicon.png");
   var android = app.manifest.android;
-  var iconPath = android && android.icons && android.icons.alerts && android.icons.alerts[name];
+  var iconPath = android.icons && android.icons.alerts && android.icons.alerts[name];
 
   if (iconPath) {
     return fs.copyAsync(iconPath, destPath);
@@ -674,7 +674,7 @@ function copyMusic(app, outputDir) {
 }
 
 function copyResDir(app, outputDir) {
-  if (app.manifest.android && app.manifest.android.resDir) {
+  if (app.manifest.android.resDir) {
     var destPath = path.join(outputDir, "res");
     var sourcePath = path.resolve(app.manifest.android.resDir);
     return fs.copyAsync(sourcePath, destPath, {preserveTimestamps: true})
@@ -883,6 +883,12 @@ exports.build = function(api, app, config, cb) {
     apkBuildName = shortName + "-aligned.apk";
   } else {
     apkBuildName = shortName + "-debug.apk";
+  }
+
+  if (!app.manifest.android) {
+    logger.warn('you should add an "android" key to your app\'s manifest.json',
+                'for android-specific settings');
+    app.manifest.android = {};
   }
 
   return Promise.try(function createAndroidProjectFiles() {
