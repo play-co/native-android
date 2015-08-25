@@ -52,19 +52,46 @@ var logger;
 function spawnWithLogger(api, name, args, opts) {
   return new Promise(function (resolve, reject) {
     var logger = api.logging.get(name);
-    logger.log(name, args.join(' '));
-    var streams = logger.createStreams(['stdout'], {silent: false});
+    logger.log(chalk.green(name + ' ' + args.join(' ')));
+    var streams = logger.createStreams(['stdout'], false);
     var child = spawn(name, args, opts);
     child.stdout.pipe(streams.stdout);
     child.stderr.pipe(streams.stdout);
-    child.on('exit', function (code) {
+    child.on('close', function (code) {
       if (code) {
-        logger.log(streams.get('stdout'));
-        logger.warn(name, 'exited with non-zero exit code (' + code + ')');
-        reject(code);
+        var err = new BuildError(chalk.green(name) + chalk.red(' exited with non-zero exit code (' + code + ')'));
+        err.stdout = streams.get('stdout');
+        err.code = code;
+        reject(err);
+      } else if (opts && opts.capture) {
+        resolve(streams.get('stdout'));
       } else {
-        console.log(name, 'ended normally');
         resolve();
+      }
+    });
+  });
+}
+
+function legacySpawnWithLogger(api, name, args, opts) {
+  var logger = api.logging.get(name);
+  logger.log(name, args.join(' '));
+  var child = spawn(name, args, opts);
+  child.stdout.pipe(logger, {end: false});
+  child.stderr.pipe(logger, {end: false});
+
+  var stdout = '';
+  if (opts && opts.capture) {
+    child.stdout.on('data', function (chunk) {
+      stdout += chunk;
+    });
+  }
+
+  return new Promise(function (resolve, reject) {
+    child.on('close', function (err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stdout);
       }
     });
   });
@@ -382,7 +409,30 @@ function makeAndroidProject(api, app, config, opts) {
           "create", "project", "--target", ANDROID_TARGET, "--name", app.manifest.shortName,
           "--path", opts.outputPath, "--activity", config.activityName,
           "--package", config.packageName
-        ]);
+        ])
+        .catch(BuildError, function (err) {
+          if (err.stdout && /not valid/i.test(err.stdout)) {
+            logger.log(chalk.yellow([
+                '',
+                'Android target ' + ANDROID_TARGET + ' was not available. Please ensure',
+                'you have installed the Android SDK properly, and use the',
+                '"android" tool to install API Level ' + ANDROID_TARGET.split('-')[1] + '.',
+                ''
+              ].join('\n')));
+          }
+
+          if (err.stdout && /no such file/i.test(err.stdout) || err.code == 126) {
+            logger.log(chalk.yellow([
+                '',
+                'You must install the Android SDK first. Please ensure the ',
+                '"android" tool is available from the command line by adding',
+                'the sdk\'s "tools/" directory to your system path.',
+                ''
+              ].join('\n')));
+          }
+
+          throw err;
+        });
     })
     .then(function () {
       var tealeafDir = path.relative(opts.outputPath, path.join(__dirname, "TeaLeaf"));
@@ -763,6 +813,11 @@ function createProject(api, app, config) {
 
 exports.build = function(api, app, config, cb) {
   logger = api.logging.get('android');
+
+  var sdkVersion = parseFloat(config.sdkVersion);
+  if (isNaN(sdkVersion) || sdkVersion < 3.1) {
+    spawnWithLogger = legacySpawnWithLogger;
+  }
 
   var argv = config.argv;
 
