@@ -502,160 +502,54 @@ function copyNotifyIcon(app, outputPath, tag, name) {
   }
 }
 
-var DEFAULT_SPLASH_FILES = [
-  {
-    copyFile: "portrait512",
-    inFiles: [
-      "portrait960",
-      "portrait1024",
-      "portrait1136",
-      "portrait480",
-      "universal",
-      "portrait2048"
-    ],
-    outFile: "splash-512.png",
-    outSize: "512"
-  },
-  {
-    copyFile: "portrait1024",
-    inFiles: [
-      "portrait1136",
-      "universal",
-      "portrait960",
-      "portrait2048"
-/*        "portrait512",
-      "portrait480"*/
-    ],
-    outFile: "splash-1024.png",
-    outSize: "1024"
-  },
-  {
-    copyFile: "portrait2048",
-    inFiles: [
-      "universal"
-/*        "portrait1136",
-      "portrait1024",
-      "portrait960",
-      "portrait512",
-      "portrait480"*/
-    ],
-    outFile: "splash-2048.png",
-    outSize: "2048"
-  }
+var SPLASH_FILES = [
+  'portrait480',
+  'portrait960',
+  'portrait1024',
+  'portrait1136',
+  'portrait2048',
+  'landscape768',
+  'landscape1536',
+  'universal'
 ];
 
+var DEFAULT_SPLASH_CONFIG = {};
+SPLASH_FILES.forEach(function (key) {
+  DEFAULT_SPLASH_CONFIG[key] = "resources/splash/" + key + ".png";
+});
+
 function copySplash(api, app, outputDir) {
-  var splashPaths = app.manifest.splash || {};
-  var splashTasks = [];
-  var destPath = path.join(outputDir, "assets/resources");
+  var splashPaths = app.manifest.android.splash || app.manifest.splash || DEFAULT_SPLASH_CONFIG;
+  var destPath = path.join(outputDir, 'assets/resources');
   return fs.mkdirsAsync(destPath)
     .then(function () {
-      return DEFAULT_SPLASH_FILES;
-    })
-    .map(function (splash) {
-      var outFile = splash.outFile;
-      var outSize = splash.outSize;
-      var copyFile = splash.copyFile;
-      var inFiles = splash.inFiles;
+      return SPLASH_FILES.map(function (key) {
+        var filename = splashPaths[key];
+        if (!filename) { return false; }
 
-      // Look up default copy file
-      var srcFile = splashPaths[copyFile];
-      var copying = true;
+        return existsAsync(filename)
+          .then(function (exists) {
+            if (!exists) {
+              logger.error('Splash file (manifest.splash.' + key + ') does not',
+                'exist (' + filename + ')');
+            }
 
-      // If copy source file DNE,
-      if (!srcFile) {
-        // Will not be copying
-        copying = false;
-
-        // For each candidate replacement,
-        for (var jj = 0; jj < inFiles.length; ++jj) {
-          // Read manifest to see if it is specified
-          var candidate = inFiles[jj];
-          srcFile = splashPaths[candidate];
-
-          // If found one that exists,
-          if (srcFile) {
-            // Stop at the first (best) one
-            break;
-          }
-        }
-      }
-
-      // If file was specified,
-      if (srcFile) {
-        // Resolve it to a valid path
-        srcFile = path.resolve(srcFile);
-
-        // If file does not exist,
-        if (!srcFile || !fs.existsSync(srcFile)) {
-          logger.warn("Splash file specified by your game manifest does not exist:", srcFile);
-          srcFile = null;
-        }
-      }
-
-      // TODO: what's the default splash
-
-      // // If no input file exists,
-      // if (!srcFile) {
-      //   srcFile = api.common.paths.lib("defsplash.png");
-
-      //   if (!srcFile || !fs.existsSync(srcFile)) {
-      //     logger.warn("Default splash file does not exist:", srcFile);
-      //     srcFile = null;
-      //   } else {
-      //     logger.warn("No splash screen images provided for size", outSize, "so using default image", srcFile);
-      //   }
-      // }
-
-      // If a source file was found,
-      if (srcFile) {
-        outFile = path.join(destPath, outFile);
-
-        // If copying,
-        if (copying) {
-          logger.log("Copying size", outSize, "splash:", outFile, "from", srcFile);
-          return fs.copyAsync(srcFile, outFile);
-        } else {
-          splashTasks.push({
-            'outSize': outSize,
-            'outFile': outFile,
-            'srcFile': srcFile
+            return {
+              key: key,
+              filename: filename,
+              exists: exists
+            };
           });
-        }
-      } // end if input file exists
-    })
-    .then(function () {
-      return splashTasks;
-    })
-    .map(function (task) {
-      if (!task) { return; }
-
-      logger.log("Creating size", task.outSize, "splash:", task.outFile, "from", task.srcFile);
-
-      return new Promise(function (resolve, reject) {
-        // Run splasher one at a time because the jvm tool is unable to run multiple
-        // instances of the same Java application in parallel.  FIXME
-        api.jvmtools.exec({
-          tool: 'splasher',
-          args: [
-            "-i", task.srcFile,
-            "-o", task.outFile,
-            "-resize", task.outSize,
-            "-rotate", "auto"
-          ]
-        }, function (err, splasher) {
-          if (err) { return reject(err); }
-
-          var logger = api.logging.get('splash' + task.outSize);
-          splasher.on('out', logger.out);
-          splasher.on('err', logger.err);
-          splasher.on('end', function () {
-            logger.log("Done splashing size", task.outSize);
-            resolve();
-          });
-        });
       });
-    }, {concurrency: 1});
+    })
+    // remove files that don't exist
+    .filter(function (splash) { return splash && splash.exists; })
+    .map(function (splash) {
+      var filename = 'splash-' + splash.key + '.png';
+      var destFile = path.join(destPath, filename);
+      logger.log('Copying', splash.filename, 'to "assets/resources/' + filename + '"');
+      return fs.copyAsync(splash.filename, destFile);
+    });
 }
 
 function copyMusic(app, outputDir) {
