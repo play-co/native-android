@@ -831,7 +831,11 @@ exports.build = function(api, app, config, cb) {
 
   var apkBuildName = "";
   if (!config.debug) {
-    apkBuildName = shortName + "-aligned.apk";
+    if (skipSigning) {
+      apkBuildName = shortName + "-release-unsigned.apk";
+    } else {
+      apkBuildName = shortName + "-aligned.apk";
+    }
   } else {
     apkBuildName = shortName + "-debug.apk";
   }
