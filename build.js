@@ -753,9 +753,12 @@ function copySplash(api, app, outputDir, next) {
 }
 
 function copyAssetKey(builder, project, destDir) {
- var destPath = path.join(destDir, "assets");
- var assetsPath = project.manifest.assets || {};
- copyFileSync(assetsPath[0], path.join(destPath, assetsPath[0]));
+  var destPath = path.join(destDir, "assets"),
+    assetsPath = project.manifest.assets || [];
+
+  if (assetsPath.length > 0) {
+    copyFileSync(assetsPath[0], path.join(destPath, assetsPath[0]));
+  }
 }
 
 function copyMusic(app, outputDir, cb) {
