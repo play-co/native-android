@@ -44,7 +44,7 @@ function copyFileSync(from, to) {
 }
 
 
-//// Addons
+//// Modules
 
 var getModuleConfig = function(api, app, config, cb) {
   var config = {};
@@ -869,7 +869,7 @@ function updateManifest(api, app, opts, cb) {
     f(params);
     copy(params, defaults);
     copy(params, app.manifest.android);
-    copyAndFlatten(params, app.manifest.addons);
+    copyAndFlatten(params, app.manifest.modules || app.manifest.addons);
     copy(params, {
       "package": opts.namespace,
       title: "@string/title",

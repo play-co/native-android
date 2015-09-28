@@ -200,30 +200,27 @@ Handle<Value> js_animate_constructor(const Arguments &args) {
     js_anim.MakeWeak(anim, js_animation_finalize);
     anim->js_anim = js_anim;
 
-    Persistent<Object> js_group = Persistent<Object>::New(Handle<Object>::Cast(args[1]));
-    anim->js_group = js_group;
-
     return thiz;
 }
 
-void def_animate_finish(Handle<Object> js_anim) {
-    LOGFN("js_animate_finish");
-    view_animation *anim = GET_TIMESTEP_ANIMATION(js_anim);
-    if (anim) {
-        Handle<Object> js_group = anim->js_group;
-        if (!js_group->IsNull() && !js_group->IsUndefined()) {
-            Handle<Value> finishValue = js_group->Get(STRING_CACHE_onAnimationFinish);
-            if (!finishValue->IsNull() && !finishValue->IsUndefined()) {
-                Handle<Object> finish = Handle<Object>::Cast(finishValue);
-                Handle<Value> args[] = {js_anim};
-                if (!finish.IsEmpty() && finish->IsFunction()) {
-                    Handle<Function> finishFn = Handle<Function>::Cast(finish);
-                    finishFn->Call(js_group, 1, args);
-                }
-            }
-        }
+void def_animate_add_to_group(Handle<Object> js_anim) {
+    LOGFN("def_animate_add_to_group");
+    Handle<Function> addToGroup = Handle<Function>::Cast(js_anim->Get(STRING_CACHE__addToGroup));
+    if (!addToGroup.IsEmpty() && addToGroup->IsFunction()) {
+        Handle<Value> args[] = {js_anim};
+        addToGroup->Call(js_anim, 1, args);
     }
-    LOGFN("end js_animate_finish");
+    LOGFN("end def_animate_add_to_group");
+}
+
+void def_animate_remove_from_group(Handle<Object> js_anim) {
+    LOGFN("def_animate_remove_from_group");
+    Handle<Function> finish = Handle<Function>::Cast(js_anim->Get(STRING_CACHE__removeFromGroup));
+    if (!finish.IsEmpty() && finish->IsFunction()) {
+        Handle<Value> args[] = {js_anim};
+        finish->Call(js_anim, 1, args);
+    }
+    LOGFN("end def_animate_remove_from_group");
 }
 
 void def_animate_cb(Handle<Object> js_view, Handle<Object> cb, double tt, double t) {

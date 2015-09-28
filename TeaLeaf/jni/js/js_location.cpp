@@ -23,8 +23,6 @@ static Persistent<String> m_location;
 
 Handle<Value> jsGetLocation(Local<String> name, const AccessorInfo &info) {
 
-    LOG("{location} Returning location of %s", ToCString(String::Utf8Value(m_location)));
-
     return m_location;
 }
 
