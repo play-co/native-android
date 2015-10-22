@@ -522,6 +522,7 @@ function copyIcons(app, outputPath) {
       copyNotifyIcon(app, outputPath, "h", "high"),
       copyNotifyIcon(app, outputPath, "xh", "xhigh"),
       copyNotifyIcon(app, outputPath, "xxh", "xxhigh")
+      copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh")
     ]);
 }
 
