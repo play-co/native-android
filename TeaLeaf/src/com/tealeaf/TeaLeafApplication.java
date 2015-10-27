@@ -16,24 +16,11 @@ package com.tealeaf;
 import android.app.Application;
 import android.content.Context;
 import com.tealeaf.plugin.PluginManager;
-import android.content.ComponentCallbacks2;
 
-public class TeaLeafApplication extends Application implements ComponentCallbacks2 {
+public class TeaLeafApplication extends Application {
 	@Override
 	public void onCreate() {
 		PluginManager.init(this);
 		PluginManager.callAll("onCreateApplication", this.getApplicationContext());
-	}
-
-	@Override
-	public void onLowMemory() {
-		NativeShim.textureManagerMemoryWarning();
-	}
-
-	@Override
-	public void onTrimMemory(int level) {
-		if (level == TRIM_MEMORY_RUNNING_CRITICAL) {
-			NativeShim.textureManagerMemoryWarning();
-		}
 	}
 }

@@ -39,6 +39,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ComponentCallbacks2;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.content.SharedPreferences.Editor;
@@ -88,7 +89,7 @@ import org.json.JSONObject;
  * Longer term, this activity should become the activity that always starts and
  * then figures out which game activity to run.
  */
-public class TeaLeaf extends FragmentActivity {
+public class TeaLeaf extends FragmentActivity implements ComponentCallbacks2 {
 	private TeaLeafOptions options;
 
 	public TeaLeafGLSurfaceView glView;
@@ -982,6 +983,20 @@ public class TeaLeaf extends FragmentActivity {
 
 	static {
 		System.loadLibrary("tealeaf");
+	}
+
+	@Override
+	public void onLowMemory() {
+		if (glView != null) {
+			glView.onMemoryWarning(TRIM_MEMORY_COMPLETE);
+		}
+	}
+
+	@Override
+	public void onTrimMemory(int level) {
+		if (glView != null) {
+			glView.onMemoryWarning(level);
+		}
 	}
 
 }
