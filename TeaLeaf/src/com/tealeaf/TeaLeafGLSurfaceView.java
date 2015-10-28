@@ -105,10 +105,12 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		};
 		orientationListener.enable();
 
-		final ActivityManager activityManager = (ActivityManager) TeaLeaf.get().getSystemService(Context.ACTIVITY_SERVICE);
-		ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
-		ActivityManager.getMyMemoryState(currentState);
-		onMemoryWarning(currentState.lastTrimLevel);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			final ActivityManager activityManager = (ActivityManager) TeaLeaf.get().getSystemService(Context.ACTIVITY_SERVICE);
+			ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
+			ActivityManager.getMyMemoryState(currentState);
+			onMemoryWarning(currentState.lastTrimLevel);
+		}
 	}
 
 	public OnTouchListener getOnTouchListener() {
