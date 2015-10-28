@@ -985,7 +985,7 @@ public class TeaLeaf extends FragmentActivity implements ComponentCallbacks2 {
 	@Override
 	public void onLowMemory() {
 		if (glView != null) {
-			glView.onMemoryWarning(TRIM_MEMORY_COMPLETE);
+			NativeShim.textureManagerMemoryCritical();
 		}
 	}
 
