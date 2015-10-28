@@ -89,7 +89,7 @@ import org.json.JSONObject;
  * Longer term, this activity should become the activity that always starts and
  * then figures out which game activity to run.
  */
-public class TeaLeaf extends FragmentActivity implements ComponentCallbacks2 {
+public class TeaLeaf extends FragmentActivity {
 	private TeaLeafOptions options;
 
 	public TeaLeafGLSurfaceView glView;
