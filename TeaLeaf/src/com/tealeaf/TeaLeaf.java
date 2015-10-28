@@ -77,7 +77,6 @@ import android.widget.AbsoluteLayout;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-import android.content.ComponentCallbacks2;
 
 import org.json.JSONObject;
 
