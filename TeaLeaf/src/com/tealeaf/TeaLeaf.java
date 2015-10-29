@@ -981,4 +981,18 @@ public class TeaLeaf extends FragmentActivity {
 		System.loadLibrary("tealeaf");
 	}
 
+	@Override
+	public void onLowMemory() {
+		if (glView != null) {
+			NativeShim.textureManagerMemoryCritical();
+		}
+	}
+
+	@Override
+	public void onTrimMemory(int level) {
+		if (glView != null) {
+			glView.onMemoryWarning(level);
+		}
+	}
+
 }

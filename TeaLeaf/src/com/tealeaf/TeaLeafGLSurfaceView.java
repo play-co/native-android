@@ -37,6 +37,9 @@ import android.view.View;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import com.tealeaf.plugin.PluginManager;
+import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
+import android.content.Context;
 
 import com.tealeaf.event.ImageLoadedEvent;
 import com.tealeaf.event.OrientationEvent;
@@ -101,6 +104,13 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			}
 		};
 		orientationListener.enable();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			final ActivityManager activityManager = (ActivityManager) TeaLeaf.get().getSystemService(Context.ACTIVITY_SERVICE);
+			ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
+			ActivityManager.getMyMemoryState(currentState);
+			onMemoryWarning(currentState.lastTrimLevel);
+		}
 	}
 
 	public OnTouchListener getOnTouchListener() {
@@ -307,6 +317,15 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		NativeShim nativeShim = renderer.getNativeShim();
 		if (nativeShim != null) {
 			nativeShim.clearTextureData();
+		}
+	}
+
+	public void onMemoryWarning(int level) {
+		logger.log("{java} onMemoryWarning", level);
+		if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+			NativeShim.textureManagerMemoryCritical();
+		} else if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+			NativeShim.textureManagerMemoryWarning();
 		}
 	}
 
