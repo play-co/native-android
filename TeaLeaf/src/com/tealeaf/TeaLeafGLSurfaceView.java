@@ -333,7 +333,10 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		} else if (level < lastTrimLevel) {
 			NativeShim.textureManagerMemoryReset();
 		}
-		lastTrimLevel = level;
+
+		if (level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+			lastTrimLevel = level;
+		}
 	}
 
 	public TextureLoader getTextureLoader() {
