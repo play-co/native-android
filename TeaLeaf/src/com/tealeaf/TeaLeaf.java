@@ -94,6 +94,7 @@ public class TeaLeaf extends FragmentActivity {
 	public TeaLeafGLSurfaceView glView;
 
 	private boolean glViewPaused;
+	private boolean isFullScreen;
 	protected FrameLayout group;
 	protected Overlay overlay;
 	protected TextInputView textboxview;
@@ -234,6 +235,7 @@ public class TeaLeaf extends FragmentActivity {
 		super.onCreate(savedInstanceState);
         PluginManager.init(this);
 		instance = this;
+		setFullscreenFlag();
 		configureActivity();
 		String appID = findAppID();
 		options = new TeaLeafOptions(this);
@@ -472,7 +474,7 @@ public class TeaLeaf extends FragmentActivity {
 			EventQueue.pushEvent(new WindowFocusAcquiredEvent());
 
 			// games are inherently full screen and immersive, hide OS UI bars
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (isFullScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 				int uiFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 					uiFlag |= View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -616,6 +618,17 @@ public class TeaLeaf extends FragmentActivity {
 		NativeShim.reset();
 	}
 
+	private void setFullscreenFlag() {
+		try {
+			Bundle metaData = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA).metaData;
+			isFullScreen = metaData.getBoolean("fullscreen", true);
+		} catch (NameNotFoundException e) {
+			logger.log(e);
+			//Default to fullscreen mode.
+			isFullScreen = true;
+		}
+	}
+
 	private String findAppID() {
 		String appid = getIntent().getStringExtra("appid");
 		if(appid != null) {
@@ -633,7 +646,13 @@ public class TeaLeaf extends FragmentActivity {
 
 	private void configureActivity() {
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		if (isFullScreen) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		} else {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 	}
 

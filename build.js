@@ -690,6 +690,7 @@ function updateManifest(api, app, config, opts) {
     version: "" + config.version,
     appid: app.manifest.appID.replace(PUNCTUATION_REGEX, ""), // Strip punctuation.,
     shortname: app.manifest.shortName,
+    fullscreen: app.manifest.fullscreen,
     orientation: orientation,
     studioName: config.studioName,
     gameHash: app.manifest.version,
