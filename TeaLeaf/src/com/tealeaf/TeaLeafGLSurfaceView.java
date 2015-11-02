@@ -331,7 +331,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				NativeShim.textureManagerMemoryWarning();
 			}
 		} else if (level < lastTrimLevel) {
-			NativeShim.textureManagerMemoryReset();
+			NativeShim.textureManagerResetMemoryCritical();
 		}
 
 		if (level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
