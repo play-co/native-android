@@ -59,7 +59,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	protected long glThreadId = 0;
 	public boolean queuePause = false;
 	private OrientationEventListener orientationListener;
-	private int lastTrimLevel = 0;
+	private int lastRunningTrimLevel = 0;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
@@ -324,18 +324,18 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	public void onMemoryWarning(int level) {
 		logger.log("{java} onMemoryWarning", level);
 
-		if (level > lastTrimLevel) {
+		if (level > lastRunningTrimLevel) {
 			if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
 				NativeShim.textureManagerMemoryCritical();
 			} else if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
 				NativeShim.textureManagerMemoryWarning();
 			}
-		} else if (level < lastTrimLevel) {
+		} else if (level < lastRunningTrimLevel) {
 			NativeShim.textureManagerResetMemoryCritical();
 		}
 
 		if (level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
-			lastTrimLevel = level;
+			lastRunningTrimLevel = level;
 		}
 	}
 
