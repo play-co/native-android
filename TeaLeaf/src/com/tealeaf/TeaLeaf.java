@@ -46,6 +46,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.ComponentCallbacks2;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -77,6 +78,7 @@ import android.widget.AbsoluteLayout;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.app.ActivityManager;
 
 import org.json.JSONObject;
 
@@ -454,7 +456,16 @@ public class TeaLeaf extends FragmentActivity {
 			soundQueue.onResume();
 			soundQueue.playSound(SoundQueue.LOADING_SOUND);
 			PluginManager.callAll("onResume");
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+				final ActivityManager activityManager = (ActivityManager) instance.getSystemService(Context.ACTIVITY_SERVICE);
+				ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
+				ActivityManager.getMyMemoryState(currentState);
+				glView.onMemoryWarning(currentState.lastTrimLevel);
+			}
 		}
+
+
 	}
 
 	@Override
@@ -987,7 +998,11 @@ public class TeaLeaf extends FragmentActivity {
 	@Override
 	public void onLowMemory() {
 		if (glView != null) {
-			NativeShim.textureManagerMemoryCritical();
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+				NativeShim.textureManagerMemoryCritical();
+			} else {
+				glView.onMemoryWarning(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+			}
 		}
 	}
 
