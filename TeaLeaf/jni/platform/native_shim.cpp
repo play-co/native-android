@@ -258,7 +258,7 @@ extern "C" {
     }
 
     void Java_com_tealeaf_NativeShim_textureManagerResetMemoryCritical(JNIEnv *env, jobject thiz) {
-        texture_manager_memory_reset_memory_critical();
+        texture_manager_reset_memory_critical();
     }
 
     void Java_com_tealeaf_NativeShim_textureManagerSetMaxMemory(JNIEnv *env, jobject thiz, jint bytes) {
