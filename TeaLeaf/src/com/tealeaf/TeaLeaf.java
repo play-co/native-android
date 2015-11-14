@@ -647,11 +647,7 @@ public class TeaLeaf extends FragmentActivity {
 	private void configureActivity() {
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 		if (isFullScreen) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-		} else {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 	}
