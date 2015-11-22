@@ -29,7 +29,7 @@ public class logger {
 		context = tealeaf;
 		// disable the log by default, allow for overriding in the manifest
 		DISABLE_LOG = tealeaf.getOptions().get("disableLogs", true);
-		logger.remoteLogger = remoteLogger;
+		logger.remoteLogger = null;
 	}
 	public static void debug(Object... text) {
 		if (DISABLE_DEBUG) { return; }
