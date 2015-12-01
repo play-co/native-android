@@ -6,6 +6,9 @@
 	<xsl:param name="version" />
 	<xsl:param name="versionCode" />
 
+	<xsl:param name="minSdkVersion">8</xsl:param>
+	<xsl:param name="targetSdkVersion">14</xsl:param>
+
 	<xsl:param name="gameHash">0.0</xsl:param>
 	<xsl:param name="sdkHash">1.0</xsl:param>
 	<xsl:param name="androidHash">1.0</xsl:param>
@@ -35,6 +38,14 @@
 		<xsl:copy>
 			<xsl:apply-templates select="@*|node()" />
 		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="uses-sdk/@android:minSdkVersion">
+		<xsl:attribute name="android:minSdkVersion"><xsl:value-of select="$minSdkVersion" /></xsl:attribute>
+	</xsl:template>
+
+	<xsl:template match="uses-sdk/@android:targetSdkVersion">
+		<xsl:attribute name="android:targetSdkVersion"><xsl:value-of select="$targetSdkVersion" /></xsl:attribute>
 	</xsl:template>
 
 	<xsl:template match="application/@android:debuggable">

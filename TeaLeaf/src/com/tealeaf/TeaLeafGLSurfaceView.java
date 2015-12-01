@@ -26,6 +26,9 @@ import android.os.Build;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.ActivityManager;
+import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -670,6 +673,8 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			Point size = new Point();
 			TeaLeaf tealeaf = this.view.context;
 			WindowManager w = tealeaf.getWindowManager();
+			int orientation = tealeaf.getRequestedOrientation();
+			boolean isPortrait = orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
 				w.getDefaultDisplay().getSize(size);
@@ -681,34 +686,39 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				sh = d.getHeight();
 			}
 
-			// Calculate longer screen side
-			int longerScreenSide = sw;
-			if (longerScreenSide < sh) {
-				longerScreenSide = sh;
-			}
-
 			boolean success = false;
-
-			if (longerScreenSide > 1024) {
-				success = trySplashImage("splash-2048.png");
+			int[] sizes;
+			int screenSide;
+			String prefix = "splash-portrait";
+			if (isPortrait) {
+				sizes = new int[] {2048, 1136, 1024, 960, 480, 0};
+				screenSide = sw < sh ? sh : sw;
+			} else {
+				sizes = new int[] {1536, 768, 0};
+				prefix = "splash-landscape";
+				screenSide = sw < sh ? sw : sh;
 			}
-			
-			if (!success && longerScreenSide > 512) {
-				success = trySplashImage("splash-1024.png");
-			} 
-			
+
+			int n = sizes.length - 1;
+			for (int i = 0; i < n; ++i) {
+				if (screenSide > sizes[i + 1]) {
+					if (success = trySplashImage(prefix + sizes[i] + ".png")) {
+						break;
+					}
+				}
+			}
+
 			if (!success) {
-				success = trySplashImage("splash-512.png");
-
-				// Use much larger splashes if smaller ones cannot be found:
-
-				if (!success && longerScreenSide <= 512) {
-					success = trySplashImage("splash-1024.png");
+				// use larger splashes if smaller ones cannot be found
+				for (int i = n; i > 0; i--) {
+					if (success = trySplashImage(prefix + sizes[i] + ".png")) {
+						break;
+					}
 				}
+			}
 
-				if (!success && longerScreenSide <= 1024) {
-					success = trySplashImage("splash-2048.png");
-				}
+			if (!success) {
+				success = trySplashImage("splash-universal.png");
 			}
 
 			if (!success) {
@@ -717,7 +727,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 
 			logger.log("{core} Device screen (", sw, ",", sh, "), using splash '", tealeaf.getOptions().getSplash(), "'");
 		}
-		
+
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
 
 			if (this.view.context.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
