@@ -781,7 +781,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 					NativeShim.textureManagerSetMaxMemory(device_limit / 2);
 				}
 				// no need to send memory warnings for devices with more than 1GB memory
-				if (device_limit > 1024*1024*1024) {
+				if (device_limit > 1073741824) {
 					handleMemoryWarning = false;
 				}
 				logger.log("Device Memory Limit", device_limit);
