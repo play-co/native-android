@@ -511,6 +511,7 @@ public class NativeShim {
 	public native static void textureManagerSetMaxMemory(int bytes);
 	public native static void textureManagerMemoryWarning();
 	public native static void textureManagerMemoryCritical();
+	public native static void textureManagerResetMemoryCritical();
 
 	//LocalStorage
 	public void setData(String key, String data) {
