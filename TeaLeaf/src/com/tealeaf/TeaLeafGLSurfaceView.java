@@ -40,9 +40,6 @@ import android.view.View;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import com.tealeaf.plugin.PluginManager;
-import android.app.ActivityManager;
-import android.content.ComponentCallbacks2;
-import android.content.Context;
 
 import com.tealeaf.event.ImageLoadedEvent;
 import com.tealeaf.event.OrientationEvent;
@@ -325,6 +322,11 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		}
 	}
 
+	public TextureLoader getTextureLoader() {
+		return renderer.getTextureLoader();
+	}
+
+
 	public void onMemoryWarning(int level) {
 		logger.log("{java} onMemoryWarning", level);
 
@@ -346,10 +348,6 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		if (level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
 			lastRunningTrimLevel = level;
 		}
-	}
-
-	public TextureLoader getTextureLoader() {
-		return renderer.getTextureLoader();
 	}
 
 	@Override
