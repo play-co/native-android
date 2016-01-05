@@ -14,6 +14,7 @@
 	<xsl:param name="androidHash">1.0</xsl:param>
 	<xsl:param name="develop">false</xsl:param>
 	<xsl:param name="appid"></xsl:param>
+	<xsl:param name="fullscreen">true</xsl:param>
 	<xsl:param name="shortname">tealeaf</xsl:param>
 	<xsl:param name="studioName">Wee Cat Studios</xsl:param>
 	<xsl:param name="codeHost">s.wee.cat</xsl:param>
@@ -95,6 +96,9 @@
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='appID']">
 		<meta-data android:name="appID" android:value="{$appid}"/>
+	</xsl:template>
+	<xsl:template match="meta-data[@android:name='fullscreen']">
+		<meta-data android:name="fullscreen" android:value="{$fullscreen}"/>
 	</xsl:template>
 	<xsl:template match="meta-data[@android:name='shortName']">
 		<meta-data android:name="shortName" android:value="{$shortname}"/>
