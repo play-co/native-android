@@ -34,7 +34,7 @@ public class Overlay extends android.webkit.WebView {
         getSettings().setJavaScriptEnabled(true);
         getSettings().setDomStorageEnabled(true);
         getSettings().setDatabaseEnabled(true);
-        getSettings().setDatabasePath(context.getExternalFilesDir().getPath());
+        getSettings().setDatabasePath(context.getExternalFilesDir(null).getPath());
                 
         browserInterface = new BrowserInterface();
         addJavascriptInterface(browserInterface, "tealeaf"); 

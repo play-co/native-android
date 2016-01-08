@@ -29,6 +29,7 @@ public class PhotoPicker {
 	private Activity activity;
 	private ResourceManager resourceManager;
 	private Settings settings;
+
 	public PhotoPicker(Activity context, Settings settings, ResourceManager manager) {
 		this.activity = context;
 		this.settings = settings;
@@ -53,7 +54,7 @@ public class PhotoPicker {
 
 	public void take(int id) {
 		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File largeFile = getCaptureImageTmpFile();
+        File largeFile = getCaptureImageTmpFile(this.activity);
 		if (largeFile != null) {
 			camera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(largeFile));
 		}
@@ -105,10 +106,10 @@ public class PhotoPicker {
 	}
 
     private static File captureImageTmpFile = null;
-    public static File getCaptureImageTmpFile() {
+    public static File getCaptureImageTmpFile(Activity context) {
         if (captureImageTmpFile == null) {
             try {
-                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", getExternalCacheDir());
+                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", context.getExternalCacheDir());
             } catch(Exception e) {
 				logger.log(e);
             }
