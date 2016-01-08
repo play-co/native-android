@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,9 +29,6 @@ import android.graphics.Canvas;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.*;
-import android.provider.ContactsContract.*;
 import android.util.Base64;
 
 public class ContactList {
@@ -46,20 +41,6 @@ public class ContactList {
 	}
 
 	public String getProfileLookup() {
-		Account[] accounts = AccountManager.get(activity).getAccounts();
-		if(accounts.length > 0) {
-			String syncName = accounts[0].name;
-			Cursor c = activity.getContentResolver().query(Email.CONTENT_URI,
-					new String[] { Contacts.LOOKUP_KEY },
-					Email.DATA + " = ?",
-					new String[] { syncName }, null);
-			String id = "";
-			if (c.moveToFirst()) {
-				id = c.getString(c.getColumnIndex(Contacts.LOOKUP_KEY));
-			}
-			c.close();
-			return id;
-		}
 		return null;
 	}
 
@@ -113,26 +94,7 @@ public class ContactList {
 	}
 
 	public Bitmap getUnscaledPicture(String lookupKey) {
-		Uri lookupUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey);
-		Uri contact = Contacts.lookupContact(activity.getContentResolver(), lookupUri);
-		Bitmap picture = null;
-		if (contact != null) {
-			InputStream photo = null;
-			try {
-				photo = Contacts.openContactPhotoInputStream(activity.getContentResolver(), contact);
-			} catch (Exception e) {
-				logger.log(e);
-				picture = null;
-			}
-			if (photo != null) {
-				picture = BitmapFactory.decodeStream(photo);
-			}
-		}
-		//on 4.0 and above we can't do this sequel query, just skip it
-		if (picture == null && android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			picture = loadFacebookAvatar(lookupKey);
-		}
-		return picture;
+		return null;
 	}
 
 	public String getProfilePicture(boolean base64) {
@@ -147,64 +109,5 @@ public class ContactList {
 			return Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT);
 		}
 		return "";
-	}
-
-	private Bitmap loadFacebookAvatar(String lookupKey) {
-		String[] rawProjection = { ContactsContract.RawContacts._ID };
-		String contactIdAssertion = ContactsContract.Contacts.LOOKUP_KEY + " = '" + lookupKey + "'";
-		String rawWhere = new StringBuilder().append(contactIdAssertion)
-				.append(") UNION ALL SELECT ")
-				.append(ContactsContract.RawContacts._ID)
-				.append(" FROM view_raw_contacts WHERE (")
-				.append(contactIdAssertion).toString();
-
-		Cursor query = null;
-		try {
-			query = activity.getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI, rawProjection, rawWhere, null, null);
-		} catch(Exception e) {
-			// guess we can't get the facebook photo. :(
-			if (query != null) {
-				query.close();
-				query = null;
-			}
-		}
-		if (query != null && query.moveToFirst()) {
-			do {
-				long id = query.getLong(query.getColumnIndex(ContactsContract.RawContacts._ID));
-				String[] projection = { ContactsContract.CommonDataKinds.Photo.PHOTO };
-				Uri uri = ContactsContract.Data.CONTENT_URI;
-
-				String mimeTypeAssertion = ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'";
-				String photoAssertion = ContactsContract.CommonDataKinds.Photo.PHOTO + " IS NOT NULL";
-				String rawContactIdAssertion = ContactsContract.CommonDataKinds.Photo.RAW_CONTACT_ID + " = " + id;
-
-				String where = new StringBuilder().append(mimeTypeAssertion)
-						.append(" AND ").append(photoAssertion).append(" AND ")
-						.append(rawContactIdAssertion)
-						.append(") UNION ALL SELECT ")
-						.append(ContactsContract.CommonDataKinds.Photo.PHOTO)
-						.append(" FROM view_data WHERE (")
-						.append(photoAssertion).append(" AND ")
-						.append(rawContactIdAssertion).toString();
-
-				Cursor photoQuery = activity.getContentResolver().query(uri, projection, where, null, null);
-				if (photoQuery != null) {
-					if (photoQuery.moveToFirst()) {
-						do {
-							byte[] photoData = photoQuery.getBlob(photoQuery.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO));
-							if (photoData != null) {
-								query.close();
-								photoQuery.close();
-								return BitmapFactory.decodeByteArray(photoData, 0, photoData.length, null);
-							}
-						} while (photoQuery.moveToNext());
-
-					}
-					photoQuery.close();
-				}
-			} while (query.moveToNext());
-			query.close();
-		}
-		return null;
 	}
 }
