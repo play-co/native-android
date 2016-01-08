@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 import java.io.File;
@@ -109,7 +108,7 @@ public class PhotoPicker {
     public static File getCaptureImageTmpFile() {
         if (captureImageTmpFile == null) {
             try {
-                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", Environment.getExternalStorageDirectory());
+                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", getExternalCacheDir());
             } catch(Exception e) {
 				logger.log(e);
             }
