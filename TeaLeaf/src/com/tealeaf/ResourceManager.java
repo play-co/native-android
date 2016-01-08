@@ -151,7 +151,7 @@ public class ResourceManager {
 		}
 	}
 	public String getExternalCacheDirectory() {
-		return Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp/";
+		return context.getExternalCacheDir();
 	}
 
 	public void clearCacheDirectory() {
@@ -190,7 +190,7 @@ public class ResourceManager {
 		if (!canUseExternalStorage() || ONLY_USE_INTERNAL_STORAGE) {
 			storageDir = context.getFilesDir();
 		} else {
-			storageDir = Environment.getExternalStorageDirectory();
+			storageDir = context.getExternalFilesDir();
 		}
 		return storageDir;
 	}
@@ -199,7 +199,7 @@ public class ResourceManager {
 		if (!canUseExternalStorage()) {
 			return false;
 		}
-		File storageDir = Environment.getExternalStorageDirectory();
+		File storageDir = context.getExternalFilesDir();
 		File file = new File(storageDir.getAbsolutePath() + File.separator + filename);
 		if (file.exists()) {
 			logger.log("{resource} ERROR: External storage file exists");
@@ -221,7 +221,7 @@ public class ResourceManager {
 		if (!canUseExternalStorage()) {
 			return null;
 		}
-		File storageDir = Environment.getExternalStorageDirectory();
+		File storageDir = context.getExternalFilesDir();
 		File file = new File(storageDir.getAbsolutePath() + File.separator + filename);
 		if (!file.exists()) {
 			return null;
