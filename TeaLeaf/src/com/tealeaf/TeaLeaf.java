@@ -813,7 +813,7 @@ public class TeaLeaf extends FragmentActivity {
 					}
 
 					//try the large file on disk
-					final File f = PhotoPicker.getCaptureImageTmpFile();
+					final File f = PhotoPicker.getCaptureImageTmpFile(this);
 					if (f != null && f.exists()) {
 						new Thread(new Runnable() {
 							public void run(){
