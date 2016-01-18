@@ -550,10 +550,9 @@ public class TeaLeaf extends FragmentActivity {
 					}
 					glView.setRendererStateReloading();
 				}
-
-				soundQueue.onPause();
-				soundQueue.pauseSound(SoundQueue.LOADING_SOUND);
 			}
+			soundQueue.onPause();
+			soundQueue.pauseSound(SoundQueue.LOADING_SOUND);
 		}
 	}
 
