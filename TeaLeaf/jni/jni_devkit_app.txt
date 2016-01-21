@@ -1,0 +1,90 @@
+#include "tealeaf.h"
+#include "core/core.h"
+
+#include "platform/platform.h"
+#include "platform/native.h"
+
+#include "util/detect.h"
+
+static jfieldID tealeafPtr = NULL;
+static jfieldID appPtr = NULL;
+static jfieldID id = NULL;
+static jfieldID url = NULL;
+
+int jni_devkit_app_initialize() {
+    JNIEnv *jni = get_native_shim()->env;
+
+    jclass appClass = jni->FindClass("com/tealeaf/DevkitApp");
+    if (appClass == NULL) {
+        return -1;
+    }
+
+    JNI_GET_FIELD(appClass, appPtr, "J");
+    JNI_GET_FIELD(appClass, tealeafPtr, "J");
+    JNI_GET_FIELD(appClass, id, "Ljava/lang/String;");
+    JNI_GET_FIELD(appClass, url, "Ljava/lang/String;");
+
+    return 0;
+}
+
+static void send_progress(void *ptr, double dlnow, double dltotal) {
+    const char *bundleId = static_cast<const char*>(ptr);
+
+    native_shim* shim = get_native_shim();
+
+    jmethodID method = shim->env->GetMethodID(shim->type, "notifyAppProgress", "(Ljava/lang/String;DD)V");
+    ASSERT(native, method != NULL);
+
+    jstring jbundleId = shim->env->NewStringUTF(bundleId);
+    shim->env->CallVoidMethod(shim->instance, method, jbundleId, dltotal, dlnow);
+    shim->env->DeleteLocalRef(jbundleId);
+}
+
+/**
+ * DevkitApp.init
+ */
+CEXPORT JNIEXPORT void JNICALL
+Java_com_tealeaf_DevkitApp_init(JNIEnv *jni, jobject japp) {
+    tealeaf_t *tl;
+    TEALEAF_CAST(tl, jni->GetLongField(japp, tealeafPtr));
+
+    jstring jbundle_id = (jstring)jni->GetObjectField(japp, id);
+    jstring jurl = (jstring)jni->GetObjectField(japp, url);
+
+    const char *bundle_id = jni->GetStringUTFChars(jbundle_id, JNI_FALSE);
+    const char *url_str = jni->GetStringUTFChars(jurl, JNI_FALSE);
+
+    struct tl_app_options opts;
+    opts.splash = nullptr;
+    opts.origin = TL_APP_ORIGIN_GUESS;
+    opts.name = bundle_id;
+    opts.url = url_str;
+    opts.progress_func = send_progress;
+    opts.progress_data = strdup(bundle_id);
+
+    tl_app_t *app = tl_app_from_options(tl, &opts);
+
+    jni->SetLongField(japp, appPtr, (jlong)app);
+
+    jni->ReleaseStringUTFChars(jbundle_id, bundle_id);
+    jni->ReleaseStringUTFChars(jbundle_id, url_str);
+}
+
+/**
+ * DevkitApp.setSplash(String url)
+ */
+CEXPORT JNIEXPORT void JNICALL
+Java_com_tealeaf_DevkitApp_setSplash(JNIEnv *jni, jobject japp,
+        jstring jsplashUrl) {
+    tl_app_t *app = (tl_app_t*)jni->GetLongField(japp, appPtr);
+    if (!app) {
+        LOG("{warning} DevkitApp.setSplash has no app pointer");
+        return;
+    }
+
+    const char *splash_url = jni->GetStringUTFChars(jsplashUrl, JNI_FALSE);
+    tl_app_set_splash(app, splash_url);
+
+    jni->ReleaseStringUTFChars(jsplashUrl, splash_url);
+}
+
