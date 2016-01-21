@@ -711,6 +711,15 @@ function updateManifest(api, app, config, opts) {
         })
     ])
     .then(function () {
+        return fs.readFileAsync(outputManifest, 'utf-8')
+    .then(function (contents) {
+      contents = contents
+        .replace(/com.gameclosure.tealeafandroid.TealeafActivity/g,
+          config.packageName + "." + config.activityName);
+      return fs.writeFileAsync(outputManifest, contents);
+    });
+    })
+    .then(function () {
       return injectPluginXML(opts);
     })
     .then(function () {
@@ -771,16 +780,29 @@ function getVersionCode(app, debug) {
 }
 
 function updateActivity(config, opts) {
-  var activityFile = path.join(opts.outputPath,
+  logger.log("packagenameActivity: ", config.packageName);
+
+  var activityFolder = path.join(opts.outputPath,
       "src",
-      config.packageName.replace(/\./g, "/"),
+      config.packageName.replace(/\./g, "/"));
+
+  var activityFile = path.join(
+      activityFolder,
       config.activityName + ".java");
 
-  return fs.readFileAsync(activityFile, 'utf-8')
+  var applicationTestFolder = path.join(opts.outputPath,
+      "src/com/gameclosure/tealeafandroid");
+
+  var applicationTestFile = path.join(
+      opts.outputPath,
+      "/ApplicationTest" + ".java");
+
+  var tealeafActivity = path.join(__dirname, "TeaLeaf/java/TealeafActivity.java");
+  return fs.readFileAsync(tealeafActivity, 'utf-8')
     .then(function (contents) {
       contents = contents
-        .replace(/extends Activity/g, "extends com.tealeaf.TeaLeaf")
-        .replace(/setContentView\(R\.layout\.main\);/g, "startGame();");
+        .replace(/com.gameclosure.tealeafandroid/g, config.packageName)
+        .replace(/TealeafActivity/g, config.activityName)
       return fs.writeFileAsync(activityFile, contents);
     });
 }
