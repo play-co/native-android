@@ -300,7 +300,7 @@ public class TeaLeaf extends FragmentActivity {
 		int orientation = getRequestedOrientation();
 
 		// gets real screen dimensions without nav bars on recent API versions
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (isFullScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			Point screenSize = new Point();
 			try {
 				display.getRealSize(screenSize);
