@@ -44,7 +44,7 @@ public class SoundManager implements Runnable {
 	private SoundPool soundPool = new SoundPool(15, AudioManager.STREAM_MUSIC, 0);
 	private MediaPlayer backgroundMusic = null, loadingSound = null;
 	private String backgroundMusicUrl = null;
-	private boolean shouldResumeBackgroundMusic = true, shouldResumeLoadingSound = true;
+	private boolean shouldResumeBackgroundMusic = true, shouldResumeLoadingSound = true, appPaused = false;
 	private ResourceManager resourceManager;
 	private TeaLeaf context;
 
@@ -239,7 +239,9 @@ public class SoundManager implements Runnable {
 
 		setDuration(url, backgroundMusic);
 		backgroundMusic.setVolume(volume, volume);
-		backgroundMusic.start();
+		if (!appPaused) {
+			backgroundMusic.start();
+		}
 		backgroundMusic.setLooping(loop);
 	}
 
@@ -363,6 +365,7 @@ public class SoundManager implements Runnable {
 	}
 
 	public void onPause() {
+		appPaused = true;
 		soundPool.autoPause();
 		if (backgroundMusic != null) {
 			backgroundMusic.pause();
@@ -370,6 +373,7 @@ public class SoundManager implements Runnable {
 	}
 
 	public void onResume() {
+		appPaused = false;
 		soundPool.autoResume();
 		if (backgroundMusic != null && shouldResumeBackgroundMusic) {
 			backgroundMusic.start();
