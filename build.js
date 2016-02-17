@@ -509,6 +509,15 @@ function repackAPK(api, outputPath, apkName, cb) {
   });
 }
 
+function copyAssets(app, project, destPath) {
+  var assetsPath = project.manifest.assets || [];
+
+  return Promise.map(assetsPath, function(asset) {
+    logger.log('Copying', asset, 'to ' + path.join(destPath, asset));
+    return fs.copyAsync(asset, path.join(destPath, asset));
+  });
+}
+
 function copyIcons(app, outputPath) {
   return Promise.all([
       copyIcon(app, outputPath, "l", "36"),
@@ -857,7 +866,8 @@ exports.build = function(api, app, config, cb) {
         copyIcons(app, config.outputPath),
         copyMusic(app, config.outputPath),
         copyResDir(app, config.outputPath),
-        copySplash(api, app, config.outputPath)
+        copySplash(api, app, config.outputPath),
+        copyAssets(api, app, config.outputPath)
       ];
     })
     .all()
