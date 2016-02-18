@@ -23,7 +23,6 @@ import java.util.UUID;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
 
 public class Device {
 	private static String fakeId = null;
@@ -81,14 +80,8 @@ public class Device {
 	private static String generateDeviceID(Context context, Settings settings, ResourceManager resourceManager) {
 		String deviceID = getRawDeviceID(context);
 		
-		TelephonyManager telephonyManager =(TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-		String phoneNumber = telephonyManager.getLine1Number();
-		String imei = telephonyManager.getDeviceId();
-		
-		String seed = (deviceID == null ? "" : deviceID) + (phoneNumber == null ? "" : phoneNumber) + (imei == null ? "" : imei);
-		if (seed.equals("")) {
-			seed = "" + System.nanoTime();
-		}
+		String seed =  "" + System.nanoTime();
+
 		UUID uuid = UUID.nameUUIDFromBytes(seed.getBytes());
 		String uuidString = uuid.toString();
 		saveDeviceID(uuidString, context, settings, resourceManager);
@@ -141,10 +134,7 @@ public class Device {
 	}
 
 	public static String getNormalizedNumber(Context context) {
-		TelephonyManager telephony = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-		String number = telephony.getLine1Number();
-		if(number == null) { return "NONUMBER"; }
-		return number.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
+		return "NONUMBER";
 	}
 
 	public static String getNumberHash(Context context) {

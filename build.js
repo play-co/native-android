@@ -44,7 +44,7 @@ var existsAsync = function (filename) {
 // used to remove punctuation (if any) from the appid
 var PUNCTUATION_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~]/g;
 
-var ANDROID_TARGET = "android-19";
+var ANDROID_TARGET = "android-23";
 var androidVersion = require('./package.json').version;
 
 var logger;
@@ -521,7 +521,7 @@ function copyIcons(app, outputPath) {
       copyNotifyIcon(app, outputPath, "m", "med"),
       copyNotifyIcon(app, outputPath, "h", "high"),
       copyNotifyIcon(app, outputPath, "xh", "xhigh"),
-      copyNotifyIcon(app, outputPath, "xxh", "xxhigh")
+      copyNotifyIcon(app, outputPath, "xxh", "xxhigh"),
       copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh")
     ]);
 }
@@ -697,8 +697,8 @@ function updateManifest(api, app, config, opts) {
     gameHash: app.manifest.version,
     sdkHash: config.sdkVersion,
     androidHash: androidVersion,
-    minSdkVersion: config.argv['min-sdk-version'] || 8,
-    targetSdkVersion: config.argv['target-sdk-version'] || 14,
+    minSdkVersion: config.argv['min-sdk-version'] || 10,
+    targetSdkVersion: config.argv['target-sdk-version'] || 23,
     debuggable: config.debug ? 'true' : 'false'
   });
 
