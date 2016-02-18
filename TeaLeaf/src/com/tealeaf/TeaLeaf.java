@@ -96,6 +96,7 @@ public class TeaLeaf extends FragmentActivity {
 	public TeaLeafGLSurfaceView glView;
 
 	private boolean glViewPaused;
+	private boolean isFullScreen;
 	protected FrameLayout group;
 	protected Overlay overlay;
 	protected TextInputView textboxview;
@@ -236,6 +237,7 @@ public class TeaLeaf extends FragmentActivity {
 		super.onCreate(savedInstanceState);
         PluginManager.init(this);
 		instance = this;
+		setFullscreenFlag();
 		configureActivity();
 		String appID = findAppID();
 		options = new TeaLeafOptions(this);
@@ -298,7 +300,7 @@ public class TeaLeaf extends FragmentActivity {
 		int orientation = getRequestedOrientation();
 
 		// gets real screen dimensions without nav bars on recent API versions
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+		if (isFullScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 			Point screenSize = new Point();
 			try {
 				display.getRealSize(screenSize);
@@ -483,7 +485,7 @@ public class TeaLeaf extends FragmentActivity {
 			EventQueue.pushEvent(new WindowFocusAcquiredEvent());
 
 			// games are inherently full screen and immersive, hide OS UI bars
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			if (isFullScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 				int uiFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 						| View.SYSTEM_UI_FLAG_FULLSCREEN
 						| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -623,6 +625,17 @@ public class TeaLeaf extends FragmentActivity {
 		NativeShim.reset();
 	}
 
+	private void setFullscreenFlag() {
+		try {
+			Bundle metaData = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA).metaData;
+			isFullScreen = metaData.getBoolean("fullscreen", true);
+		} catch (NameNotFoundException e) {
+			logger.log(e);
+			//Default to fullscreen mode.
+			isFullScreen = true;
+		}
+	}
+
 	private String findAppID() {
 		String appid = getIntent().getStringExtra("appid");
 		if(appid != null) {
@@ -640,7 +653,9 @@ public class TeaLeaf extends FragmentActivity {
 
 	private void configureActivity() {
 		getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		if (isFullScreen) {
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 	}
 

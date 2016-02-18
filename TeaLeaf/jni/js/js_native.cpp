@@ -15,6 +15,7 @@
  * along with the Game Closure SDK.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+#include <sys/time.h>
 
 extern "C" {
 #include "core/config.h"

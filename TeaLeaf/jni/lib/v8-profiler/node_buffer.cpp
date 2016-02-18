@@ -33,6 +33,9 @@
 # include <arpa/inet.h> // htons, htonl
 #endif
 
+#ifdef MIN
+#undef MIN
+#endif
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 

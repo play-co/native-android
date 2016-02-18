@@ -24,6 +24,7 @@
 		<meta-data android:name="androidHash" android:value="Unknown" />
 		<meta-data android:name="develop" android:value="false" />
 		<meta-data android:name="appID" android:value="tealeaf" />
+		<meta-data android:name="fullscreen" android:value="true" />
 		<meta-data android:name="codeHost" android:value="s.wee.cat" />
 		<meta-data android:name="tcpHost" android:value="s.wee.cat" />
 		<meta-data android:name="codePort" android:value="80" />
