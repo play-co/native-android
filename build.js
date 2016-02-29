@@ -370,7 +370,7 @@ function buildSupportProjects(api, config) {
   var tealeafDir = path.join(__dirname, 'TeaLeaf');
   var singleArch = config.argv.arch;
   return Promise.try(function () {
-      if (config.clean || singleArch) {
+      if (config.argv.clean || singleArch) {
         return spawnWithLogger(api, 'make', ['clean'], {cwd: rootDir});
       }
     })
