@@ -713,13 +713,8 @@ function updateManifest(api, app, config, opts) {
 
   var defaultManifest = path.join(__dirname, "TeaLeaf/AndroidManifest.xml");
   var outputManifest = path.join(opts.outputPath, "AndroidManifest.xml");
-  Promise.all([
-      fs.copyAsync(defaultManifest, outputManifest),
-      getVersionCode(app, config.debug)
-        .then(function(versionCode) {
-          params.versionCode = versionCode;
-        })
-    ])
+
+  fs.copyAsync(defaultManifest, outputManifest)
     .then(function () {
       return injectPluginXML(opts);
     })
@@ -740,43 +735,6 @@ function updateManifest(api, app, config, opts) {
       return transformXSL(api, xmlPath, xmlPath,
           path.join(__dirname, "AndroidManifest.xsl"),
           params);
-    });
-}
-
-function getVersionCode(app, debug) {
-  var versionPath = path.join(app.paths.root, '.version');
-  var versionCode = '0'; // debug version is code 0
-  return fs.readFileAsync(versionPath)
-    .catch(function (err) {
-      if (err && err.code == 'ENOENT') {
-        var contents = '0';
-        return fs.writeFileAsync(versionPath, contents)
-          .return(contents);
-      } else {
-        throw err;
-      }
-    })
-    .then(function (contents) {
-      var version = parseInt(contents, 10);
-      if (isNaN(version)) {
-        throw new BuildError('Invalid ".version" file. It must contain a single integer.');
-      }
-
-      if (!debug) {
-        ++version;
-        versionCode = '' + version;
-        logger.log(chalk.yellow('** release versionCode set to ' + versionCode));
-        return fs.writeFileAsync(versionPath, versionCode);
-      }
-    })
-    .catch(function (err) {
-      if (!debug) {
-        // version code only needed for release builds, ignore errors in debug
-        throw err;
-      }
-    })
-    .then(function () {
-      return versionCode;
     });
 }
 
