@@ -28,6 +28,8 @@ Persistent<String> STRING_CACHE_window;
 Persistent<String> STRING_CACHE_stopSound;
 Persistent<String> STRING_CACHE_location;
 Persistent<String> STRING_CACHE_densityDpi;
+Persistent<String> STRING_CACHE_xdpi;
+Persistent<String> STRING_CACHE_ydpi;
 Persistent<String> STRING_CACHE_hasVibrator;
 Persistent<String> STRING_CACHE_save;
 Persistent<String> STRING_CACHE_hide;
@@ -254,6 +256,8 @@ void js_string_cache_init() {
     STRING_CACHE_stopSound = Persistent<String>::New(String::New("stopSound"));
     STRING_CACHE_location = Persistent<String>::New(String::New("location"));
     STRING_CACHE_densityDpi = Persistent<String>::New(String::New("densityDpi"));
+    STRING_CACHE_xdpi = Persistent<String>::New(String::New("xdpi"));
+    STRING_CACHE_ydpi = Persistent<String>::New(String::New("ydpi"));
     STRING_CACHE_hasVibrator = Persistent<String>::New(String::New("hasVibrator"));
     STRING_CACHE_save = Persistent<String>::New(String::New("save"));
     STRING_CACHE_hide = Persistent<String>::New(String::New("hide"));
