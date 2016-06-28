@@ -31,6 +31,8 @@ extern Persistent<String> STRING_CACHE_window;
 extern Persistent<String> STRING_CACHE_stopSound;
 extern Persistent<String> STRING_CACHE_location;
 extern Persistent<String> STRING_CACHE_densityDpi;
+extern Persistent<String> STRING_CACHE_xdpi;
+extern Persistent<String> STRING_CACHE_ydpi;
 extern Persistent<String> STRING_CACHE_hasVibrator;
 extern Persistent<String> STRING_CACHE_save;
 extern Persistent<String> STRING_CACHE_hide;
