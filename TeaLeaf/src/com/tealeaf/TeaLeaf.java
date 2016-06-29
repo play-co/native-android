@@ -17,6 +17,7 @@ package com.tealeaf;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.File;
+import java.util.List;
 import android.content.pm.ActivityInfo;
 import com.tealeaf.ActivityState;
 import com.tealeaf.event.BackButtonEvent;
@@ -461,10 +462,13 @@ public class TeaLeaf extends FragmentActivity {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 				final ActivityManager activityManager = (ActivityManager) instance.getSystemService(Context.ACTIVITY_SERVICE);
-				ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
-				ActivityManager.getMyMemoryState(currentState);
-				glView.onMemoryWarning(currentState.lastTrimLevel);
-			}
+				List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
+				if (processes != null) {
+					ActivityManager.RunningAppProcessInfo currentState = processes.get(0);
+					ActivityManager.getMyMemoryState(currentState);
+					glView.onMemoryWarning(currentState.lastTrimLevel);
+				}
+			    }
 		}
 
 
