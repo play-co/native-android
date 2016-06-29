@@ -462,7 +462,7 @@ public class TeaLeaf extends FragmentActivity {
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 				final ActivityManager activityManager = (ActivityManager) instance.getSystemService(Context.ACTIVITY_SERVICE);
-				List processes = activityManager.getRunningAppProcesses();
+				List<ActivityManager.RunningAppProcessInfo> processes = activityManager.getRunningAppProcesses();
 				if (processes != null) {
 					ActivityManager.RunningAppProcessInfo currentState = processes.get(0);
 					ActivityManager.getMyMemoryState(currentState);
