@@ -706,7 +706,7 @@ function updateManifest(api, app, config, opts) {
     gameHash: app.manifest.version,
     sdkHash: config.sdkVersion,
     androidHash: androidVersion,
-    minSdkVersion: config.argv['min-sdk-version'] || 10,
+    minSdkVersion: config.argv['min-sdk-version'] || 14,
     targetSdkVersion: config.argv['target-sdk-version'] || 23,
     debuggable: config.debug ? 'true' : 'false'
   });
