@@ -527,7 +527,7 @@ function copyIcons(app, outputPath) {
 }
 
 function copyIcon(app, outputPath, tag, size) {
-  var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/icon.png");
+  var destPath = path.join(outputPath, "res/mipmap-" + tag + "dpi/icon.png");
   var android = app.manifest.android;
   var iconPath = android.icons && android.icons[size];
 
