@@ -942,7 +942,7 @@ function installAPK(api, config, apkPath, opts) {
 
   function tryUninstall(device) {
     var args = ['-s', device, 'shell', 'pm', 'uninstall'];
-    if (opts.clearstorage) {
+    if (!opts.clearstorage) {
       args.push('-k');
     }
     args.push(packageName);
