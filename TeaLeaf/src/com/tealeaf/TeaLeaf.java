@@ -468,10 +468,8 @@ public class TeaLeaf extends FragmentActivity {
 					ActivityManager.getMyMemoryState(currentState);
 					glView.onMemoryWarning(currentState.lastTrimLevel);
 				}
-			    }
+			}
 		}
-
-
 	}
 
 	@Override
