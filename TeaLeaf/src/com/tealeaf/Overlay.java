@@ -15,7 +15,6 @@
 package com.tealeaf;
 
 
-import android.os.Environment;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -35,7 +34,7 @@ public class Overlay extends android.webkit.WebView {
         getSettings().setJavaScriptEnabled(true);
         getSettings().setDomStorageEnabled(true);
         getSettings().setDatabaseEnabled(true);
-        getSettings().setDatabasePath(Environment.getExternalStorageDirectory().getPath());
+        getSettings().setDatabasePath(context.getExternalFilesDir(null).getPath());
                 
         browserInterface = new BrowserInterface();
         addJavascriptInterface(browserInterface, "tealeaf"); 
