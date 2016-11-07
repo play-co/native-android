@@ -531,7 +531,13 @@ function copyIcons(app, outputPath) {
       copyNotifyIcon(app, outputPath, "h", "high"),
       copyNotifyIcon(app, outputPath, "xh", "xhigh"),
       copyNotifyIcon(app, outputPath, "xxh", "xxhigh"),
-      copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh")
+      copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh"),
+      copyShortcutIcons(app, outputPath, "l", "low"),
+      copyShortcutIcons(app, outputPath, "m", "med"),
+      copyShortcutIcons(app, outputPath, "h", "high"),
+      copyShortcutIcons(app, outputPath, "xh", "xhigh"),
+      copyShortcutIcons(app, outputPath, "xxh", "xxhigh"),
+      copyShortcutIcons(app, outputPath, "xxxh", "xxxhigh")
     ]);
 }
 
@@ -559,6 +565,30 @@ function copyNotifyIcon(app, outputPath, tag, name) {
     // Do not copy a default icon to this location -- Android will fill in
     // the blanks intelligently.
     logger.warn("No alert icon specified in the manifest for density '" + name + "'");
+  }
+}
+
+function copyShortcutIcons(app, outputPath, tag, name) {
+  var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/");
+  var android = app.manifest.android;
+  var shortcutIcons = android.icons && android.icons.shortcuts && android.icons.shortcuts[name];
+  var imgSize = {
+    high: 36,
+    low: 18,
+    med: 24,
+    xhigh: 48,
+    xxhigh: 72,
+    xxxhhigh: 96
+  }[name];
+  var regExp = new RegExp("^.*[\\\/](.*)" + imgSize + "(.png)");
+  var targetFile = function (val, p1, p2) {
+    return "shortcut_" + p1 + p2;
+  };
+
+  if (shortcutIcons) {
+    return Promise.map(shortcutIcons, function (iconPath) {
+      return fs.copyAsync(iconPath, destPath + iconPath.replace(regExp, targetFile));
+    });
   }
 }
 
