@@ -526,6 +526,12 @@ function copyIcons(app, outputPath) {
       copyIcon(app, outputPath, "xh", "96"),
       copyIcon(app, outputPath, "xxh", "144"),
       copyIcon(app, outputPath, "xxxh", "192"),
+      copyRoundIcon(app, outputPath, "l", "36"),
+      copyRoundIcon(app, outputPath, "m", "48"),
+      copyRoundIcon(app, outputPath, "h", "72"),
+      copyRoundIcon(app, outputPath, "xh", "96"),
+      copyRoundIcon(app, outputPath, "xxh", "144"),
+      copyRoundIcon(app, outputPath, "xxxh", "192"),
       copyNotifyIcon(app, outputPath, "l", "low"),
       copyNotifyIcon(app, outputPath, "m", "med"),
       copyNotifyIcon(app, outputPath, "h", "high"),
@@ -539,6 +545,19 @@ function copyIcons(app, outputPath) {
       copyShortcutIcons(app, outputPath, "xxh", "xxhigh"),
       copyShortcutIcons(app, outputPath, "xxxh", "xxxhigh")
     ]);
+}
+
+function copyRoundIcon(app, outputPath, tag, size) {
+  var destPath = path.join(outputPath, "res/mipmap-" + tag + "dpi/round_icon.png");
+  var android = app.manifest.android;
+  var iconPath = android.icons && android.icons.round && android.icons.round[size];
+
+  if (iconPath) {
+    iconPath = path.resolve(app.paths.root, iconPath);
+    return fs.copyAsync(iconPath, destPath);
+  }
+
+  logger.warn("No icon specified in the manifest for size '" + size + "'. Using the default icon for this size. This is probably not what you want.");
 }
 
 function copyIcon(app, outputPath, tag, size) {
