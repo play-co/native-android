@@ -538,12 +538,12 @@ function copyIcons(app, outputPath) {
       copyNotifyIcon(app, outputPath, "xh", "xhigh"),
       copyNotifyIcon(app, outputPath, "xxh", "xxhigh"),
       copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh"),
-      copyShortcutIcons(app, outputPath, "l", "low"),
-      copyShortcutIcons(app, outputPath, "m", "med"),
-      copyShortcutIcons(app, outputPath, "h", "high"),
-      copyShortcutIcons(app, outputPath, "xh", "xhigh"),
-      copyShortcutIcons(app, outputPath, "xxh", "xxhigh"),
-      copyShortcutIcons(app, outputPath, "xxxh", "xxxhigh")
+      copyShortcutIcons(app, outputPath, "l", "36"),
+      copyShortcutIcons(app, outputPath, "m", "48"),
+      copyShortcutIcons(app, outputPath, "h", "72"),
+      copyShortcutIcons(app, outputPath, "xh", "96"),
+      copyShortcutIcons(app, outputPath, "xxh", "144"),
+      copyShortcutIcons(app, outputPath, "xxxh", "192")
     ]);
 }
 
@@ -591,15 +591,7 @@ function copyShortcutIcons(app, outputPath, tag, name) {
   var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/");
   var android = app.manifest.android;
   var shortcutIcons = android.icons && android.icons.shortcuts && android.icons.shortcuts[name];
-  var imgSize = {
-    high: 36,
-    low: 18,
-    med: 24,
-    xhigh: 48,
-    xxhigh: 72,
-    xxxhhigh: 96
-  }[name];
-  var regExp = new RegExp("^.*[\\\/](.*)" + imgSize + "(.png)");
+  var regExp = new RegExp("^.*[\\\/](.*)" + name + "(.png)");
   var targetFile = function (val, p1, p2) {
     return "shortcut_" + p1 + p2;
   };
