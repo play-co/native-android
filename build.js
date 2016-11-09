@@ -526,13 +526,38 @@ function copyIcons(app, outputPath) {
       copyIcon(app, outputPath, "xh", "96"),
       copyIcon(app, outputPath, "xxh", "144"),
       copyIcon(app, outputPath, "xxxh", "192"),
+      copyRoundIcon(app, outputPath, "l", "36"),
+      copyRoundIcon(app, outputPath, "m", "48"),
+      copyRoundIcon(app, outputPath, "h", "72"),
+      copyRoundIcon(app, outputPath, "xh", "96"),
+      copyRoundIcon(app, outputPath, "xxh", "144"),
+      copyRoundIcon(app, outputPath, "xxxh", "192"),
       copyNotifyIcon(app, outputPath, "l", "low"),
       copyNotifyIcon(app, outputPath, "m", "med"),
       copyNotifyIcon(app, outputPath, "h", "high"),
       copyNotifyIcon(app, outputPath, "xh", "xhigh"),
       copyNotifyIcon(app, outputPath, "xxh", "xxhigh"),
-      copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh")
+      copyNotifyIcon(app, outputPath, "xxxh", "xxxhigh"),
+      copyShortcutIcons(app, outputPath, "l", "low"),
+      copyShortcutIcons(app, outputPath, "m", "med"),
+      copyShortcutIcons(app, outputPath, "h", "high"),
+      copyShortcutIcons(app, outputPath, "xh", "xhigh"),
+      copyShortcutIcons(app, outputPath, "xxh", "xxhigh"),
+      copyShortcutIcons(app, outputPath, "xxxh", "xxxhigh")
     ]);
+}
+
+function copyRoundIcon(app, outputPath, tag, size) {
+  var destPath = path.join(outputPath, "res/mipmap-" + tag + "dpi/round_icon.png");
+  var android = app.manifest.android;
+  var iconPath = android.icons && android.icons.round && android.icons.round[size];
+
+  if (iconPath) {
+    iconPath = path.resolve(app.paths.root, iconPath);
+    return fs.copyAsync(iconPath, destPath);
+  }
+
+  logger.warn("No icon specified in the manifest for size '" + size + "'. Using the default icon for this size. This is probably not what you want.");
 }
 
 function copyIcon(app, outputPath, tag, size) {
@@ -559,6 +584,30 @@ function copyNotifyIcon(app, outputPath, tag, name) {
     // Do not copy a default icon to this location -- Android will fill in
     // the blanks intelligently.
     logger.warn("No alert icon specified in the manifest for density '" + name + "'");
+  }
+}
+
+function copyShortcutIcons(app, outputPath, tag, name) {
+  var destPath = path.join(outputPath, "res/drawable-" + tag + "dpi/");
+  var android = app.manifest.android;
+  var shortcutIcons = android.icons && android.icons.shortcuts && android.icons.shortcuts[name];
+  var imgSize = {
+    high: 36,
+    low: 18,
+    med: 24,
+    xhigh: 48,
+    xxhigh: 72,
+    xxxhhigh: 96
+  }[name];
+  var regExp = new RegExp("^.*[\\\/](.*)" + imgSize + "(.png)");
+  var targetFile = function (val, p1, p2) {
+    return "shortcut_" + p1 + p2;
+  };
+
+  if (shortcutIcons) {
+    return Promise.map(shortcutIcons, function (iconPath) {
+      return fs.copyAsync(iconPath, destPath + iconPath.replace(regExp, targetFile));
+    });
   }
 }
 

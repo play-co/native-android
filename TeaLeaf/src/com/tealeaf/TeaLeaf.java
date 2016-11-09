@@ -133,6 +133,10 @@ public class TeaLeaf extends FragmentActivity {
 	//edit text
 	public EditTextView editText;
 
+	public static String ACTION_SHORTCUT = "com.tealeaf.action.SHORTCUT";
+	public static String SHORTCUT_KEY = "com.tealeaf.SHORTCUT_KEY";
+
+
 	/**
 	 *
 	 * @return true if the app is running and in foreground and false if it's
