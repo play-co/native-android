@@ -400,6 +400,35 @@ function saveLocalizedStringsXmls(outputPath, titles) {
     });
 }
 
+function executeOnCreate(api, app, config, opts) {
+  var modules = app.modules;
+  var hookName = 'onCreateProject';
+
+  return Promise.resolve(Object.keys(modules))
+    .map(function (moduleName) {
+      var module = modules[moduleName];
+      var buildExtension = module.extensions && module.extensions.build;
+
+      buildExtension = buildExtension ? require(buildExtension) : null;
+
+      if (!buildExtension || !buildExtension[hookName]) {
+        return;
+      }
+
+      return new Promise(function (resolve, reject) {
+          var retVal = buildExtension[hookName](api, app, config, function (err, res) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          });
+
+          if (retVal) { resolve(retVal); }
+        })
+    });
+}
+
 function makeAndroidProject(api, app, config, opts) {
   var projectPropertiesFile = path.join(opts.outputPath, 'project.properties');
   return fs.unlinkAsync(projectPropertiesFile)
@@ -448,7 +477,8 @@ function makeAndroidProject(api, app, config, opts) {
         fs.appendFileAsync(projectPropertiesFile, dexDir),
         saveLocalizedStringsXmls(opts.outputPath, config.titles),
         updateManifest(api, app, config, opts),
-        updateActivity(config, opts)
+        updateActivity(config, opts),
+        executeOnCreate(api, app, config, opts)
       ];
     })
     .all();
