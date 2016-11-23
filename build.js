@@ -443,7 +443,7 @@ function makeAndroidProject(api, app, config, opts) {
         ]);
     })
     .then(function () {
-      var dexDir = '\nout.dexed.absolute.dir=../.dex/\nsource.dir=src\n';
+      var dexDir = '\nout.dexed.absolute.dir=../.dex/\nsource.dir=src\ndex.force.jumbo=true\n';
       return [
         fs.appendFileAsync(projectPropertiesFile, dexDir),
         saveLocalizedStringsXmls(opts.outputPath, config.titles),
