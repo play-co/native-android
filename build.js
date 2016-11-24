@@ -472,7 +472,10 @@ function makeAndroidProject(api, app, config, opts) {
         ]);
     })
     .then(function () {
-      var dexDir = '\nout.dexed.absolute.dir=../.dex/\nsource.dir=src\n';
+      var install_store = app.manifest.android.install_store,
+        jumbo_txt = (install_store === 'kindle' || install_store === 'underground') ?
+          'dex.force.jumbo=true\n' : '',
+        dexDir = '\nout.dexed.absolute.dir=../.dex/\nsource.dir=src\n';
       return [
         fs.appendFileAsync(projectPropertiesFile, dexDir),
         saveLocalizedStringsXmls(opts.outputPath, config.titles),
