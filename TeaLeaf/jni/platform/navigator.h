@@ -17,6 +17,8 @@
 
 typedef struct navigator_info_t {
     int density_dpi;
+    int xdpi;
+    int ydpi;
     char *android_version;
     char *language;
     char *country;

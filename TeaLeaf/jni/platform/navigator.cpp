@@ -31,12 +31,17 @@ navigator_info* navigator_info_init() {
 
     jclass display_metrics_class = (jclass)shim->env->FindClass("android/util/DisplayMetrics");
     jfieldID density_dpi = shim->env->GetFieldID(display_metrics_class, "densityDpi", "I");
+    jfieldID xdpi = shim->env->GetFieldID(display_metrics_class, "xdpi", "F");
+    jfieldID ydpi = shim->env->GetFieldID(display_metrics_class, "ydpi", "F");
 
     jmethodID method = shim->env->GetMethodID(shim->type, "getDisplayMetrics", "()Landroid/util/DisplayMetrics;");
     jobject result = shim->env->CallObjectMethod(shim->instance, method);
 
     navigator_info *info = (navigator_info *) malloc(sizeof(navigator_info));
     info->density_dpi = shim->env->GetIntField(result, density_dpi);
+
+    info->xdpi = shim->env->GetFloatField(result, xdpi);
+    info->ydpi = shim->env->GetFloatField(result, ydpi);
 
     jstring android_version;
     jmethodID get_android_version = shim->env->GetMethodID(shim->type, "getAndroidHash", "()Ljava/lang/String;");

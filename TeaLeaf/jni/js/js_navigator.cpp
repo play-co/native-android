@@ -45,6 +45,8 @@ Handle<ObjectTemplate> js_navigator_get_template() {
 
     Handle<ObjectTemplate> js_metrics = ObjectTemplate::New();
     js_metrics->Set(STRING_CACHE_densityDpi, Integer::New(info->density_dpi));
+    js_metrics->Set(STRING_CACHE_xdpi, Number::New(info->xdpi));
+    js_metrics->Set(STRING_CACHE_ydpi, Number::New(info->ydpi));
     navigator->Set(STRING_CACHE_displayMetrics, js_metrics);
     const char *android_hash = build_get_android_hash();
     const char *sdk_hash = build_get_sdk_hash();

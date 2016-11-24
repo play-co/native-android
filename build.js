@@ -44,7 +44,7 @@ var existsAsync = function (filename) {
 // used to remove punctuation (if any) from the appid
 var PUNCTUATION_REGEX = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~]/g;
 
-var ANDROID_TARGET = "android-19";
+var ANDROID_TARGET = "android-23";
 var androidVersion = require('./package.json').version;
 
 var logger;
@@ -509,6 +509,15 @@ function repackAPK(api, outputPath, apkName, cb) {
   });
 }
 
+function copyAssets(app, project, destPath) {
+  var assetsPath = project.manifest.assets || [];
+
+  return Promise.map(assetsPath, function(asset) {
+    logger.log('Copying', asset, 'to ' + path.join(destPath, asset));
+    return fs.copyAsync(asset, path.join(destPath, asset));
+  });
+}
+
 function copyIcons(app, outputPath) {
   return Promise.all([
       copyIcon(app, outputPath, "l", "36"),
@@ -697,20 +706,15 @@ function updateManifest(api, app, config, opts) {
     gameHash: app.manifest.version,
     sdkHash: config.sdkVersion,
     androidHash: androidVersion,
-    minSdkVersion: config.argv['min-sdk-version'] || 8,
-    targetSdkVersion: config.argv['target-sdk-version'] || 14,
+    minSdkVersion: config.argv['min-sdk-version'] || 10,
+    targetSdkVersion: config.argv['target-sdk-version'] || 23,
     debuggable: config.debug ? 'true' : 'false'
   });
 
   var defaultManifest = path.join(__dirname, "TeaLeaf/AndroidManifest.xml");
   var outputManifest = path.join(opts.outputPath, "AndroidManifest.xml");
-  Promise.all([
-      fs.copyAsync(defaultManifest, outputManifest),
-      getVersionCode(app, config.debug)
-        .then(function(versionCode) {
-          params.versionCode = versionCode;
-        })
-    ])
+
+  fs.copyAsync(defaultManifest, outputManifest)
     .then(function () {
       return injectPluginXML(opts);
     })
@@ -731,43 +735,6 @@ function updateManifest(api, app, config, opts) {
       return transformXSL(api, xmlPath, xmlPath,
           path.join(__dirname, "AndroidManifest.xsl"),
           params);
-    });
-}
-
-function getVersionCode(app, debug) {
-  var versionPath = path.join(app.paths.root, '.version');
-  var versionCode = '0'; // debug version is code 0
-  return fs.readFileAsync(versionPath)
-    .catch(function (err) {
-      if (err && err.code == 'ENOENT') {
-        var contents = '0';
-        return fs.writeFileAsync(versionPath, contents)
-          .return(contents);
-      } else {
-        throw err;
-      }
-    })
-    .then(function (contents) {
-      var version = parseInt(contents, 10);
-      if (isNaN(version)) {
-        throw new BuildError('Invalid ".version" file. It must contain a single integer.');
-      }
-
-      if (!debug) {
-        ++version;
-        versionCode = '' + version;
-        logger.log(chalk.yellow('** release versionCode set to ' + versionCode));
-        return fs.writeFileAsync(versionPath, versionCode);
-      }
-    })
-    .catch(function (err) {
-      if (!debug) {
-        // version code only needed for release builds, ignore errors in debug
-        throw err;
-      }
-    })
-    .then(function () {
-      return versionCode;
     });
 }
 
@@ -858,7 +825,8 @@ exports.build = function(api, app, config, cb) {
         copyIcons(app, config.outputPath),
         copyMusic(app, config.outputPath),
         copyResDir(app, config.outputPath),
-        copySplash(api, app, config.outputPath)
+        copySplash(api, app, config.outputPath),
+        copyAssets(api, app, config.outputPath)
       ];
     })
     .all()
@@ -942,7 +910,7 @@ function installAPK(api, config, apkPath, opts) {
 
   function tryUninstall(device) {
     var args = ['-s', device, 'shell', 'pm', 'uninstall'];
-    if (opts.clearstorage) {
+    if (!opts.clearstorage) {
       args.push('-k');
     }
     args.push(packageName);

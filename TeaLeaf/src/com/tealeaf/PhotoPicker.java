@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 import java.io.File;
@@ -30,6 +29,7 @@ public class PhotoPicker {
 	private Activity activity;
 	private ResourceManager resourceManager;
 	private Settings settings;
+
 	public PhotoPicker(Activity context, Settings settings, ResourceManager manager) {
 		this.activity = context;
 		this.settings = settings;
@@ -54,7 +54,7 @@ public class PhotoPicker {
 
 	public void take(int id) {
 		Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File largeFile = getCaptureImageTmpFile();
+        File largeFile = getCaptureImageTmpFile(this.activity);
 		if (largeFile != null) {
 			camera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(largeFile));
 		}
@@ -106,10 +106,10 @@ public class PhotoPicker {
 	}
 
     private static File captureImageTmpFile = null;
-    public static File getCaptureImageTmpFile() {
+    public static File getCaptureImageTmpFile(Activity context) {
         if (captureImageTmpFile == null) {
             try {
-                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", Environment.getExternalStorageDirectory());
+                captureImageTmpFile = File.createTempFile(".gc_tmpfile", ".jpg", context.getExternalCacheDir());
             } catch(Exception e) {
 				logger.log(e);
             }

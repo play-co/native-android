@@ -60,6 +60,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	public boolean queuePause = false;
 	private OrientationEventListener orientationListener;
 	private int lastRunningTrimLevel = 0;
+	private static boolean handleMemoryWarning = true;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
@@ -325,7 +326,15 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		return renderer.getTextureLoader();
 	}
 
+
 	public void onMemoryWarning(int level) {
+		logger.log("{java} onMemoryWarning", level);
+
+		if (!handleMemoryWarning) {
+			logger.log("{java} device has more than 1 GB memory, don't halfsize.");
+			return;
+		}
+
 		if (level > lastRunningTrimLevel) {
 			if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
 				NativeShim.textureManagerMemoryCritical();
@@ -778,6 +787,10 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 				int device_limit = Device.getDeviceMemory();
 				if (device_limit != -1) {
 					NativeShim.textureManagerSetMaxMemory(device_limit / 2);
+				}
+				// no need to send memory warnings for devices with more than 1GB memory
+				if (device_limit > 1073741824) {
+					handleMemoryWarning = false;
 				}
 				logger.log("Device Memory Limit", device_limit);
 			}
