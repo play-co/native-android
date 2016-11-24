@@ -472,9 +472,7 @@ function makeAndroidProject(api, app, config, opts) {
         ]);
     })
     .then(function () {
-      var install_store = app.manifest.android.install_store,
-        jumbo_txt = (install_store === 'kindle' || install_store === 'underground') ?
-          'dex.force.jumbo=true\n' : '',
+      var jumbo_txt = app.manifest.android.dex_jumbo ? 'dex.force.jumbo=true\n' : '',
         dexDir = '\nout.dexed.absolute.dir=../.dex/\nsource.dir=src\n' + jumbo_txt;
       return [
         fs.appendFileAsync(projectPropertiesFile, dexDir),
