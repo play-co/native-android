@@ -42,16 +42,12 @@
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
-			<intent-filter>
+			<intent-filter android:label="app_links" android:autoVerify="true">
 				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.BROWSABLE" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<data android:host="*" android:scheme="tealeaf" />
+<!--START_PLUGINS_LINKS-->
+<!--END_PLUGINS_LINKS-->
 			</intent-filter>
 <!--START_PLUGINS_ACTIVITY-->
 <!--END_PLUGINS_ACTIVITY-->
