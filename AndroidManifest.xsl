@@ -56,8 +56,8 @@
 	<xsl:template match="manifest/@package">
 		<xsl:attribute name="package"><xsl:value-of select="$package" /></xsl:attribute>
 	</xsl:template>
-	<xsl:template match="intent-filter/data/@android:host">
-		<xsl:attribute name="android:host"><xsl:value-of select="$package" /></xsl:attribute>
+	<xsl:template match="intent-filter[@android:label=app_links]">
+		<xsl:attribute name="android:label"><xsl:value-of select="$title" /></xsl:attribute>
 	</xsl:template>
 	<xsl:template match="manifest/@android:versionName">
 		<xsl:attribute name="android:versionName"><xsl:value-of select="$version" /></xsl:attribute>

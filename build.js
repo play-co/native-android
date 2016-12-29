@@ -146,6 +146,46 @@ var replaceTextBetween = function(text, startToken, endToken, replaceText) {
   return newText;
 };
 
+function injectAppLinks(outputPath, android_manifest) {
+  var manifestXml = path.join(outputPath, 'AndroidManifest.xml');
+  var app_links = android_manifest.app_links;
+  var template = '<data android:host="curr_host" android:scheme="curr_scheme"/>';
+  var result = '';
+
+  if (!app_links || app_links.length === 0) {
+    return Promise.resolve(true);
+  }
+
+  app_links.forEach(function (curr) {
+    var curr_data = '';
+    var host = curr.host;
+    var scheme = curr.scheme || 'http';
+
+    curr_data = template.replace('curr_host', host);
+    curr_data = curr_data.replace('curr_scheme', scheme);
+    ['path', 'pathPrefix', 'pathPattern', 'port'].forEach(function (prop) {
+      if (curr[prop]) {
+        curr_data = curr_data.replace('/>', ' android:'.concat(prop, '="', curr[prop], '"/>'))
+      }
+    });
+    result = result.concat(curr_data);
+  });
+  result = result.concat('\n');
+
+  return Promise.resolve()
+    .then(function () {
+      return fs.readFileAsync(manifestXml, 'utf-8');
+    })
+    .then(function (xml) {
+      var XML_START_PLUGINS_LINKS = '<!--START_PLUGINS_LINKS-->';
+      var XML_END_PLUGINS_LINKS = '<!--END_PLUGINS_LINKS-->';
+
+      xml = replaceTextBetween(xml, XML_START_PLUGINS_LINKS, XML_END_PLUGINS_LINKS, result);
+
+      return fs.writeFileAsync(manifestXml, xml, 'utf-8');
+    });
+};
+
 function injectPluginXML(opts) {
   var moduleConfig = opts.moduleConfig;
   var outputPath = opts.outputPath;
@@ -787,6 +827,9 @@ function updateManifest(api, app, config, opts) {
   var outputManifest = path.join(opts.outputPath, "AndroidManifest.xml");
 
   fs.copyAsync(defaultManifest, outputManifest)
+    .then(function () {
+      return injectAppLinks(opts.outputPath, app.manifest.android);
+    })
     .then(function () {
       return injectPluginXML(opts);
     })
