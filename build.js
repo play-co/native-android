@@ -165,7 +165,7 @@ function injectAppLinks(outputPath, android_manifest) {
     curr_data = curr_data.replace('curr_scheme', scheme);
     ['path', 'pathPrefix', 'pathPattern', 'port'].forEach(function (prop) {
       if (curr[prop]) {
-        curr_data.replace('/>', ' android:'.concat(prop, '"', curr[prop], '"/>'))
+        curr_data = curr_data.replace('/>', ' android:'.concat(prop, '="', curr[prop], '"/>'))
       }
     });
     result = result.concat(curr_data);
