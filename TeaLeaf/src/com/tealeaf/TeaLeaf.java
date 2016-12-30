@@ -447,10 +447,10 @@ public class TeaLeaf extends FragmentActivity {
 
 	private void checkAppLinkLaunch(Intent intent) {
 		String action = intent.getAction();
-		String data = intent.getDataString();
+		Uri data = intent.getData();
 
-		if (Intent.ACTION_VIEW.equals(action)) {
-			EventQueue.pushEvent(new AppLinkEvent(data));
+		if (Intent.ACTION_VIEW.equals(action) && data != null) {
+			EventQueue.pushEvent(new AppLinkEvent(data.toString(), data.getHost(), data.getPath(), data.getQuery()));
 		}
         }
 

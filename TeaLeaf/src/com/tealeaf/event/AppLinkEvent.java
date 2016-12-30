@@ -16,10 +16,16 @@ package com.tealeaf.event;
 
 public class AppLinkEvent extends Event {
 	protected String url;
+	protected String host;
+	protected String path;
+	protected String query;
 
-	public AppLinkEvent(String url) {
+	public AppLinkEvent(String url, String host, String path, String query) {
 		super("launchedFromLink");
 
 		this.url = url;
+		this.host = host;
+		this.path = path;
+		this.query = query;
 	}
 }
