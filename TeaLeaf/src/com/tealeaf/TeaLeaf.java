@@ -30,6 +30,7 @@ import com.tealeaf.event.PauseEvent;
 import com.tealeaf.event.PhotoBeginLoadedEvent;
 import com.tealeaf.event.WindowFocusAcquiredEvent;
 import com.tealeaf.event.WindowFocusLostEvent;
+import com.tealeaf.event.AppLinkEvent;
 import com.tealeaf.plugin.PluginManager;
 import com.tealeaf.util.ILogger;
 
@@ -240,17 +241,19 @@ public class TeaLeaf extends FragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        PluginManager.init(this);
+	        PluginManager.init(this);
 		instance = this;
 		setFullscreenFlag();
 		configureActivity();
 		String appID = findAppID();
+		Intent intent = getIntent();
 		options = new TeaLeafOptions(this);
 
+		checkAppLinkLaunch(intent);
 		PluginManager.callAll("onCreate", this, savedInstanceState);
 
 		//check intent for test app info
-		Bundle bundle = getIntent().getExtras();
+		Bundle bundle = intent.getExtras();
 		boolean isTestApp = false;
 		if (bundle != null) {
 		   isTestApp = bundle.getBoolean("isTestApp", false);
@@ -438,8 +441,18 @@ public class TeaLeaf extends FragmentActivity {
 
 	@Override
 	public void onNewIntent(Intent intent) {
+		checkAppLinkLaunch(intent);
 		PluginManager.callAll("onNewIntent", intent);
 	}
+
+	private void checkAppLinkLaunch(Intent intent) {
+		String action = intent.getAction();
+		Uri data = intent.getData();
+
+		if (Intent.ACTION_VIEW.equals(action) && data != null) {
+			EventQueue.pushEvent(new AppLinkEvent(data.toString(), data.getHost(), data.getPath(), data.getQuery()));
+		}
+        }
 
 	private void getLaunchType(Intent intent) {
 		Uri data = intent.getData();
