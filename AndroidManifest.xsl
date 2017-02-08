@@ -31,6 +31,7 @@
 	<xsl:param name="contactsUrl"></xsl:param>
 
 	<xsl:param name="orientation"></xsl:param>
+	<xsl:param name="otherApps" />
 	<xsl:strip-space elements="*" />
 	<xsl:output indent="yes" />
 	<xsl:template match="comment()" />
@@ -136,4 +137,7 @@
 	<xsl:template match="meta-data[@android:name='installShortcut']">
 		<meta-data android:name="installShortcut" android:value="{$installShortcut}"/>
 	</xsl:template>
+        <xsl:template match="meta-data[@android:name='otherApps']">
+                <meta-data android:name="otherApps" android:value="{$otherApps}"/>
+        </xsl:template>
 </xsl:stylesheet>
