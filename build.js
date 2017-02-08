@@ -775,6 +775,7 @@ function updateManifest(api, app, config, opts) {
 
   var orientations = app.manifest.supportedOrientations;
   var orientation = "portrait";
+  var otherApps = app.manifest.android.otherApps || [];
 
   if (orientations.indexOf("portrait") != -1 && orientations.indexOf("landscape") != -1) {
     orientation = "unspecified";
@@ -820,7 +821,8 @@ function updateManifest(api, app, config, opts) {
     androidHash: androidVersion,
     minSdkVersion: config.argv['min-sdk-version'] || 14,
     targetSdkVersion: config.argv['target-sdk-version'] || 25,
-    debuggable: config.debug ? 'true' : 'false'
+    debuggable: config.debug ? 'true' : 'false',
+    otherApps: otherApps.join('|')
   });
 
   var defaultManifest = path.join(__dirname, "TeaLeaf/AndroidManifest.xml");
