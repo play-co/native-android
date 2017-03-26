@@ -48,6 +48,28 @@ public class TeaLeafReceiver extends BroadcastReceiver {
         return result;
     }
 
+    private boolean toTrack(Context context, String packageName) {
+        boolean track = false;
+        String currQuery;
+
+        try {
+            Bundle metaData = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
+            String otherApps = metaData.getString("otherApps");
+            String[] otherPackages = otherApps.trim().split("\\|");
+            for (int i = 0; i < otherPackages.length; i++) {
+                currQuery = otherPackages[i].replaceAll("\\*", "\\\\w*");
+                if (packageName.matches(currQuery)) {
+                    track = true;
+                    break;
+                }
+            }
+        } catch (NameNotFoundException e) {
+            logger.log(e);
+        }
+
+        return track;
+    }
+
     @Override
     public void onReceive(final Context context, final Intent intent) {
         String action = intent.getAction();
@@ -66,17 +88,12 @@ public class TeaLeafReceiver extends BroadcastReceiver {
 
             try {
                 String packageName = intent.getData().getEncodedSchemeSpecificPart();
-                Bundle metaData = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA).metaData;
-                String otherApps = metaData.getString("otherApps");
-                String[] otherPackages = otherApps.trim().split("\\|");
                 String installedPackages = getSettings(context).getString(INSTALLED_APPS_KEY, "");
-                if (Arrays.asList(otherPackages).contains(packageName)) {
+                if (toTrack(context, packageName)) {
                     installedPackages = removePackage(installedPackages, packageName).trim();
                     installedPackages = TextUtils.isEmpty(installedPackages) ?  installedPackages : installedPackages + PACKAGE_DELIMITER;
                     getSettings(context).setString(INSTALLED_APPS_KEY, TextUtils.concat(installedPackages, packageName, INSTALL_TIME_DELIMITER, "" + System.currentTimeMillis()).toString());
                 }
-            } catch(NameNotFoundException e) {
-                logger.log(e);
             } catch (NullPointerException e) {
 		logger.log(e);
             }
