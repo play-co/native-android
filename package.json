@@ -2,7 +2,7 @@
   "author": "The Game Closure DevKit Team",
   "name": "native-android",
   "description": "Native-Android DevKit addon for building for the Android platform",
-  "version": "1.0.22",
+  "version": "1.0.46",
   "dependencies": {
     "bluebird": "^2.9.34",
     "chalk": "^1.1.1",

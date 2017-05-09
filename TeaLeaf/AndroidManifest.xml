@@ -38,6 +38,7 @@
 		<meta-data android:name="useZeroConfig" android:value="false" />
 		<meta-data android:name="enableUpdater" android:value="false" />
 		<meta-data android:name="disableLogs" android:value="false" />
+		<meta-data android:name="android.max_aspect" android:value="2.1" />
 		<meta-data android:name="pushUrl" android:value="https://api.gameclosure.com/push/%s/?device=%s&amp;version=%s" />
 		<meta-data android:name="contactsUrl" android:value="https://api.gameclosure.com/users/me/contacts/?device=%s" />
 
