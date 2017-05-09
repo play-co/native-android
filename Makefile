@@ -63,6 +63,7 @@ clean:
 	ndk-build -C TeaLeaf clean
 	ant -f TeaLeaf/build.xml clean
 	ant -f GCTestApp/build.xml clean
+	ant -f appcompat-v7/build.xml clean
 
 analyze:
 	./scripts/analyze.sh
@@ -75,3 +76,4 @@ setup:
 	node checkSymlinks
 	android update project -p TeaLeaf --target android-25 --subprojects
 	android update project -p GCTestApp --target android-25 --subprojects
+	android update project -p appcompat-v7 --target android-25 --subprojects
