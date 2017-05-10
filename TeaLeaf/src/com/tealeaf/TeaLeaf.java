@@ -807,9 +807,6 @@ public class TeaLeaf extends FragmentActivity {
 
 	// TODO: can this be called after your activity is recycled, meaning we're never going to see these events?
 	protected void onActivityResult(int request, int result, Intent data) {
-		if (data == null) {
-			return;
-		}
 		super.onActivityResult(request, result, data);
 		PluginManager.callAll("onActivityResult", request, result, data);
 		logger.log("GOT ACTIVITY RESULT WITH", request, result);
