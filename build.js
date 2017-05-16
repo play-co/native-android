@@ -680,6 +680,7 @@ var SPLASH_FILES = [
   'portrait1024',
   'portrait1136',
   'portrait2048',
+  'portrait2960',
   'landscape768',
   'landscape1536',
   'universal'
