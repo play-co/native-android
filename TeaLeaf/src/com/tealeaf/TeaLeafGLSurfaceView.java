@@ -689,7 +689,7 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 			int screenSide;
 			String prefix = "splash-portrait";
 			if (isPortrait) {
-				sizes = new int[] {2048, 1136, 1024, 960, 480, 0};
+				sizes = new int[] {2960, 2048, 1136, 1024, 960, 480, 0};
 				screenSide = sw < sh ? sh : sw;
 			} else {
 				sizes = new int[] {1536, 768, 0};
