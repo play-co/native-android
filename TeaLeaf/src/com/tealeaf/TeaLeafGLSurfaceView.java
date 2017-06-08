@@ -35,16 +35,16 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import com.tealeaf.plugin.PluginManager;
+// import android.view.OrientationEventListener;
 
 import com.tealeaf.event.ImageLoadedEvent;
-import com.tealeaf.event.OrientationEvent;
 import com.tealeaf.event.ResumeEvent;
 import com.tealeaf.event.RedrawOffscreenBuffersEvent;
+// import com.tealeaf.event.OrientationEvent;
 
 import com.tealeaf.util.Device;
 
@@ -58,9 +58,9 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 	protected Object lastFrame = new Object();
 	protected long glThreadId = 0;
 	public boolean queuePause = false;
-	private OrientationEventListener orientationListener;
 	private int lastRunningTrimLevel = 0;
 	private static boolean handleMemoryWarning = true;
+	// private OrientationEventListener orientationListener;
 
 	public TeaLeafOptions getOptions() {
 		return context.getOptions();
@@ -81,31 +81,32 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 		renderer = new Renderer(this);
 		this.setOnTouchListener(renderer);
 
-		orientationListener = new OrientationEventListener(context) {
-			private String lastOrientation = "unknown";
-			@Override
-			public void onOrientationChanged(int orientation) {
-				String newOrientation = "";
-				if (orientation == -1) {
-					newOrientation = "unknown";
-				} else if (orientation > 315 || orientation <= 45) {
-					newOrientation = "portrait";
-				} else if (orientation > 45 && orientation <= 135) {
-					newOrientation = "landscapeRight";
-				} else if (orientation > 135 && orientation <= 225) {
-					newOrientation = "portraitUpsideDown";
-				} else if (orientation > 225 && orientation <= 315) {
-					newOrientation = "landscapeLeft";
-				}
+		// This is to handle Orientation Changes, we aren't using it right now
+		// orientationListener = new OrientationEventListener(context) {
+		// 	private String lastOrientation = "unknown";
+		// 	@Override
+		// 	public void onOrientationChanged(int orientation) {
+		// 		String newOrientation = "";
+		// 		if (orientation == -1) {
+		// 			newOrientation = "unknown";
+		// 		} else if (orientation > 315 || orientation <= 45) {
+		// 			newOrientation = "portrait";
+		// 		} else if (orientation > 45 && orientation <= 135) {
+		// 			newOrientation = "landscapeRight";
+		// 		} else if (orientation > 135 && orientation <= 225) {
+		// 			newOrientation = "portraitUpsideDown";
+		// 		} else if (orientation > 225 && orientation <= 315) {
+		// 			newOrientation = "landscapeLeft";
+		// 		}
 				
-				if (newOrientation != lastOrientation) {
-					lastOrientation = newOrientation;
-					String[] events = { new OrientationEvent(newOrientation).pack() };
-					NativeShim.dispatchEvents(events);
-				}
-			}
-		};
-		orientationListener.enable();
+		// 		if (newOrientation != lastOrientation) {
+		// 			lastOrientation = newOrientation;
+		// 			String[] events = { new OrientationEvent(newOrientation).pack() };
+		// 			NativeShim.dispatchEvents(events);
+		// 		}
+		// 	}
+		// };
+		// orientationListener.enable();
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			final ActivityManager activityManager = (ActivityManager) TeaLeaf.get().getSystemService(Context.ACTIVITY_SERVICE);
