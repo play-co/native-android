@@ -79,8 +79,11 @@ public class TeaLeafReceiver extends BroadcastReceiver {
             // log referrer
             try {
                 Bundle bundle = intent.getExtras();
-                String referrer = URLDecoder.decode(bundle.getString("referrer"), "UTF-8");
-                getSettings(context).setString("installReferrer.referrer", referrer);
+                String referrer = bundle.getString("referrer");
+                if (referrer != null) {
+                    referrer = URLDecoder.decode(referrer, "UTF-8");
+                    getSettings(context).setString("installReferrer.referrer", referrer);
+                }
             } catch (UnsupportedEncodingException e) {
                 logger.log(e);
             }

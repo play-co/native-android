@@ -70,10 +70,10 @@
 			<intent-filter>
 				<action android:name="com.android.vending.INSTALL_REFERRER" />
 			</intent-filter>
-                        <intent-filter android:priority="100">
-                                <action android:name="android.intent.action.PACKAGE_ADDED"/>
-                                <data android:scheme="package"/>
-                        </intent-filter>
+			<intent-filter android:priority="100">
+				<action android:name="android.intent.action.PACKAGE_ADDED"/>
+				<data android:scheme="package"/>
+			</intent-filter>
 		</receiver>
 
 <!--START_PLUGINS_APPLICATION-->
