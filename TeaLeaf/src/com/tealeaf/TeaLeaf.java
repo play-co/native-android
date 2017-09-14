@@ -114,7 +114,7 @@ public class TeaLeaf extends FragmentActivity {
 	private Settings settings;
 	private IMenuButtonHandler menuButtonHandler;
 
-	private BroadcastReceiver screenOffReciever;
+	private BroadcastReceiver screenOffReceiver;
 
 	private ILogger remoteLogger;
 
@@ -518,7 +518,11 @@ public class TeaLeaf extends FragmentActivity {
 			logger.log("{focus} Lost focus");
 			ActivityState.onWindowFocusLost();
 			pause();
-			unregisterReceiver(screenOffReciever);
+			/* Fix Crash in Android 7.0 Samsung devices where screenOffReceiver is null
+			TODO: Need to find why it is null */
+			if (screenOffReceiver != null) {
+				unregisterReceiver(screenOffReceiver);
+			}
 			if (jsRunning) {
 				//always send lost focus event
 				String[] events = {new WindowFocusLostEvent().pack()};
@@ -728,7 +732,7 @@ public class TeaLeaf extends FragmentActivity {
 	}
 
 	private void makeScreenOffReceiver() {
-		screenOffReciever = new BroadcastReceiver() {
+		screenOffReceiver = new BroadcastReceiver() {
 
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -742,13 +746,13 @@ public class TeaLeaf extends FragmentActivity {
 	}
 
 	private void registerScreenOffReceiver() {
-		if(screenOffReciever == null) {
+		if(screenOffReceiver == null) {
 			makeScreenOffReceiver();
 		}
 		IntentFilter filter = new IntentFilter();
 
 		filter.addAction("android.intent.action.SCREEN_OFF");
-		registerReceiver(screenOffReciever, filter);
+		registerReceiver(screenOffReceiver, filter);
 
 	}
 
