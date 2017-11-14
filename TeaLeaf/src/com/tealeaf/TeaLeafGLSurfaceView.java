@@ -110,9 +110,12 @@ public class TeaLeafGLSurfaceView extends com.tealeaf.GLSurfaceView {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			final ActivityManager activityManager = (ActivityManager) TeaLeaf.get().getSystemService(Context.ACTIVITY_SERVICE);
-			ActivityManager.RunningAppProcessInfo currentState = activityManager.getRunningAppProcesses().get(0);
-			ActivityManager.getMyMemoryState(currentState);
-			onMemoryWarning(currentState.lastTrimLevel);
+			ActivityManager.RunningAppProcessInfo currentStates = activityManager.getRunningAppProcesses();
+			currentState = currentState.get(0);
+			if (currentState) {
+				ActivityManager.getMyMemoryState(currentState);
+				onMemoryWarning(currentState.lastTrimLevel);
+			}
 		}
 	}
 
